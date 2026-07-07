@@ -859,13 +859,46 @@ class AIShowrunnerService:
         mitb = self._refresh_mitb_system(year, week, roster, opportunity, rng)
         war_games = self._refresh_war_games_system(year, week, roster, universe, rng)
         crown = self._refresh_crown_payoff_system(year, week, roster, universe, rng)
+        living_arcs = self._propose_living_story_arcs(year, week, show, roster, universe, rng, risk)
         return {
             "angle_execution": angle,
             "mitb": mitb,
             "war_games": war_games,
             "crown_payoffs": crown,
+            "living_arcs": living_arcs,
             "autonomy": autonomy,
         }
+
+
+    def _propose_living_story_arcs(self, year: int, week: int, show: dict, roster: list[dict], universe, rng: random.Random, risk: float) -> list[dict]:
+        """Paced, approval-gated living-world faction/team/turn pitches."""
+        is_major_window = bool(show.get("is_ppv") or show.get("show_type") in {"ppv", "major_ppv", "premium_live_event"} or show.get("tier") in {"ppv", "major"})
+        if not is_major_window and week % 3 != 0:
+            return []
+        brands = sorted({w.get("primary_brand") or show.get("brand") or "Cross-Brand" for w in roster})
+        if show.get("brand") not in {None, "", "Cross-Brand"}:
+            brands = [show.get("brand")]
+        proposals = []
+        for brand in brands[:3]:
+            brand_roster = [w for w in roster if brand in {"Cross-Brand", None, ""} or w.get("primary_brand") in {brand, "Cross-Brand", None, ""}]
+            for gender in ("Male", "Female"):
+                division = [w for w in brand_roster if str(w.get("gender", "")).lower() == gender.lower()]
+                if len(division) < 2:
+                    continue
+                ranked = sorted(division, key=lambda w: (float(w.get("momentum") or 0), float(w.get("popularity") or 0), float(w.get("overall") or 0)), reverse=True)
+                if len(ranked) >= 3:
+                    members = ranked[: min(4, len(ranked))]
+                    leader = members[0]
+                    betrayer = members[-1]
+                    proposals.append({"arc_type": "faction_formation_betrayal_seed", "brand": brand, "division": gender, "title": f"Form {leader['name']}'s {gender} faction on {brand}", "summary": f"Create a {gender.lower()} faction led by {leader['name']} with a slow-burn trust fracture around {betrayer['name']}.", "participants": [{"id": w["id"], "name": w["name"], "role": "leader" if w == leader else "member"} for w in members], "beats": ["Recruitment save after a numbers-game attack", "Six-person statement win", "Leader takes credit for the group", "Betrayal tease near the next major show", "Player-approved turn or reconciliation payoff"], "mechanical_effects": ["faction_momentum +8", "feud_seed +10", "betrayal_suspicion +12"]})
+                team = ranked[-2:]
+                proposals.append({"arc_type": "tag_team_formation_breakup_seed", "brand": brand, "division": gender, "title": f"Pair {team[0]['name']} & {team[1]['name']} as a new tag team", "summary": f"Test {team[0]['name']} and {team[1]['name']} as a {gender.lower()} tag act with a loyalty arc that can become a betrayal feud if chemistry fails.", "participants": [{"id": w["id"], "name": w["name"], "role": "partner"} for w in team], "beats": ["Accidental save creates alliance", "Two-week winning streak", "Miscommunication loss", "Partner jealousy promo", "Approve breakup, betrayal, or renewed unity"], "mechanical_effects": ["tag_chemistry_test +10", "underused_visibility +8", "betrayal_option_unlocked"]})
+                turn_candidate = ranked[min(1, len(ranked) - 1)]
+                current = str(turn_candidate.get("alignment") or "Tweener")
+                target = rng.choice([a for a in ["Face", "Heel", "Tweener"] if a != current] or ["Tweener"])
+                proposals.append({"arc_type": "alignment_turn", "brand": brand, "division": gender, "title": f"Turn arc: {turn_candidate['name']} toward {target}", "summary": f"Begin a paced {current}-to-{target} character shift for {turn_candidate['name']} with weekly story consequences before any final turn is applied.", "participants": [{"id": turn_candidate["id"], "name": turn_candidate["name"], "role": "turn_focus"}], "beats": ["Ambiguous promo motive", "Choice between friend and ambition", "Crowd-reaction checkpoint", "Major-show reveal", "Approval decides final alignment"], "mechanical_effects": ["character_direction +10", "alignment_pressure +12", "story_progression +8"]})
+        rng.shuffle(proposals)
+        return proposals[: (4 if is_major_window else 2)]
 
     def _seed_angle_library(self) -> None:
         now = self.now()
@@ -1292,6 +1325,15 @@ class AIShowrunnerService:
                 auto_executed.append(self._decode_queue(self.repo.fetch_one("SELECT * FROM booker_approval_queue WHERE id = ?", (crown_item["id"],))))
             else:
                 approvals.append(crown_item)
+        for arc in (special_systems.get("living_arcs") or []):
+            approvals.append(self._queue_item(
+                year, week, "living_story_ai",
+                f"{show['show_id']}:{arc['arc_type']}:{arc['brand']}:{arc['division']}:{self._slug(arc['title'])}",
+                arc["arc_type"], "high" if arc["arc_type"] in {"faction_formation_betrayal_seed", "alignment_turn"} else "medium",
+                arc["title"], arc["summary"],
+                {"living_arc": arc, "recommended_action": "approve_counter_or_reject_living_story_arc"},
+                "ask", None,
+            ))
         dark_house = special_systems.get("dark_house_autopilot") or {}
         dark_created = dark_house.get("created") or []
         if dark_created:
