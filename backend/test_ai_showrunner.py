@@ -93,6 +93,20 @@ class AIShowrunnerTests(unittest.TestCase):
         self.assertIn("dark_house_autopilot", categories)
         self.assertIn("promo_dialogue", categories)
 
+    def test_approving_war_games_materializes_factions(self):
+        self.service.run_weekly(1, 9, seed=77, force=True, autonomy_level="balanced")
+        dashboard = self.service.dashboard()
+        war_games_item = next(item for item in dashboard["pending_approvals"] if item["category"] == "war_games")
+
+        before = self.database.get_all_factions(active_only=True)
+        self.service.decide_approval(war_games_item["id"], {"decision": "approve", "notes": "Lock the teams."})
+        after = self.database.get_all_factions(active_only=True)
+
+        self.assertGreaterEqual(len(after), len(before) + 1)
+        names = {faction["faction_name"] for faction in after}
+        self.assertTrue(any(name.endswith("Team A") for name in names))
+        self.assertTrue(any("Team" in name for name in names))
+
     def test_approval_decision_and_aggressive_auto_execute(self):
         result = self.service.run_weekly(1, 10, seed=88, force=True, autonomy_level="aggressive")
 

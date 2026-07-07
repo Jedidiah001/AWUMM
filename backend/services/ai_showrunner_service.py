@@ -206,8 +206,128 @@ class AIShowrunnerService:
             (new_status, json.dumps(payload), new_status, now, now, approval_id),
         )
         self.conn.commit()
+        if new_status in {"approved", "auto_executed"}:
+            self._execute_approved_world_change(row)
         row = self.repo.fetch_one("SELECT * FROM booker_approval_queue WHERE id = ?", (approval_id,))
         return self._decode_queue(row)
+
+    def _execute_approved_world_change(self, approval_row: dict) -> None:
+        """Materialize approval-queue items that should change persistent game state."""
+        try:
+            item = self._decode_queue(dict(approval_row))
+            recommendation = item.get("recommendation_json") or {}
+            if item.get("source_type") == "war_games":
+                self._materialize_war_games_factions(recommendation.get("war_games") or {})
+            elif item.get("source_type") == "living_story_ai":
+                arc = recommendation.get("living_arc") or {}
+                if arc.get("arc_type") == "faction_formation_betrayal_seed":
+                    self._materialize_living_arc_faction(arc)
+        except Exception:
+            # Approval decisions should still persist even if optional world materialization fails.
+            pass
+
+    def _materialize_war_games_factions(self, war_games: dict) -> list[dict]:
+        created = []
+        event_name = war_games.get("target_event_name") or "War Games"
+        target_year = war_games.get("target_year") or war_games.get("year") or 1
+        target_week = war_games.get("target_week") or war_games.get("week") or 1
+        sides = [
+            ("A", war_games.get("faction_a_json") or war_games.get("faction_a") or []),
+            ("B", war_games.get("faction_b_json") or war_games.get("faction_b") or []),
+        ]
+        for label, members in sides:
+            if len(members) < 3:
+                continue
+            leader = members[0]
+            faction_name = f"{event_name} Team {label}"
+            faction = self._create_persistent_faction(
+                faction_name=faction_name,
+                members=members,
+                leader=leader,
+                primary_brand="Cross-Brand",
+                identity=f"AI-approved War Games side for {event_name}.",
+                goals=[
+                    f"Build to War Games at Y{target_year} W{target_week}",
+                    "Escalate faction warfare through advantage matches",
+                    "Create betrayal and power-struggle hooks after the payoff",
+                ],
+                entrance_style="war_games_unit",
+            )
+            if faction:
+                created.append(faction)
+        return created
+
+    def _materialize_living_arc_faction(self, arc: dict) -> dict | None:
+        participants = arc.get("participants") or []
+        members = [{"id": p.get("id"), "name": p.get("name")} for p in participants if p.get("id") and p.get("name")]
+        if len(members) < 3:
+            return None
+        leader = next((p for p in participants if p.get("role") == "leader"), members[0])
+        return self._create_persistent_faction(
+            faction_name=arc.get("title") or f"{leader.get('name', 'AI')} Faction",
+            members=members,
+            leader={"id": leader.get("id"), "name": leader.get("name")},
+            primary_brand=arc.get("brand") or "Cross-Brand",
+            identity=arc.get("summary") or "AI-approved living-story faction.",
+            goals=(arc.get("beats") or [])[:5],
+            entrance_style="ai_story_arc",
+        )
+
+    def _create_persistent_faction(self, faction_name: str, members: list[dict], leader: dict, primary_brand: str, identity: str, goals: list[str], entrance_style: str) -> dict | None:
+        clean_members = [m for m in members if m.get("id") and m.get("name")]
+        if len(clean_members) < 3 or not leader.get("id"):
+            return None
+        existing = self.database.get_all_factions(active_only=False) if hasattr(self.database, "get_all_factions") else []
+        for faction in existing:
+            if faction.get("faction_name") == faction_name and not faction.get("is_disbanded"):
+                return faction
+        try:
+            from flask import current_app, has_app_context
+            universe = current_app.config.get("UNIVERSE") if has_app_context() else None
+        except Exception:
+            universe = None
+        if universe and getattr(universe, "faction_manager", None):
+            faction = universe.faction_manager.create_faction(
+                faction_name=faction_name,
+                member_ids=[m["id"] for m in clean_members],
+                member_names=[m["name"] for m in clean_members],
+                leader_id=leader["id"],
+                leader_name=leader.get("name") or clean_members[0]["name"],
+                primary_brand=primary_brand,
+                identity=identity,
+                goals=goals,
+                entrance_style=entrance_style,
+            )
+            universe.save_faction(faction)
+            self.database.conn.commit()
+            return faction.to_dict()
+        from models.faction import Faction
+        faction_id = self._next_faction_id(existing)
+        faction = Faction(
+            faction_id=faction_id,
+            faction_name=faction_name,
+            member_ids=[m["id"] for m in clean_members],
+            member_names=[m["name"] for m in clean_members],
+            leader_id=leader["id"],
+            leader_name=leader.get("name") or clean_members[0]["name"],
+            primary_brand=primary_brand,
+            identity=identity,
+            goals=goals,
+            entrance_style=entrance_style,
+        )
+        faction.ensure_member_tracking()
+        self.database.save_faction(faction)
+        self.database.conn.commit()
+        return faction.to_dict()
+
+    def _next_faction_id(self, existing: list[dict]) -> str:
+        max_id = 0
+        for faction in existing:
+            raw = str(faction.get("faction_id", ""))
+            match = re.search(r"(\d+)$", raw)
+            if match:
+                max_id = max(max_id, int(match.group(1)))
+        return f"faction_{max_id + 1:03d}"
 
     def auto_resolve_due(self, year: int, week: int) -> dict:
         self._ensure_tables()
