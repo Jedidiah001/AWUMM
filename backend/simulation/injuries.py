@@ -934,7 +934,8 @@ class InjuryManager:
                 })
                 total_costs += injury_info['medical_costs']
             
-            by_severity[wrestler.injury.severity].append(wrestler_info)
+            severity_key = wrestler.injury.severity if wrestler.injury.severity in by_severity else "Severe" if wrestler.injury.severity == "Major" else "Moderate"
+            by_severity.setdefault(severity_key, []).append(wrestler_info)
                 
         return {
             'total_injured': len(injured),

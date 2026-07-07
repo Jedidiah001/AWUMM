@@ -206,8 +206,128 @@ class AIShowrunnerService:
             (new_status, json.dumps(payload), new_status, now, now, approval_id),
         )
         self.conn.commit()
+        if new_status in {"approved", "auto_executed"}:
+            self._execute_approved_world_change(row)
         row = self.repo.fetch_one("SELECT * FROM booker_approval_queue WHERE id = ?", (approval_id,))
         return self._decode_queue(row)
+
+    def _execute_approved_world_change(self, approval_row: dict) -> None:
+        """Materialize approval-queue items that should change persistent game state."""
+        try:
+            item = self._decode_queue(dict(approval_row))
+            recommendation = item.get("recommendation_json") or {}
+            if item.get("source_type") == "war_games":
+                self._materialize_war_games_factions(recommendation.get("war_games") or {})
+            elif item.get("source_type") == "living_story_ai":
+                arc = recommendation.get("living_arc") or {}
+                if arc.get("arc_type") == "faction_formation_betrayal_seed":
+                    self._materialize_living_arc_faction(arc)
+        except Exception:
+            # Approval decisions should still persist even if optional world materialization fails.
+            pass
+
+    def _materialize_war_games_factions(self, war_games: dict) -> list[dict]:
+        created = []
+        event_name = war_games.get("target_event_name") or "War Games"
+        target_year = war_games.get("target_year") or war_games.get("year") or 1
+        target_week = war_games.get("target_week") or war_games.get("week") or 1
+        sides = [
+            ("A", war_games.get("faction_a_json") or war_games.get("faction_a") or []),
+            ("B", war_games.get("faction_b_json") or war_games.get("faction_b") or []),
+        ]
+        for label, members in sides:
+            if len(members) < 3:
+                continue
+            leader = members[0]
+            faction_name = f"{event_name} Team {label}"
+            faction = self._create_persistent_faction(
+                faction_name=faction_name,
+                members=members,
+                leader=leader,
+                primary_brand="Cross-Brand",
+                identity=f"AI-approved War Games side for {event_name}.",
+                goals=[
+                    f"Build to War Games at Y{target_year} W{target_week}",
+                    "Escalate faction warfare through advantage matches",
+                    "Create betrayal and power-struggle hooks after the payoff",
+                ],
+                entrance_style="war_games_unit",
+            )
+            if faction:
+                created.append(faction)
+        return created
+
+    def _materialize_living_arc_faction(self, arc: dict) -> dict | None:
+        participants = arc.get("participants") or []
+        members = [{"id": p.get("id"), "name": p.get("name")} for p in participants if p.get("id") and p.get("name")]
+        if len(members) < 3:
+            return None
+        leader = next((p for p in participants if p.get("role") == "leader"), members[0])
+        return self._create_persistent_faction(
+            faction_name=arc.get("title") or f"{leader.get('name', 'AI')} Faction",
+            members=members,
+            leader={"id": leader.get("id"), "name": leader.get("name")},
+            primary_brand=arc.get("brand") or "Cross-Brand",
+            identity=arc.get("summary") or "AI-approved living-story faction.",
+            goals=(arc.get("beats") or [])[:5],
+            entrance_style="ai_story_arc",
+        )
+
+    def _create_persistent_faction(self, faction_name: str, members: list[dict], leader: dict, primary_brand: str, identity: str, goals: list[str], entrance_style: str) -> dict | None:
+        clean_members = [m for m in members if m.get("id") and m.get("name")]
+        if len(clean_members) < 3 or not leader.get("id"):
+            return None
+        existing = self.database.get_all_factions(active_only=False) if hasattr(self.database, "get_all_factions") else []
+        for faction in existing:
+            if faction.get("faction_name") == faction_name and not faction.get("is_disbanded"):
+                return faction
+        try:
+            from flask import current_app, has_app_context
+            universe = current_app.config.get("UNIVERSE") if has_app_context() else None
+        except Exception:
+            universe = None
+        if universe and getattr(universe, "faction_manager", None):
+            faction = universe.faction_manager.create_faction(
+                faction_name=faction_name,
+                member_ids=[m["id"] for m in clean_members],
+                member_names=[m["name"] for m in clean_members],
+                leader_id=leader["id"],
+                leader_name=leader.get("name") or clean_members[0]["name"],
+                primary_brand=primary_brand,
+                identity=identity,
+                goals=goals,
+                entrance_style=entrance_style,
+            )
+            universe.save_faction(faction)
+            self.database.conn.commit()
+            return faction.to_dict()
+        from models.faction import Faction
+        faction_id = self._next_faction_id(existing)
+        faction = Faction(
+            faction_id=faction_id,
+            faction_name=faction_name,
+            member_ids=[m["id"] for m in clean_members],
+            member_names=[m["name"] for m in clean_members],
+            leader_id=leader["id"],
+            leader_name=leader.get("name") or clean_members[0]["name"],
+            primary_brand=primary_brand,
+            identity=identity,
+            goals=goals,
+            entrance_style=entrance_style,
+        )
+        faction.ensure_member_tracking()
+        self.database.save_faction(faction)
+        self.database.conn.commit()
+        return faction.to_dict()
+
+    def _next_faction_id(self, existing: list[dict]) -> str:
+        max_id = 0
+        for faction in existing:
+            raw = str(faction.get("faction_id", ""))
+            match = re.search(r"(\d+)$", raw)
+            if match:
+                max_id = max(max_id, int(match.group(1)))
+        return f"faction_{max_id + 1:03d}"
 
     def auto_resolve_due(self, year: int, week: int) -> dict:
         self._ensure_tables()
@@ -859,13 +979,46 @@ class AIShowrunnerService:
         mitb = self._refresh_mitb_system(year, week, roster, opportunity, rng)
         war_games = self._refresh_war_games_system(year, week, roster, universe, rng)
         crown = self._refresh_crown_payoff_system(year, week, roster, universe, rng)
+        living_arcs = self._propose_living_story_arcs(year, week, show, roster, universe, rng, risk)
         return {
             "angle_execution": angle,
             "mitb": mitb,
             "war_games": war_games,
             "crown_payoffs": crown,
+            "living_arcs": living_arcs,
             "autonomy": autonomy,
         }
+
+
+    def _propose_living_story_arcs(self, year: int, week: int, show: dict, roster: list[dict], universe, rng: random.Random, risk: float) -> list[dict]:
+        """Paced, approval-gated living-world faction/team/turn pitches."""
+        is_major_window = bool(show.get("is_ppv") or show.get("show_type") in {"ppv", "major_ppv", "premium_live_event"} or show.get("tier") in {"ppv", "major"})
+        if not is_major_window and week % 3 != 0:
+            return []
+        brands = sorted({w.get("primary_brand") or show.get("brand") or "Cross-Brand" for w in roster})
+        if show.get("brand") not in {None, "", "Cross-Brand"}:
+            brands = [show.get("brand")]
+        proposals = []
+        for brand in brands[:3]:
+            brand_roster = [w for w in roster if brand in {"Cross-Brand", None, ""} or w.get("primary_brand") in {brand, "Cross-Brand", None, ""}]
+            for gender in ("Male", "Female"):
+                division = [w for w in brand_roster if str(w.get("gender", "")).lower() == gender.lower()]
+                if len(division) < 2:
+                    continue
+                ranked = sorted(division, key=lambda w: (float(w.get("momentum") or 0), float(w.get("popularity") or 0), float(w.get("overall") or 0)), reverse=True)
+                if len(ranked) >= 3:
+                    members = ranked[: min(4, len(ranked))]
+                    leader = members[0]
+                    betrayer = members[-1]
+                    proposals.append({"arc_type": "faction_formation_betrayal_seed", "brand": brand, "division": gender, "title": f"Form {leader['name']}'s {gender} faction on {brand}", "summary": f"Create a {gender.lower()} faction led by {leader['name']} with a slow-burn trust fracture around {betrayer['name']}.", "participants": [{"id": w["id"], "name": w["name"], "role": "leader" if w == leader else "member"} for w in members], "beats": ["Recruitment save after a numbers-game attack", "Six-person statement win", "Leader takes credit for the group", "Betrayal tease near the next major show", "Player-approved turn or reconciliation payoff"], "mechanical_effects": ["faction_momentum +8", "feud_seed +10", "betrayal_suspicion +12"]})
+                team = ranked[-2:]
+                proposals.append({"arc_type": "tag_team_formation_breakup_seed", "brand": brand, "division": gender, "title": f"Pair {team[0]['name']} & {team[1]['name']} as a new tag team", "summary": f"Test {team[0]['name']} and {team[1]['name']} as a {gender.lower()} tag act with a loyalty arc that can become a betrayal feud if chemistry fails.", "participants": [{"id": w["id"], "name": w["name"], "role": "partner"} for w in team], "beats": ["Accidental save creates alliance", "Two-week winning streak", "Miscommunication loss", "Partner jealousy promo", "Approve breakup, betrayal, or renewed unity"], "mechanical_effects": ["tag_chemistry_test +10", "underused_visibility +8", "betrayal_option_unlocked"]})
+                turn_candidate = ranked[min(1, len(ranked) - 1)]
+                current = str(turn_candidate.get("alignment") or "Tweener")
+                target = rng.choice([a for a in ["Face", "Heel", "Tweener"] if a != current] or ["Tweener"])
+                proposals.append({"arc_type": "alignment_turn", "brand": brand, "division": gender, "title": f"Turn arc: {turn_candidate['name']} toward {target}", "summary": f"Begin a paced {current}-to-{target} character shift for {turn_candidate['name']} with weekly story consequences before any final turn is applied.", "participants": [{"id": turn_candidate["id"], "name": turn_candidate["name"], "role": "turn_focus"}], "beats": ["Ambiguous promo motive", "Choice between friend and ambition", "Crowd-reaction checkpoint", "Major-show reveal", "Approval decides final alignment"], "mechanical_effects": ["character_direction +10", "alignment_pressure +12", "story_progression +8"]})
+        rng.shuffle(proposals)
+        return proposals[: (4 if is_major_window else 2)]
 
     def _seed_angle_library(self) -> None:
         now = self.now()
@@ -1292,6 +1445,15 @@ class AIShowrunnerService:
                 auto_executed.append(self._decode_queue(self.repo.fetch_one("SELECT * FROM booker_approval_queue WHERE id = ?", (crown_item["id"],))))
             else:
                 approvals.append(crown_item)
+        for arc in (special_systems.get("living_arcs") or []):
+            approvals.append(self._queue_item(
+                year, week, "living_story_ai",
+                f"{show['show_id']}:{arc['arc_type']}:{arc['brand']}:{arc['division']}:{self._slug(arc['title'])}",
+                arc["arc_type"], "high" if arc["arc_type"] in {"faction_formation_betrayal_seed", "alignment_turn"} else "medium",
+                arc["title"], arc["summary"],
+                {"living_arc": arc, "recommended_action": "approve_counter_or_reject_living_story_arc"},
+                "ask", None,
+            ))
         dark_house = special_systems.get("dark_house_autopilot") or {}
         dark_created = dark_house.get("created") or []
         if dark_created:

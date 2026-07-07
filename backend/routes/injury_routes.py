@@ -4,6 +4,10 @@ Injury Routes - Injury & Rehabilitation System (Step 20)
 
 from flask import Blueprint, jsonify, request, current_app
 import traceback
+import random
+
+from simulation.injuries import InjuryDetails, InjurySeverity, BodyPart
+from persistence.injury_db import get_injury_details
 
 injury_bp = Blueprint('injury', __name__)
 
@@ -19,6 +23,48 @@ def get_universe():
 def get_injury_manager():
     return current_app.config.get('INJURY_MANAGER')
 
+
+
+def _injury_severity_from_label(label):
+    normalized = str(label or '').strip().lower().replace('_', ' ')
+    if normalized in {'career threatening', 'critical'}:
+        return InjurySeverity.CAREER_THREATENING
+    if normalized in {'severe', 'major'}:
+        return InjurySeverity.SEVERE
+    if normalized == 'minor':
+        return InjurySeverity.MINOR
+    return InjurySeverity.MODERATE
+
+
+def _infer_body_part(description):
+    text = str(description or '').lower()
+    for part in BodyPart:
+        if part.value.lower() in text:
+            return part
+    return random.choice(list(BodyPart))
+
+
+def _injury_details_for(injury_manager, wrestler_id):
+    """Return active injury details from memory or persisted rehab tables."""
+    if injury_manager and hasattr(injury_manager, 'active_injuries'):
+        details = injury_manager.active_injuries.get(wrestler_id)
+        if details:
+            return details
+    try:
+        return get_injury_details(get_database(), wrestler_id)
+    except Exception:
+        return None
+
+
+def _detail_value(details, key, default=None):
+    if not details:
+        return default
+    if isinstance(details, dict):
+        return details.get(key, default)
+    value = getattr(details, key, default)
+    if hasattr(value, 'value'):
+        return value.value
+    return value
 
 def _severity_bucket(severity):
     severity = (severity or '').lower()
@@ -37,7 +83,7 @@ def api_injury_report():
     injury_manager = get_injury_manager()
     
     try:
-        roster = universe.get_active_wrestlers()
+        roster = [w for w in universe.wrestlers if not w.is_retired]
         report = injury_manager.get_injury_report(roster)
         
         return jsonify({
@@ -55,11 +101,11 @@ def api_get_active_injuries():
     injury_manager = get_injury_manager()
     
     try:
-        injured_wrestlers = [w for w in universe.get_active_wrestlers() if w.is_injured]
+        injured_wrestlers = [w for w in universe.wrestlers if not w.is_retired and w.is_injured]
         
         injuries = []
         for wrestler in injured_wrestlers:
-            injury_details = injury_manager.active_injuries.get(wrestler.id)
+            injury_details = _injury_details_for(injury_manager, wrestler.id)
             
             injury_data = {
                 'wrestler': wrestler.to_dict(),
@@ -72,12 +118,12 @@ def api_get_active_injuries():
             
             if injury_details:
                 injury_data['injury'].update({
-                    'body_part': injury_details.body_part.value,
-                    'requires_surgery': injury_details.requires_surgery,
-                    'can_appear_limited': injury_details.can_appear_limited,
-                    'rehab_progress': injury_details.rehab_progress,
-                    'medical_costs': injury_details.medical_costs,
-                    'milestones': injury_details.rehab_milestones
+                    'body_part': _detail_value(injury_details, 'body_part'),
+                    'requires_surgery': bool(_detail_value(injury_details, 'requires_surgery', False)),
+                    'can_appear_limited': bool(_detail_value(injury_details, 'can_appear_limited', False)),
+                    'rehab_progress': _detail_value(injury_details, 'rehab_progress'),
+                    'medical_costs': _detail_value(injury_details, 'medical_costs'),
+                    'milestones': _detail_value(injury_details, 'rehab_milestones', [])
                 })
             
             injuries.append(injury_data)
@@ -106,7 +152,7 @@ def api_get_wrestler_injury(wrestler_id):
         if not wrestler.is_injured:
             return jsonify({'success': False, 'error': 'Wrestler is not injured'}), 404
         
-        injury_details = injury_manager.active_injuries.get(wrestler_id)
+        injury_details = _injury_details_for(injury_manager, wrestler_id)
         
         response = {
             'success': True,
@@ -120,14 +166,14 @@ def api_get_wrestler_injury(wrestler_id):
         
         if injury_details:
             response['injury'].update({
-                'body_part': injury_details.body_part.value,
-                'requires_surgery': injury_details.requires_surgery,
-                'can_appear_limited': injury_details.can_appear_limited,
-                'rehab_progress': injury_details.rehab_progress,
-                'medical_costs': injury_details.medical_costs,
-                'milestones': injury_details.rehab_milestones,
-                'occurred_date': injury_details.occurred_date,
-                'estimated_return': injury_details.return_date
+                'body_part': _detail_value(injury_details, 'body_part'),
+                'requires_surgery': bool(_detail_value(injury_details, 'requires_surgery', False)),
+                'can_appear_limited': bool(_detail_value(injury_details, 'can_appear_limited', False)),
+                'rehab_progress': _detail_value(injury_details, 'rehab_progress'),
+                'medical_costs': _detail_value(injury_details, 'medical_costs'),
+                'milestones': _detail_value(injury_details, 'rehab_milestones', []),
+                'occurred_date': _detail_value(injury_details, 'occurred_date') or {'year': _detail_value(injury_details, 'occurred_year'), 'week': _detail_value(injury_details, 'occurred_week')},
+                'estimated_return': _detail_value(injury_details, 'return_date') or {'year': _detail_value(injury_details, 'estimated_return_year'), 'week': _detail_value(injury_details, 'estimated_return_week')}
             })
         
         return jsonify(response)
@@ -139,6 +185,7 @@ def api_get_wrestler_injury(wrestler_id):
 @injury_bp.route('/api/injuries/<wrestler_id>/apply', methods=['POST'])
 def api_apply_injury(wrestler_id):
     universe = get_universe()
+    injury_manager = get_injury_manager()
     
     try:
         wrestler = universe.get_wrestler_by_id(wrestler_id)
@@ -152,7 +199,23 @@ def api_apply_injury(wrestler_id):
         description = data.get('description', 'Unspecified injury')
         weeks_out = data.get('weeks_out', 4)
         
-        wrestler.apply_injury(severity, description, weeks_out)
+        if injury_manager:
+            severity_enum = _injury_severity_from_label(severity)
+            body_part = _infer_body_part(description)
+            details = InjuryDetails(
+                severity=severity_enum,
+                body_part=body_part,
+                description=description,
+                weeks_out=int(weeks_out),
+                requires_surgery=severity_enum in {InjurySeverity.SEVERE, InjurySeverity.CAREER_THREATENING},
+                can_appear_limited=severity_enum in {InjurySeverity.MINOR, InjurySeverity.MODERATE},
+                medical_costs=max(1000, int(weeks_out) * (3500 if severity_enum == InjurySeverity.SEVERE else 1800)),
+            )
+            injury_manager.apply_injury_to_wrestler(wrestler, details, year=1, week=1, show_id='manual_rehab', show_name='Manual Rehab Entry')
+            if hasattr(injury_manager, 'active_injuries'):
+                injury_manager.active_injuries[wrestler.id] = details
+        else:
+            wrestler.apply_injury(severity, description, weeks_out)
         
         universe.save_wrestler(wrestler)
         
@@ -185,7 +248,7 @@ def api_heal_injury(wrestler_id):
         
         wrestler.heal_injury(weeks_to_heal)
         
-        if not wrestler.is_injured and wrestler_id in injury_manager.active_injuries:
+        if not wrestler.is_injured and injury_manager and hasattr(injury_manager, 'active_injuries') and wrestler_id in injury_manager.active_injuries:
             del injury_manager.active_injuries[wrestler_id]
         
         universe.save_wrestler(wrestler)
@@ -214,7 +277,7 @@ def api_rush_return(wrestler_id):
         if not wrestler.is_injured:
             return jsonify({'success': False, 'error': 'Wrestler is not injured'}), 404
         
-        injury_details = injury_manager.active_injuries.get(wrestler_id)
+        injury_details = _injury_details_for(injury_manager, wrestler_id)
         
         if not injury_details:
             return jsonify({
@@ -224,7 +287,7 @@ def api_rush_return(wrestler_id):
         
         success, message = injury_manager.simulator.attempt_rushed_return(wrestler, injury_details)
         
-        if success and wrestler_id in injury_manager.active_injuries:
+        if success and injury_manager and hasattr(injury_manager, 'active_injuries') and wrestler_id in injury_manager.active_injuries:
             del injury_manager.active_injuries[wrestler_id]
         
         universe.save_wrestler(wrestler)
@@ -245,7 +308,7 @@ def api_injury_dashboard():
     injury_manager = get_injury_manager()
 
     try:
-        roster = universe.get_active_wrestlers()
+        roster = [w for w in universe.wrestlers if not w.is_retired]
         injured_wrestlers = [w for w in roster if w.is_injured]
         severity_counts = {
             'critical': 0,
@@ -267,10 +330,11 @@ def api_injury_dashboard():
                 bucket = _severity_bucket(wrestler.injury.severity)
                 severity_counts[bucket] += 1
 
-                details = injury_manager.active_injuries.get(wrestler.id) if injury_manager else None
+                details = _injury_details_for(injury_manager, wrestler.id)
                 if details:
-                    body_part = details.body_part.value
-                    body_part_counts[body_part] = body_part_counts.get(body_part, 0) + 1
+                    body_part = _detail_value(details, 'body_part')
+                    if body_part:
+                        body_part_counts[body_part] = body_part_counts.get(body_part, 0) + 1
 
                 weeks_remaining = int(wrestler.injury.weeks_remaining or 0)
                 if weeks_remaining <= 2:
@@ -358,7 +422,7 @@ def api_work_through_injury(wrestler_id):
         wrestler.adjust_fatigue(15)
         wrestler.adjust_morale(-5)
 
-        injury_details = injury_manager.active_injuries.get(wrestler_id) if injury_manager else None
+        injury_details = _injury_details_for(injury_manager, wrestler_id) if injury_manager else None
         if injury_details:
             injury_details.can_appear_limited = True
 
