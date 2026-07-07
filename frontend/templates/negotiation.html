@@ -1,0 +1,2743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Negotiation Room — AWUM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ══════════════════════════════════════════════════════════════════
+           RESET & ROOT VARIABLES
+        ══════════════════════════════════════════════════════════════════ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --brand-purple:   #7c5cbf;
+            --brand-blue:     #5a7cf0;
+            --brand-dark:     #0e0f18;
+            --brand-mid:      #12141f;
+
+            --green:          #28a745;
+            --accent-2:       #3fb950;
+            --amber:          #f0b429;
+            --warn:           #d29922;
+            --red:            #dc3545;
+            --danger:         #f05149;
+            --teal:           #17a2b8;
+            --accent:         #5b9cf6;
+
+            --bg-dark:        #0b0d15;
+            --bg-panel:       #13151f;
+            --bg-card:        #1c1f2e;
+            --bg-elevated:    #20243a;
+            --border:         rgba(255,255,255,0.07);
+            --border-soft:    rgba(255,255,255,0.04);
+            --border-light:   #dee2e6;
+            --text-muted:     rgba(255,255,255,0.42);
+            --text-dim:       rgba(255,255,255,0.65);
+            --text-main:      #dde4f0;
+
+            --surface:        #f8f9fa;
+            --surface-white:  #ffffff;
+
+            --gradient:       linear-gradient(135deg, #5a7cf0 0%, #7c5cbf 100%);
+            --gradient-dark:  linear-gradient(160deg, #0e0f18 0%, #12141f 100%);
+            --gradient-green: linear-gradient(135deg, #3fb950, #2ea043);
+            --gradient-blue:  linear-gradient(135deg, #5b9cf6, #3a7de0);
+            --gradient-amber: linear-gradient(135deg, #f0b429, #e09800);
+
+            --font-display:   'Barlow Condensed', sans-serif;
+            --font-body:      'DM Sans', sans-serif;
+
+            --radius-sm:      6px;
+            --radius:         10px;
+            --radius-lg:      14px;
+            --radius-xl:      20px;
+
+            --shadow-sm:      0 1px 3px rgba(0,0,0,0.25);
+            --shadow:         0 4px 16px rgba(0,0,0,0.35);
+            --shadow-lg:      0 8px 32px rgba(0,0,0,0.5);
+            --shadow-glow:    0 0 0 3px rgba(91,156,246,0.18);
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           BASE
+        ══════════════════════════════════════════════════════════════════ */
+        body {
+            background: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 14px;
+            line-height: 1.55;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-display);
+            letter-spacing: 0.01em;
+        }
+
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { color: #85b7ff; }
+
+        /* ══════════════════════════════════════════════════════════════════
+           LOADING OVERLAY
+        ══════════════════════════════════════════════════════════════════ */
+        #loadingOverlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: var(--text-main);
+            transition: opacity 0.4s ease;
+            gap: 12px;
+        }
+        #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
+
+        .loading-gear {
+            font-size: 2.8rem;
+            animation: spin 2s linear infinite;
+            display: block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-title {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .loading-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           HEADER / NAVBAR
+        ══════════════════════════════════════════════════════════════════ */
+        .nego-header {
+            background: var(--brand-dark);
+            border-bottom: 1px solid var(--border);
+            color: white;
+            padding: 0 1.5rem;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: white; }
+
+        .header-center {
+            text-align: center;
+            line-height: 1.2;
+        }
+        .nego-title {
+            font-family: var(--font-display);
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: white;
+        }
+        .nego-subtitle {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .header-stats {
+            text-align: right;
+            line-height: 1.3;
+        }
+        .header-stats .nav-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .header-stats .balance {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent-2);
+            letter-spacing: 0.03em;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           LAYOUT — 3-COLUMN GRID
+        ══════════════════════════════════════════════════════════════════ */
+        .nego-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 1.25rem;
+            padding: 1.25rem;
+            max-width: 1680px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        @media (max-width: 1400px) {
+            .nego-layout { grid-template-columns: 280px 1fr 270px; }
+        }
+        @media (max-width: 1200px) {
+            .nego-layout { grid-template-columns: 1fr 1fr; }
+            .nego-col-advisor { grid-column: 1 / -1; }
+        }
+        @media (max-width: 768px) {
+            .nego-layout { grid-template-columns: 1fr; padding: 0.75rem; gap: 0.75rem; }
+        }
+
+        .nego-sticky {
+            position: sticky;
+            top: 70px;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           PANEL BASE
+        ══════════════════════════════════════════════════════════════════ */
+        .nego-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nego-panel-header {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-display);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+        .nego-panel-header i { font-size: 0.85rem; }
+        .nego-panel-header .ms-auto { font-family: var(--font-body); font-size: 0.72rem; font-weight: 600; }
+
+        /* Header color variants */
+        .nego-panel-header.purple {
+            background: var(--gradient);
+            color: #fff;
+            border-bottom: none;
+        }
+        .nego-panel-header.dark {
+            background: var(--gradient-dark);
+            color: white;
+            border-bottom: none;
+        }
+        .nego-panel-header.amber {
+            background: rgba(240,180,41,0.1);
+            color: var(--amber);
+            border-bottom-color: rgba(240,180,41,0.15);
+        }
+        .nego-panel-header.green {
+            background: rgba(63,185,80,0.1);
+            color: var(--accent-2);
+            border-bottom-color: rgba(63,185,80,0.15);
+        }
+        .nego-panel-header.teal {
+            background: rgba(23,162,184,0.1);
+            color: var(--teal);
+            border-bottom-color: rgba(23,162,184,0.15);
+        }
+        .nego-panel-header.danger {
+            background: rgba(240,81,73,0.1);
+            color: var(--danger);
+            border-bottom-color: rgba(240,81,73,0.15);
+        }
+
+        .nego-panel-body { padding: 16px; }
+        .nego-panel-body.pt-0 { padding-top: 0; }
+        .nego-panel-body.pt-2 { padding-top: 8px; }
+
+        /* ══════════════════════════════════════════════════════════════════
+           FA IDENTITY CARD
+        ══════════════════════════════════════════════════════════════════ */
+        .fa-identity {
+            text-align: center;
+            padding: 24px 20px 16px;
+        }
+
+        .fa-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            background: var(--gradient);
+            margin-bottom: 10px;
+            box-shadow: 0 4px 20px rgba(124,92,191,0.4), 0 0 0 3px rgba(124,92,191,0.15);
+        }
+
+        .fa-name {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            color: #eef2ff;
+            text-transform: uppercase;
+        }
+
+        .fa-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+            letter-spacing: 0.03em;
+        }
+
+        .fa-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           PATIENCE METER
+        ══════════════════════════════════════════════════════════════════ */
+        .patience-section {
+            padding: 12px 16px 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .patience-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+            letter-spacing: 0.04em;
+        }
+        .patience-label span:first-child { text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.1em; }
+
+        .patience-bar-track {
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .patience-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.6s ease, background 0.6s ease;
+        }
+        .patience-bar-fill.high   { background: linear-gradient(90deg, #28a745, #55c87a); }
+        .patience-bar-fill.medium { background: linear-gradient(90deg, #f0b429, #ffd86b); }
+        .patience-bar-fill.low    {
+            background: linear-gradient(90deg, #f05149, #ff7070);
+            animation: pulseOpacity 1.6s infinite;
+        }
+        @keyframes pulseOpacity { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+
+        .patience-hint {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+        .patience-hint.urgent { color: var(--danger); font-weight: 600; }
+
+        /* ══════════════════════════════════════════════════════════════════
+           FLEXIBILITY DOTS
+        ══════════════════════════════════════════════════════════════════ */
+        .flex-dots {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin: 6px 0;
+        }
+        .flex-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+        .flex-dot.used  { background: var(--bg-elevated); border: 1px solid var(--border); }
+        .flex-dot.avail { background: var(--accent); box-shadow: 0 0 6px rgba(91,156,246,0.5); }
+
+        /* ══════════════════════════════════════════════════════════════════
+           MOOD BADGES
+        ══════════════════════════════════════════════════════════════════ */
+        .mood-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .mood-patient   { background: rgba(63,185,80,0.15);  color: var(--accent-2); }
+        .mood-hungry    { background: rgba(240,180,41,0.15); color: var(--amber); }
+        .mood-bitter    { background: rgba(240,81,73,0.15);  color: var(--danger); }
+        .mood-desperate { background: rgba(255,255,255,0.08); color: var(--text-dim); }
+        .mood-arrogant  { background: rgba(124,92,191,0.2);  color: #b79ef5; }
+
+        /* ══════════════════════════════════════════════════════════════════
+           FA STAT ROWS
+        ══════════════════════════════════════════════════════════════════ */
+        .fa-stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 0;
+            font-size: 0.8rem;
+            border-bottom: 1px solid var(--border-soft);
+        }
+        .fa-stat-row:last-child { border-bottom: none; }
+        .fa-stat-label { color: var(--text-muted); }
+        .fa-stat-value { font-weight: 600; color: var(--text-main); }
+
+        /* ══════════════════════════════════════════════════════════════════
+           ROUND TRACKER
+        ══════════════════════════════════════════════════════════════════ */
+        .round-tracker {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px 20px 20px;
+            gap: 0;
+        }
+
+        .round-node {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .round-node::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 55%;
+            right: -55%;
+            height: 2px;
+            background: var(--border);
+            z-index: 0;
+        }
+        .round-node:last-child::before { display: none; }
+
+        .round-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: var(--bg-panel);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 700;
+            z-index: 1;
+            transition: all 0.3s ease;
+            color: var(--text-muted);
+        }
+        .round-dot.done    { background: var(--accent-2); border-color: var(--accent-2); color: #000; }
+        .round-dot.active  { background: var(--gradient); border-color: var(--brand-purple); color: white; box-shadow: 0 0 0 4px rgba(124,92,191,0.2); }
+        .round-dot.pending { background: var(--bg-card); }
+
+        .round-label {
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            font-weight: 600;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           DEADLINE BANNER
+        ══════════════════════════════════════════════════════════════════ */
+        .deadline-banner {
+            background: rgba(240,81,73,0.08);
+            border: 1px solid rgba(240,81,73,0.35);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            margin-bottom: 10px;
+            font-size: 0.82rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #ffb0ad;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           BEHAVIORAL TELLS
+        ══════════════════════════════════════════════════════════════════ */
+        .tell-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--border-soft);
+        }
+        .tell-row:last-child { border-bottom: none; }
+        .tell-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+        .tell-text {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+        .tell-text strong { color: var(--text-main); font-weight: 600; }
+
+        .tell-tag {
+            display: inline-block;
+            padding: 1px 7px;
+            border-radius: 100px;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            margin-left: 4px;
+            vertical-align: middle;
+            text-transform: uppercase;
+        }
+        .tell-tag.positive { background: rgba(63,185,80,0.15);  color: var(--accent-2); }
+        .tell-tag.negative { background: rgba(240,81,73,0.15);  color: var(--danger); }
+        .tell-tag.neutral  { background: rgba(255,255,255,0.08); color: var(--text-muted); }
+
+        .tell-card {
+            background: rgba(91,156,246,0.07);
+            border: 1px solid rgba(91,156,246,0.18);
+            border-radius: var(--radius-sm);
+            padding: 9px 12px;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            color: var(--text-dim);
+            line-height: 1.45;
+        }
+        .tell-card.priority {
+            background: rgba(63,185,80,0.07);
+            border-color: rgba(63,185,80,0.2);
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           PROBABILITY RING
+        ══════════════════════════════════════════════════════════════════ */
+        .prob-ring {
+            width: 96px;
+            height: 96px;
+            position: relative;
+            margin: 0 auto 8px;
+            flex-shrink: 0;
+        }
+        .prob-ring svg { transform: rotate(-90deg); }
+        .prob-ring .prob-label {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           OFFER BUILDER — TABS
+        ══════════════════════════════════════════════════════════════════ */
+        .offer-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            padding: 0 16px;
+        }
+        .offer-tab {
+            padding: 10px 14px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+            letter-spacing: 0.03em;
+        }
+        .offer-tab:hover { color: var(--text-dim); }
+        .offer-tab.active { color: var(--accent); }
+        .offer-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 2px 2px 0 0;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           OFFER BUILDER — FORM ELEMENTS
+        ══════════════════════════════════════════════════════════════════ */
+        .offer-builder-section { padding: 0 16px 16px; }
+
+        .offer-field { margin-bottom: 16px; }
+        .offer-field:last-child { margin-bottom: 0; }
+
+        .offer-field label {
+            font-size: 0.73rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            margin-bottom: 5px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .value-badge {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: 0.02em;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+
+        .form-control,
+        .form-select {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--text-main) !important;
+            border-radius: var(--radius-sm) !important;
+            font-size: 0.84rem !important;
+            font-family: var(--font-body) !important;
+            padding: 7px 10px !important;
+            transition: border-color 0.2s, box-shadow 0.2s !important;
+        }
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--accent) !important;
+            box-shadow: var(--shadow-glow) !important;
+            outline: none !important;
+        }
+        .form-select option { background: var(--bg-card); }
+
+        .form-range { accent-color: var(--accent); }
+
+        .input-group-text {
+            background: var(--bg-elevated) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--text-muted) !important;
+            font-size: 0.82rem !important;
+        }
+
+        .input-hint {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .input-hint.warn { color: #e67e22; }
+        .input-hint.ok   { color: var(--accent-2); }
+
+        .form-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+        .form-section h6 {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-check-input {
+            background-color: var(--bg-card);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .form-check-input:checked {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+        .form-check-label {
+            font-size: 0.82rem;
+            color: var(--text-dim);
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           COST PREVIEW
+        ══════════════════════════════════════════════════════════════════ */
+        .cost-preview {
+            background: rgba(91,156,246,0.05);
+            border: 1px solid rgba(91,156,246,0.12);
+            border-radius: var(--radius);
+            padding: 12px 14px;
+            margin: 0 16px 12px;
+        }
+        .cost-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            padding: 4px 0;
+        }
+        .cost-line.total {
+            border-top: 1px solid rgba(91,156,246,0.15);
+            margin-top: 6px;
+            padding-top: 8px;
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+        .cost-line .label { color: var(--text-muted); }
+        .cost-line .value { font-weight: 600; color: var(--text-dim); }
+        .cost-line.total .value { color: var(--accent); }
+
+        /* ══════════════════════════════════════════════════════════════════
+           OFFER BAR
+        ══════════════════════════════════════════════════════════════════ */
+        .offer-bar-container { padding: 0 16px 14px; }
+        .offer-bar-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .offer-bar-labels strong { color: var(--text-dim); }
+        .offer-bar-track {
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .offer-bar-fill {
+            height: 100%;
+            background: var(--gradient);
+            border-radius: 999px;
+            transition: width 0.35s ease, background 0.35s ease;
+            width: 0%;
+        }
+        .offer-bar-caption {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           SUBMIT BUTTON
+        ══════════════════════════════════════════════════════════════════ */
+        .submit-offer-btn {
+            display: block;
+            width: calc(100% - 32px);
+            margin: 0 16px 16px;
+            padding: 13px;
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s;
+        }
+        .submit-offer-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124,92,191,0.45);
+        }
+        .submit-offer-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-sign {
+            background: var(--gradient-green);
+            border: none;
+            color: #000;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 10px 22px;
+            border-radius: var(--radius-sm);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .btn-sign:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(63,185,80,0.35); color: #000; }
+
+        .btn-submit {
+            background: var(--gradient-blue);
+            border: none;
+            color: #000;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 10px 22px;
+            border-radius: var(--radius-sm);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(91,156,246,0.35); color: #000; }
+
+        /* ══════════════════════════════════════════════════════════════════
+           HISTORY LOG
+        ══════════════════════════════════════════════════════════════════ */
+        .history-log {
+            padding: 12px 16px 16px;
+            max-height: 360px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        .history-entry {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .history-entry:last-child { margin-bottom: 0; }
+
+        .history-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .history-icon.player { background: rgba(91,156,246,0.15); color: var(--accent); }
+        .history-icon.fa     { background: rgba(124,92,191,0.15); color: #b79ef5; }
+        .history-icon.event  { background: rgba(240,180,41,0.15); color: var(--amber); }
+        .history-icon.system { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+
+        .history-content { flex: 1; }
+
+        .history-who {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .history-who.player { color: var(--accent); }
+        .history-who.fa     { color: #b79ef5; }
+        .history-who.event  { color: var(--amber); }
+
+        .history-msg {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.45;
+            margin-top: 2px;
+        }
+        .history-salary { font-weight: 700; color: var(--accent-2); }
+        .history-time   { font-size: 0.67rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* ══════════════════════════════════════════════════════════════════
+           ADVISOR PANEL
+        ══════════════════════════════════════════════════════════════════ */
+        .advisor-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .advisor-head {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-card);
+        }
+        .advisor-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(91,156,246,0.15);
+            border: 1px solid rgba(91,156,246,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .advisor-name {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.88rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--text-main);
+        }
+        .advisor-role { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.03em; }
+
+        .advisor-body { padding: 14px 16px; }
+
+        .advisor-rec {
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+        .advisor-rec:last-child { margin-bottom: 0; }
+
+        .advisor-rec.primary {
+            background: rgba(91,156,246,0.08);
+            border: 1px solid rgba(91,156,246,0.18);
+            color: #aac5f8;
+        }
+        .advisor-rec.warning {
+            background: rgba(240,180,41,0.08);
+            border: 1px solid rgba(240,180,41,0.2);
+            color: #f5d580;
+        }
+        .advisor-rec.danger {
+            background: rgba(240,81,73,0.08);
+            border: 1px solid rgba(240,81,73,0.2);
+            color: #ffacaa;
+        }
+
+        .advisor-rec-title {
+            font-weight: 700;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 4px;
+            opacity: 0.8;
+        }
+
+        .advisor-stat-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--bg-elevated);
+            border-radius: 100px;
+            padding: 3px 10px;
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            margin: 3px 2px;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           RIVAL ALERT
+        ══════════════════════════════════════════════════════════════════ */
+        .rival-alert-panel { display: none; }
+        .rival-alert-panel.active { display: block; }
+
+        .rival-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid var(--border-soft);
+            font-size: 0.78rem;
+        }
+        .rival-entry:last-child { border-bottom: none; }
+
+        /* ══════════════════════════════════════════════════════════════════
+           QUICK ACTIONS
+        ══════════════════════════════════════════════════════════════════ */
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 12px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 6px;
+            font-family: var(--font-body);
+            text-align: left;
+        }
+        .quick-action-btn:last-child { margin-bottom: 0; }
+        .quick-action-btn:hover:not(:disabled) {
+            background: rgba(255,255,255,0.04);
+            border-color: var(--accent);
+            color: white;
+        }
+        .quick-action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .quick-action-btn.danger:hover:not(:disabled) {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: rgba(240,81,73,0.06);
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           ACCEPT COUNTER PANEL
+        ══════════════════════════════════════════════════════════════════ */
+        #acceptCounterPanel { display: none; }
+
+        /* ══════════════════════════════════════════════════════════════════
+           OUTCOME BANNER
+        ══════════════════════════════════════════════════════════════════ */
+        .outcome-banner {
+            border-radius: var(--radius-lg);
+            padding: 28px 24px;
+            text-align: center;
+            display: none;
+        }
+        .outcome-banner.active { display: block; }
+
+        .outcome-banner.win {
+            background: linear-gradient(135deg, rgba(63,185,80,0.15), rgba(40,167,69,0.08));
+            border: 1px solid rgba(63,185,80,0.35);
+        }
+        .outcome-banner.loss {
+            background: rgba(240,81,73,0.08);
+            border: 1px solid rgba(240,81,73,0.3);
+        }
+        .outcome-banner.wait {
+            background: rgba(240,180,41,0.08);
+            border: 1px solid rgba(240,180,41,0.25);
+        }
+
+        .outcome-icon { font-size: 3rem; display: block; margin-bottom: 10px; }
+        .outcome-title {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .outcome-detail { font-size: 0.88rem; color: var(--text-muted); }
+
+        /* ══════════════════════════════════════════════════════════════════
+           RESULT OVERLAY
+        ══════════════════════════════════════════════════════════════════ */
+        #resultOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        #resultOverlay.show { display: flex; }
+
+        .result-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 40px 36px;
+            max-width: 460px;
+            width: 92%;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+        .result-icon { font-size: 3.5rem; margin-bottom: 14px; display: block; }
+        .result-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .result-card p { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 24px; }
+
+        /* ══════════════════════════════════════════════════════════════════
+           COLLAPSE TOGGLE
+        ══════════════════════════════════════════════════════════════════ */
+        .collapse-toggle {
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s;
+        }
+        .collapse-toggle:hover { color: var(--accent); }
+
+        /* ══════════════════════════════════════════════════════════════════
+           UTILITY BADGES & MISC
+        ══════════════════════════════════════════════════════════════════ */
+        .badge {
+            font-family: var(--font-display);
+            letter-spacing: 0.06em;
+            font-size: 0.65rem;
+        }
+
+        .spinner-sm { width: 16px; height: 16px; }
+
+        hr { border-color: var(--border); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        /* Toast */
+        .toast-container { z-index: 10000; }
+    </style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay">
+    <span class="loading-gear">⚙️</span>
+    <div class="loading-title">Negotiation Room</div>
+    <div class="loading-sub">Setting up the deal table…</div>
+</div>
+
+<!-- STICKY HEADER -->
+<header class="nego-header">
+    <a href="/free-agents" class="back-link">
+        <i class="bi bi-arrow-left"></i>
+        Free Agents
+    </a>
+    <div class="header-center">
+        <div class="nego-title" id="headerFaName">Negotiation Room</div>
+        <div class="nego-subtitle" id="headerRound">Round 1 of 3</div>
+    </div>
+    <div class="header-stats">
+        <div class="nav-label" id="navStatus">Loading…</div>
+        <div class="balance" id="headerBalance">$—</div>
+    </div>
+</header>
+
+<!-- MAIN LAYOUT -->
+<div class="nego-layout" id="negoLayout">
+
+    <!-- ══ LEFT COLUMN ══ -->
+    <div class="nego-col-left nego-sticky">
+
+        <!-- FA Identity Card -->
+        <div class="nego-panel mb-3">
+            <div class="fa-identity" id="faIdentity">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+            <div class="patience-section">
+                <div class="patience-label">
+                    <span><i class="bi bi-hourglass-split me-1"></i>Patience</span>
+                    <span id="patienceValue">—%</span>
+                </div>
+                <div class="patience-bar-track">
+                    <div class="patience-bar-fill high" id="patienceBar" style="width:100%"></div>
+                </div>
+                <div class="patience-hint" id="patienceHint">Loading…</div>
+            </div>
+        </div>
+
+        <!-- Round Tracker -->
+        <div class="nego-panel mb-3">
+            <div class="nego-panel-header purple">
+                <i class="bi bi-arrow-repeat"></i> Negotiation Rounds
+            </div>
+            <div class="round-tracker" id="roundTracker"></div>
+        </div>
+
+        <!-- Flexibility -->
+        <div class="nego-panel mb-3" id="flexibilityPanel">
+            <div class="nego-panel-header">
+                <i class="bi bi-sliders" style="color:var(--accent)"></i>
+                Wrestler Flexibility
+            </div>
+            <div class="nego-panel-body">
+                <div class="flex-dots" id="flexDots"></div>
+                <small class="text-muted" id="flexLabel">Loading…</small>
+            </div>
+        </div>
+
+        <!-- Deadline Warning -->
+        <div id="deadlinePanel" style="display:none;" class="mb-3">
+            <div class="deadline-banner">
+                <i class="bi bi-alarm-fill"></i>
+                <span id="deadlineText"></span>
+            </div>
+        </div>
+
+        <!-- FA Stats -->
+        <div class="nego-panel mb-3">
+            <div class="nego-panel-header">
+                <i class="bi bi-clipboard-data" style="color:var(--accent)"></i>
+                Key Details
+            </div>
+            <div class="nego-panel-body pt-0" id="faStatsPanel">
+                <div class="text-center py-3 text-muted small">Loading…</div>
+            </div>
+        </div>
+
+        <!-- Behavioral Tells -->
+        <div class="nego-panel mb-3">
+            <div class="nego-panel-header amber">
+                <i class="bi bi-eye"></i> Reading the Room
+            </div>
+            <div class="nego-panel-body pt-2" id="tellsPanel">
+                <div class="text-center py-2 text-muted small">Loading tells…</div>
+            </div>
+        </div>
+
+        <!-- Third-Party Ally -->
+        <div class="nego-panel">
+            <div class="nego-panel-header">
+                <i class="bi bi-people-fill" style="color:var(--teal)"></i>
+                <span class="collapse-toggle" data-bs-toggle="collapse" data-bs-target="#tpCollapse">
+                    Call In An Ally <i class="bi bi-chevron-down float-end"></i>
+                </span>
+            </div>
+            <div class="collapse" id="tpCollapse">
+                <div class="nego-panel-body pt-2">
+                    <select class="form-select form-select-sm mb-2" id="tpAlly">
+                        <option value="">Select roster member…</option>
+                    </select>
+                    <select class="form-select form-select-sm mb-2" id="tpType">
+                        <option value="roster_friend">Roster Friend (+10%)</option>
+                        <option value="legend">Legend (+15%)</option>
+                        <option value="satisfied_signee">Past Signee (+8%)</option>
+                    </select>
+                    <button class="btn btn-sm btn-outline-info w-100" id="tpBtn">
+                        <i class="bi bi-handshake me-1"></i>Apply
+                    </button>
+                    <div id="tpResult" class="mt-2 small"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ CENTER COLUMN ══ -->
+    <div class="nego-col-center">
+
+        <!-- Outcome Banner -->
+        <div class="outcome-banner mb-3" id="outcomeBanner">
+            <span class="outcome-icon" id="outcomeIcon">🏆</span>
+            <div class="outcome-title" id="outcomeTitle">Deal Signed!</div>
+            <div class="outcome-detail" id="outcomeDetail"></div>
+            <div class="mt-3" id="outcomeActions">
+                <a href="/roster" class="btn btn-sign me-2">
+                    <i class="bi bi-people-fill me-1"></i>View Roster
+                </a>
+                <a href="/free-agents" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Free Agents
+                </a>
+            </div>
+        </div>
+
+        <!-- Deal Probability -->
+        <div class="nego-panel mb-3">
+            <div class="nego-panel-header green">
+                <i class="bi bi-graph-up-arrow"></i> Deal Probability
+            </div>
+            <div class="nego-panel-body">
+                <div class="row align-items-center g-3">
+                    <div class="col-auto text-center">
+                        <div class="prob-ring">
+                            <svg width="96" height="96" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="42" fill="none" stroke="var(--bg-card)" stroke-width="8"/>
+                                <circle id="probCircle" cx="50" cy="50" r="42" fill="none"
+                                        stroke="var(--accent)" stroke-width="8"
+                                        stroke-dasharray="263.89" stroke-dashoffset="263.89"
+                                        stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease, stroke 0.4s ease;"/>
+                            </svg>
+                            <div class="prob-label" id="probPct">—%</div>
+                        </div>
+                        <small style="color:var(--text-muted); font-size:0.7rem; line-height:1.3; display:block;">
+                            Acceptance<br>Probability
+                        </small>
+                    </div>
+                    <div class="col">
+                        <div class="fa-stat-row">
+                            <span class="fa-stat-label">Asking Price</span>
+                            <span class="fa-stat-value" style="color:var(--amber);" id="askingDisplay">$—</span>
+                        </div>
+                        <div class="fa-stat-row">
+                            <span class="fa-stat-label">Minimum</span>
+                            <span class="fa-stat-value" style="color:var(--accent-2);" id="minimumDisplay">$—</span>
+                        </div>
+                        <div class="fa-stat-row" style="border-bottom:none;">
+                            <span class="fa-stat-label">Opening Quality</span>
+                            <span id="openingQuality" class="badge bg-secondary">—</span>
+                        </div>
+                        <div class="mt-2" style="font-size:0.78rem; color:var(--text-muted); line-height:1.45;" id="probRecommendation">
+                            Adjust your offer to see probability update live.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offer Builder -->
+        <div class="nego-panel mb-3" id="offerBuilderPanel">
+            <div class="nego-panel-header purple">
+                <i class="bi bi-pen-fill"></i>
+                Build Your Offer
+                <span class="ms-auto badge bg-white text-dark" id="roundBadge">Round 1</span>
+            </div>
+
+            <!-- Tabs -->
+            <div class="offer-tabs">
+                <button class="offer-tab active" data-tab="monetary">
+                    <i class="bi bi-cash-coin me-1"></i>Monetary
+                </button>
+                <button class="offer-tab" data-tab="creative">
+                    <i class="bi bi-pencil-square me-1"></i>Creative
+                </button>
+                <button class="offer-tab" data-tab="lifestyle">
+                    <i class="bi bi-house-heart me-1"></i>Lifestyle
+                </button>
+            </div>
+
+            <!-- TAB: Monetary -->
+            <div class="offer-tab-content" id="tab-monetary">
+                <div class="offer-builder-section pt-3">
+
+                    <div class="offer-field">
+                        <label><i class="bi bi-cash me-1"></i>Salary Per Show</label>
+                        <div class="value-badge mb-1">$<span id="salaryDisplay">0</span></div>
+                        <input type="range" class="form-range" id="salarySlider"
+                               min="5000" max="200000" step="1000" value="50000">
+                        <div class="d-flex justify-content-between mt-1">
+                            <small style="color:var(--text-muted); font-size:0.7rem;" id="salaryMin">$5K</small>
+                            <small style="color:var(--text-muted); font-size:0.7rem;" id="salaryMax">$200K</small>
+                        </div>
+                        <div class="input-hint" id="salaryHint">Drag slider to set salary</div>
+                    </div>
+
+                    <div class="offer-field">
+                        <label><i class="bi bi-calendar3 me-1"></i>Contract Length</label>
+                        <div class="value-badge mb-1"><span id="lengthDisplay">52</span> <span style="font-size:0.9rem; opacity:0.6;">weeks</span></div>
+                        <input type="range" class="form-range" id="lengthSlider"
+                               min="13" max="156" step="13" value="52">
+                        <div class="d-flex justify-content-between mt-1">
+                            <small style="color:var(--text-muted); font-size:0.7rem;">13w (3mo)</small>
+                            <small style="color:var(--text-muted); font-size:0.7rem;">156w (3yr)</small>
+                        </div>
+                    </div>
+
+                    <div class="offer-field">
+                        <label><i class="bi bi-calendar-week me-1"></i>Salary Structure</label>
+                        <select class="form-select form-select-sm" id="salaryStructure">
+                            <option value="weekly">Weekly</option>
+                            <option value="per_appearance" selected>Per Appearance</option>
+                            <option value="annual">Annual</option>
+                            <option value="hybrid">Hybrid</option>
+                        </select>
+                    </div>
+
+                    <div class="offer-field">
+                        <label><i class="bi bi-gift me-1"></i>Signing Bonus</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" id="signingBonus" class="form-control"
+                                   placeholder="0" min="0" step="5000" value="0">
+                        </div>
+                        <div class="input-hint">One-time payment on signing. Attracts 'hungry' talent.</div>
+                    </div>
+
+                    <div class="offer-field">
+                        <label><i class="bi bi-shop me-1"></i>Merch Split (you / them)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="merchPromo" min="50" max="85" value="70">
+                            <span class="input-group-text">%</span>
+                            <span class="input-group-text">/</span>
+                            <input type="number" class="form-control" id="merchWrestler" min="15" max="50" value="30" readonly>
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+
+                    <div class="offer-field">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="downsideActive">
+                            <label class="form-check-label" for="downsideActive">
+                                <i class="bi bi-shield-check me-1"></i>Downside Guarantee
+                                <span style="color:var(--text-muted); font-size:0.75rem;">(pay even if unused)</span>
+                            </label>
+                        </div>
+                        <div id="downsideFields" style="display:none;" class="mt-2 ms-4">
+                            <div class="input-group input-group-sm" style="max-width:210px;">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="downsideAmount"
+                                       min="0" step="500" value="3000" placeholder="Weekly guarantee">
+                                <span class="input-group-text">/wk</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PPV Bonuses -->
+                <div class="form-section mx-3 mb-3">
+                    <h6 class="collapse-toggle" data-bs-toggle="collapse" data-bs-target="#ppvCollapse">
+                        <i class="bi bi-trophy"></i>PPV Bonuses
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </h6>
+                    <div class="collapse" id="ppvCollapse">
+                        <div class="row g-2 mt-1">
+                            <div class="col-6">
+                                <label class="form-label" style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Base Appearance</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="ppvBase" min="0" step="1000" value="0">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Main Event</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="ppvMain" min="0" step="1000" value="0">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Championship</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="ppvChamp" min="0" step="1000" value="0">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Guaranteed Min/yr</label>
+                                <input type="number" class="form-control form-control-sm" id="ppvMin" min="0" max="12" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Incentives -->
+                <div class="form-section mx-3 mb-3">
+                    <h6 class="collapse-toggle" data-bs-toggle="collapse" data-bs-target="#incCollapse">
+                        <i class="bi bi-graph-up"></i>Performance Incentives
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </h6>
+                    <div class="collapse" id="incCollapse">
+                        <div class="row g-2 mt-1">
+                            <div class="col-6">
+                                <label class="form-label" style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Match Quality (≥★★★½)</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="incQuality" min="0" step="500" value="0">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Championship</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="incChamp" min="0" step="500" value="0">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Loyalty (full term)</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="incLoyalty" min="0" step="500" value="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Creative -->
+            <div class="offer-tab-content" id="tab-creative" style="display:none;">
+                <div class="offer-builder-section pt-3">
+
+                    <div class="offer-field">
+                        <label><i class="bi bi-lightbulb me-1"></i>Creative Control</label>
+                        <select id="creativeControl" class="form-select">
+                            <option value="none">None (Standard)</option>
+                            <option value="consultation">Consultation rights</option>
+                            <option value="approval">Approval rights</option>
+                            <option value="partnership">Creative Partnership</option>
+                            <option value="full">Full Control (rare)</option>
+                        </select>
+                        <div class="input-hint" id="creativeHint">Standard contracts have no creative input.</div>
+                    </div>
+
+                    <div class="offer-field">
+                        <label><i class="bi bi-mic me-1"></i>Promo Style</label>
+                        <select id="promoStyle" class="form-select">
+                            <option value="none">No preference</option>
+                            <option value="scripted">Fully Scripted</option>
+                            <option value="bullets">Bullet Points</option>
+                            <option value="improv">Full Improv</option>
+                        </select>
+                    </div>
+
+                    <div class="offer-field">
+                        <label><i class="bi bi-clock me-1"></i>Promo Time Minimum (min/show)</label>
+                        <input type="number" class="form-control" id="promoTime" min="0" max="30" value="0">
+                    </div>
+
+                    <div class="offer-field">
+                        <label><i class="bi bi-trophy me-1"></i>Title Guarantee</label>
+                        <input type="text" class="form-control" id="titleGuarantee"
+                               placeholder="e.g. World title shot within 6 months">
+                        <div class="form-check mt-2">
+                            <input type="checkbox" id="titleGuaranteeCheck" class="form-check-input">
+                            <label for="titleGuaranteeCheck" class="form-check-label">
+                                <i class="bi bi-trophy-fill text-warning me-1"></i>
+                                Guaranteed title shot (within 6 months)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="offer-field">
+                        <label><i class="bi bi-tag me-1"></i>Assign to Brand</label>
+                        <select id="brandPref" class="form-select">
+                            <option value="">— No preference —</option>
+                            <option value="ROC Alpha">ROC Alpha</option>
+                            <option value="ROC Velocity">ROC Velocity</option>
+                            <option value="ROC Vanguard">ROC Vanguard</option>
+                        </select>
+                    </div>
+
+                    <div class="offer-field">
+                        <label class="mb-2">Additional Rights</label>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="storylineVeto">
+                                <label class="form-check-label" for="storylineVeto">Storyline Veto Rights</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="finishProtection">
+                                <label class="form-check-label" for="finishProtection">Finish Protection</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Lifestyle -->
+            <div class="offer-tab-content" id="tab-lifestyle" style="display:none;">
+                <div class="offer-builder-section pt-3">
+
+                    <div class="offer-field">
+                        <label><i class="bi bi-calendar-event me-1"></i>Max Appearances / Year <span style="color:var(--text-muted); font-weight:400;">(0 = unlimited)</span></label>
+                        <input type="number" class="form-control" id="maxAppearances" min="0" max="300" step="10" value="0">
+                    </div>
+
+                    <div class="offer-field">
+                        <label><i class="bi bi-building me-1"></i>Hotel Tier</label>
+                        <select id="hotelTier" class="form-select">
+                            <option value="standard">Standard</option>
+                            <option value="4-star">4-Star</option>
+                            <option value="5-star">5-Star</option>
+                        </select>
+                    </div>
+
+                    <div class="offer-field">
+                        <label class="mb-2">Travel &amp; Lifestyle Perks</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="firstClass">
+                                    <label class="form-check-label" for="firstClass">
+                                        <i class="bi bi-airplane me-1"></i>First Class
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="privateCar">
+                                    <label class="form-check-label" for="privateCar">
+                                        <i class="bi bi-car-front me-1"></i>Private Car
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="outsideProjects" checked>
+                                    <label class="form-check-label" for="outsideProjects">
+                                        <i class="bi bi-camera-reels me-1"></i>Outside Projects
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="familyTime">
+                                    <label class="form-check-label" for="familyTime">
+                                        <i class="bi bi-house-heart me-1"></i>Family Time Off
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="injuryPay">
+                                    <label class="form-check-label" for="injuryPay">
+                                        <i class="bi bi-bandaid me-1"></i>Injury Pay
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="injuryJobSecurity">
+                                    <label class="form-check-label" for="injuryJobSecurity">
+                                        <i class="bi bi-shield-plus me-1"></i>Job Security
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost Preview -->
+            <div class="cost-preview">
+                <div class="cost-line">
+                    <span class="label">Per-show cost</span>
+                    <span class="value" id="costPerShow">$0</span>
+                </div>
+                <div class="cost-line">
+                    <span class="label">Est. shows/year (~156)</span>
+                    <span class="value" id="costPerYear">$0</span>
+                </div>
+                <div class="cost-line">
+                    <span class="label">Signing bonus</span>
+                    <span class="value" id="costBonus">$0</span>
+                </div>
+                <div class="cost-line total">
+                    <span class="label">Year 1 total commitment</span>
+                    <span class="value" id="costTotal">$0</span>
+                </div>
+            </div>
+
+            <!-- Offer Bar -->
+            <div class="offer-bar-container">
+                <div class="offer-bar-labels">
+                    <span>Min: <strong id="barMinLabel">$—</strong></span>
+                    <span>Asking: <strong id="barAskLabel">$—</strong></span>
+                </div>
+                <div class="offer-bar-track">
+                    <div id="offerBar" class="offer-bar-fill"></div>
+                </div>
+                <div class="offer-bar-caption" id="barCaption">Set a salary to see where you stand</div>
+            </div>
+
+            <!-- Submit -->
+            <button class="submit-offer-btn" id="submitOfferBtn" disabled>
+                <i class="bi bi-send-fill me-2"></i>Submit Offer
+                <span class="ms-1 opacity-75" id="submitRoundLabel" style="font-size:0.85em;">(Round 1/3)</span>
+            </button>
+        </div>
+
+        <!-- Negotiation Log -->
+        <div class="nego-panel">
+            <div class="nego-panel-header teal">
+                <i class="bi bi-chat-square-text"></i> Negotiation Log
+                <span class="ms-auto badge bg-white text-dark" id="logCount">0 entries</span>
+            </div>
+            <div class="history-log" id="historyLog">
+                <div class="text-center py-4" style="color:var(--text-muted);">
+                    <i class="bi bi-chat-dots" style="font-size:2rem; opacity:0.25; display:block; margin-bottom:8px;"></i>
+                    <span style="font-size:0.8rem;">Log will appear once talks begin.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ RIGHT COLUMN ══ -->
+    <div class="nego-col-advisor nego-sticky">
+
+        <!-- Advisor -->
+        <div class="advisor-card mb-3">
+            <div class="advisor-head">
+                <div class="advisor-avatar">🧠</div>
+                <div>
+                    <div class="advisor-name">Contract Advisor</div>
+                    <div class="advisor-role">Strategic Recommendations</div>
+                </div>
+            </div>
+            <div class="advisor-body" id="advisorBody">
+                <div class="text-center py-3" style="color:var(--text-muted); font-size:0.82rem;">
+                    Loading recommendations…
+                </div>
+            </div>
+        </div>
+
+        <!-- Rival Alert -->
+        <div class="nego-panel rival-alert-panel mb-3" id="rivalAlertPanel">
+            <div class="nego-panel-header amber">
+                <i class="bi bi-exclamation-triangle-fill"></i> Rival Activity
+            </div>
+            <div class="nego-panel-body" id="rivalAlertBody"></div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="nego-panel mb-3">
+            <div class="nego-panel-header">
+                <i class="bi bi-lightning-fill" style="color:var(--amber)"></i> Quick Actions
+            </div>
+            <div class="nego-panel-body">
+                <button class="quick-action-btn" id="matchAskBtn" disabled>
+                    <i class="bi bi-bullseye"></i>
+                    Match Asking Price
+                </button>
+                <button class="quick-action-btn" id="meetMidBtn" disabled>
+                    <i class="bi bi-arrows-collapse"></i>
+                    Meet in Middle
+                </button>
+                <button class="quick-action-btn" id="lowestAcceptBtn" disabled>
+                    <i class="bi bi-arrow-down-circle"></i>
+                    Set to Minimum
+                </button>
+                <hr class="my-2">
+                <button class="quick-action-btn danger" id="walkAwayBtn">
+                    <i class="bi bi-box-arrow-left"></i>
+                    Walk Away
+                </button>
+            </div>
+        </div>
+
+        <!-- Accept Counter Panel -->
+        <div class="nego-panel mb-3" id="acceptCounterPanel">
+            <div class="nego-panel-header green">
+                <i class="bi bi-arrow-left-right"></i> Counter-Offer Received
+            </div>
+            <div class="nego-panel-body">
+                <p class="small mb-2" id="counterOfferSummary" style="color:var(--text-dim);">—</p>
+                <button class="btn btn-sign w-100" id="acceptCounterBtn">
+                    <i class="bi bi-check-circle-fill me-1"></i>Accept Counter-Offer
+                </button>
+            </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="nego-panel">
+            <div class="nego-panel-header">
+                <i class="bi bi-info-circle" style="color:var(--accent)"></i> Tips
+            </div>
+            <div class="nego-panel-body" style="padding-top:10px;">
+                <ul style="padding-left:16px; margin:0; display:flex; flex-direction:column; gap:7px;">
+                    <li style="font-size:0.78rem; color:var(--text-muted); line-height:1.4;">Start below asking to leave negotiation room</li>
+                    <li style="font-size:0.78rem; color:var(--text-muted); line-height:1.4;">Signing bonuses appeal to <em>hungry</em> talent</li>
+                    <li style="font-size:0.78rem; color:var(--text-muted); line-height:1.4;">Creative control matters more to veterans</li>
+                    <li style="font-size:0.78rem; color:var(--text-muted); line-height:1.4;">Watch patience meter — don't drag talks out</li>
+                    <li style="font-size:0.78rem; color:var(--text-muted); line-height:1.4;">Use allies to boost acceptance chance</li>
+                    <li style="font-size:0.78rem; color:var(--text-muted); line-height:1.4;">Rivals can poach if you wait too long</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /nego-layout -->
+
+<!-- RESULT OVERLAY -->
+<div id="resultOverlay">
+    <div class="result-card">
+        <div class="result-icon" id="resultIcon">🤝</div>
+        <h3 id="resultTitle">—</h3>
+        <p id="resultBody">—</p>
+        <div id="resultActions">
+            <a href="/roster" class="btn btn-sign me-2">
+                <i class="bi bi-people-fill me-1"></i>View Roster
+            </a>
+            <a href="/free-agents" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Free Agents
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/api.js"></script>
+<script>
+(function() {
+    'use strict';
+
+    // ── STATE ──────────────────────────────────────────────────────────────
+    let faId           = null;
+    let faData         = null;
+    let sessionId      = null;
+    let session        = null;
+    let negoState      = null;
+    let currentRound   = 1;
+    let maxRounds      = 3;
+    let lastCounterOffer = null;
+
+    const SHOWS_PER_YEAR = 156;
+    const logEntries     = [];
+
+    // ── INIT ───────────────────────────────────────────────────────────────
+    async function init() {
+        const params = new URLSearchParams(window.location.search);
+        faId = params.get('fa');
+
+        if (!faId) {
+            showError('No free agent ID specified. Return to the <a href="/free-agents">free agent pool</a>.');
+            hideLoader();
+            return;
+        }
+
+        try {
+            await Promise.all([loadFA(), loadUniverseState()]);
+            await initNegotiationSession();
+            hideLoader();
+            setupEventListeners();
+            setupTabs();
+            onOfferChange();
+        } catch (err) {
+            console.error('Init failed:', err);
+            showError('Failed to load negotiation data. <a href="/free-agents">Go back</a>.');
+            hideLoader();
+        }
+    }
+
+    // ── DATA LOADING ───────────────────────────────────────────────────────
+    async function loadFA() {
+        const res = await getAPI(`/api/free-agents/${faId}?force=true`);
+        if (!res || !res.free_agent) throw new Error('Free agent not found');
+        faData = res.free_agent;
+        renderFAProfile();
+        renderFAStats();
+        renderTells();
+        renderFlexibility();
+        updateOfferBar();
+        updateAdvisor();
+        updateQuickActions();
+        calibrateSalarySlider();
+    }
+
+    async function loadUniverseState() {
+        try {
+            const res = await getAPI('/api/universe/state');
+            if (res) {
+                document.getElementById('headerBalance').textContent = '$' + (res.balance || 0).toLocaleString();
+                document.getElementById('navStatus').textContent = `Year ${res.current_year || 1}, Week ${res.current_week || 1}`;
+            }
+        } catch(e) { console.warn('Failed to load universe state:', e); }
+    }
+
+    async function initNegotiationSession() {
+        try {
+            const res = await postAPI('/api/negotiation/start', { fa_id: faId });
+            if (res && res.success && res.session) {
+                session   = res.session;
+                sessionId = session.session_id;
+                currentRound = session.round_number || 1;
+                maxRounds    = session.max_rounds || 3;
+                renderRoundTracker();
+                updateRoundLabels();
+                if (res.deadline_warning) addChatBubble(res.deadline_warning, 'them', '⚠️');
+                if (res.opening_guidance) addChatBubble(res.opening_guidance, 'them', '💡');
+                if (session.deadline && session.deadline.has_deadline) renderDeadline(session.deadline);
+                if (session.flexibility) renderFlexibilityFromSession(session.flexibility);
+                if (session.tells) renderTellsFromSession(session.tells);
+                return;
+            }
+        } catch(e) { console.warn('Session init failed, trying state style:', e); }
+
+        try {
+            const res = await getAPI(`/api/free-agents/${faId}/negotiation-state`);
+            if (res && res.success && res.state) {
+                negoState    = res.state;
+                currentRound = res.state.current_round || 1;
+                maxRounds    = res.state.max_rounds || 3;
+                renderRoundTracker();
+                updateRoundLabels();
+                if (res.state.log && res.state.log.length > 0) res.state.log.forEach(e => appendLogEntry(e));
+                if (res.state.status === 'decided') showOutcomeBanner(res.state);
+                return;
+            }
+        } catch(e) { console.warn('State load failed:', e); }
+
+        renderRoundTracker();
+        updateRoundLabels();
+        appendLogEntry({
+            who: 'system',
+            message: `Negotiation room opened for <strong>${escapeHtml(faData?.wrestler_name || 'Free Agent')}</strong>. Make your first offer to begin Round 1.`,
+            time: 'Now'
+        });
+        loadRivalInterest();
+        loadAllyDropdown();
+    }
+
+    async function loadRivalInterest() {
+        try {
+            const res = await getAPI(`/api/free-agents/${faId}/rival-interest`);
+            if (res && res.total_interested > 0) renderRivalAlert(res);
+        } catch(e) { console.warn('Failed to load rival interest:', e); }
+    }
+
+    async function loadAllyDropdown() {
+        try {
+            const res = await getAPI('/api/roster');
+            const sel = document.getElementById('tpAlly');
+            if (sel && res && res.wrestlers) {
+                res.wrestlers.forEach(w => {
+                    const opt = document.createElement('option');
+                    opt.value = w.id;
+                    opt.textContent = `${w.name} (${w.role})`;
+                    sel.appendChild(opt);
+                });
+            }
+        } catch(e) { console.warn('Failed to load roster:', e); }
+    }
+
+    // ── RENDER: FA PROFILE ─────────────────────────────────────────────────
+    function renderFAProfile() {
+        if (!faData) return;
+        const fa    = faData;
+        const name  = fa.wrestler_name || 'Unknown';
+        const init  = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        const mood  = fa.mood || 'patient';
+        const moodLabel = fa.mood_label || capitalize(mood);
+        
+        document.getElementById('headerFaName').textContent = name;
+        document.getElementById('headerRound').textContent  = `Round ${currentRound} of ${maxRounds}`;
+
+        document.getElementById('faIdentity').innerHTML = `
+            <div class="fa-avatar">${escapeHtml(init)}</div>
+            <div class="fa-name">${escapeHtml(name)}</div>
+            <div class="fa-meta">${fa.age || '?'} yrs · ${escapeHtml(fa.gender || '')} · ${escapeHtml(fa.role || '')}</div>
+            <div class="fa-badges">
+                
+                <span class="mood-badge mood-${mood}">${moodLabel}</span>
+                ${fa.is_legend ? '<span class="badge" style="background:#f0b429;color:#000;">LEGEND</span>' : ''}
+                ${fa.is_prospect ? '<span class="badge bg-success">PROSPECT</span>' : ''}
+            </div>
+        `;
+        renderPatienceMeter();
+    }
+
+    function renderPatienceMeter() {
+        const patience = computePatience();
+        const bar  = document.getElementById('patienceBar');
+        const val  = document.getElementById('patienceValue');
+        const hint = document.getElementById('patienceHint');
+        bar.style.width = patience + '%';
+        val.textContent = Math.round(patience) + '%';
+        if (patience >= 65) {
+            bar.className = 'patience-bar-fill high';
+            hint.className = 'patience-hint';
+            hint.textContent = 'Patient — plenty of time to negotiate carefully.';
+        } else if (patience >= 35) {
+            bar.className = 'patience-bar-fill medium';
+            hint.className = 'patience-hint';
+            hint.textContent = "Getting restless — don't drag this out too long.";
+        } else {
+            bar.className = 'patience-bar-fill low';
+            hint.className = 'patience-hint urgent';
+            hint.textContent = '⚠️ Near breaking point — act soon or lose them!';
+        }
+    }
+
+    function computePatience() {
+        if (!faData) return 80;
+        const weeks = faData.weeks_unemployed || 0;
+        const mood  = faData.mood || 'patient';
+        let base = 100 - (weeks * 4);
+        const moodMods = { desperate:-25, arrogant:+15, bitter:-15, hungry:-10, patient:0 };
+        base += moodMods[mood] || 0;
+        base -= (currentRound - 1) * 10;
+        return Math.max(5, Math.min(100, base));
+    }
+
+    // ── RENDER: FLEXIBILITY ────────────────────────────────────────────────
+    function renderFlexibility() {
+        const total = Math.floor(Math.random() * 3) + 3;
+        renderFlexibilityDots(total, total);
+    }
+
+    function renderFlexibilityFromSession(flex) {
+        if (!flex) return;
+        renderFlexibilityDots(flex.total_points || 5, flex.points_remaining || 5);
+        const label = document.getElementById('flexLabel');
+        if (flex.is_exhausted) {
+            label.textContent = '❌ No flexibility left — this is final.';
+            label.style.color = 'var(--danger)';
+        }
+    }
+
+    function renderFlexibilityDots(total, remaining) {
+        const container = document.getElementById('flexDots');
+        const label     = document.getElementById('flexLabel');
+        if (!container) return;
+        container.innerHTML = '';
+        for (let i = 0; i < total; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'flex-dot ' + (i < remaining ? 'avail' : 'used');
+            container.appendChild(dot);
+        }
+        if (label) label.textContent = `${remaining}/${total} flexibility points remaining`;
+    }
+
+    // ── RENDER: ROUND TRACKER ──────────────────────────────────────────────
+    function renderRoundTracker() {
+        const container = document.getElementById('roundTracker');
+        if (!container) return;
+        const labels = ['Opening', 'Counter', 'Final'];
+        let html = '';
+        for (let i = 1; i <= maxRounds; i++) {
+            let dotClass = 'pending', icon = i;
+            if (i < currentRound) { dotClass = 'done'; icon = '✓'; }
+            else if (i === currentRound) dotClass = 'active';
+            html += `
+                <div class="round-node">
+                    <div class="round-dot ${dotClass}">${icon}</div>
+                    <div class="round-label">${labels[i-1] || `Round ${i}`}</div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+
+    function updateRoundLabels() {
+        const map = {
+            roundBadge:    `Round ${currentRound}`,
+            submitRoundLabel: `(Round ${currentRound}/${maxRounds})`,
+            headerRound:   `Round ${currentRound} of ${maxRounds}`
+        };
+        Object.entries(map).forEach(([id, val]) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+        });
+    }
+
+    // ── RENDER: FA STATS ───────────────────────────────────────────────────
+    function renderFAStats() {
+        if (!faData) return;
+        const fa      = faData;
+        const demands = fa.demands || {};
+        const agent   = fa.agent || {};
+        const asking  = demands.asking_salary || 0;
+        const minimum = demands.minimum_salary || 0;
+
+        const stats = [
+            { label:'Asking Salary', value:`$${asking.toLocaleString()}/show`, color:'var(--amber)' },
+            { label:'Minimum', value:`$${minimum.toLocaleString()}/show`, color:'var(--accent-2)' },
+            { label:'Popularity', value:`${fa.popularity || 0}/100` },
+            { label:'Overall Rating', value:`${fa.attributes?.overall || fa.overall || 0}/100` },
+            { label:'Experience', value:`${fa.years_experience || 0} years` },
+            { label:'Weeks Available', value:`${fa.weeks_unemployed || 0} weeks` },
+        ];
+        if (agent.agent_type && agent.agent_type !== 'none') {
+            stats.push({ label:'Agent', value:escapeHtml(agent.agent_name || 'Has Agent'), color:'#b79ef5' });
+            stats.push({ label:'Commission', value:`${((agent.commission_rate||0)*100).toFixed(0)}%`, color:'#b79ef5' });
+        }
+
+        document.getElementById('faStatsPanel').innerHTML = stats.map(s => `
+            <div class="fa-stat-row">
+                <span class="fa-stat-label">${s.label}</span>
+                <span class="fa-stat-value"${s.color ? ` style="color:${s.color}"` : ''}>${s.value}</span>
+            </div>
+        `).join('');
+
+        document.getElementById('barMinLabel').textContent = '$' + minimum.toLocaleString();
+        document.getElementById('barAskLabel').textContent = '$' + asking.toLocaleString();
+        document.getElementById('askingDisplay').textContent = '$' + asking.toLocaleString();
+        document.getElementById('minimumDisplay').textContent = '$' + minimum.toLocaleString();
+    }
+
+    // ── RENDER: TELLS ──────────────────────────────────────────────────────
+    function renderTells() {
+        if (!faData) return;
+        const tells = generateTells(faData, faData.mood || 'patient');
+        document.getElementById('tellsPanel').innerHTML = tells.map(t => `
+            <div class="tell-row">
+                <div class="tell-icon">${t.icon}</div>
+                <div class="tell-text">${t.text}</div>
+            </div>
+        `).join('');
+    }
+
+    function renderTellsFromSession(tells) {
+        if (!tells || !tells.length) return;
+        document.getElementById('tellsPanel').innerHTML = tells.map((tell, i) => `
+            <div class="tell-card ${i === 0 ? 'priority' : ''}">${i === 0 ? '🔑 ' : '💬 '}${tell}</div>
+        `).join('');
+    }
+
+    function generateTells(fa, mood) {
+        const tells   = [];
+        const weeks   = fa.weeks_unemployed || 0;
+        const pop     = fa.popularity || 50;
+
+        const moodTells = {
+            patient:   { icon:'🎯', text:'<strong>Patient mindset</strong> — not rushing into anything. Money matters, but fit matters more. <span class="tell-tag neutral">SELECTIVE</span>' },
+            hungry:    { icon:'🔥', text:'<strong>Wants to get back fast</strong> — higher salary will accelerate signing. Signing bonus carries extra weight. <span class="tell-tag positive">MONEY DRIVEN</span>' },
+            bitter:    { icon:'😤', text:'<strong>Burned by their last promotion</strong> — expects respect above all else. Don\'t lowball. <span class="tell-tag negative">PRIDE SENSITIVE</span>' },
+            desperate: { icon:'⏰', text:'<strong>Needs a deal urgently</strong> — almost any reasonable offer will be accepted. <span class="tell-tag positive">EAGER TO SIGN</span>' },
+            arrogant:  { icon:'👑', text:'<strong>Knows their worth</strong> — expects to be courted. Creative control and title guarantees land hard. <span class="tell-tag negative">HIGH MAINTENANCE</span>' },
+        };
+        if (moodTells[mood]) tells.push(moodTells[mood]);
+
+        if (weeks >= 8) tells.push({ icon:'📅', text:`<strong>${weeks} weeks on the market</strong> — showing wear. They want resolution. <span class="tell-tag neutral">TIMING SENSITIVE</span>` });
+        if (weeks <= 2) tells.push({ icon:'✨', text:'Fresh on the market — still evaluating options and in no hurry to commit.' });
+        if (pop >= 80) tells.push({ icon:'⭐', text:`<strong>Marquee name</strong> (${pop}/100 pop) — wants to headline, not fill cards. <span class="tell-tag positive">PRESTIGE MATTERS</span>` });
+        if (pop <= 30) tells.push({ icon:'📈', text:'Early-career talent — growth path and regular TV time matters more than peak salary.' });
+        if (fa.agent && fa.agent.agent_type !== 'none') tells.push({ icon:'💼', text:`Represented by <strong>${escapeHtml(fa.agent.agent_name || 'an agent')}</strong> — expect hardball on salary. <span class="tell-tag negative">AGENT BUFFER</span>` });
+        if (fa.has_chronic_issues) tells.push({ icon:'🏥', text:'Known injury history — will push for injury protection clause. <span class="tell-tag neutral">INJURY CLAUSE</span>' });
+        if (fa.is_legend) tells.push({ icon:'🏆', text:'Legend status — this is about legacy. A title guarantee and creative role trump salary alone.' });
+        if (fa.is_prospect) tells.push({ icon:'🌱', text:'Developmental prospect — low cost, high ceiling. Will choose the promotion with the best development record.' });
+
+        return tells.slice(0, 5);
+    }
+
+    // ── RENDER: DEADLINE ───────────────────────────────────────────────────
+    function renderDeadline(deadline) {
+        if (!deadline || !deadline.has_deadline) return;
+        document.getElementById('deadlinePanel').style.display = 'block';
+        document.getElementById('deadlineText').textContent =
+            `⏰ ${deadline.rival_offer_rival || 'Rival'} offer expires Week ${deadline.deadline_week}. Their offer: $${(deadline.rival_offer_value||0).toLocaleString()}`;
+    }
+
+    // ── RENDER: RIVAL ALERT ────────────────────────────────────────────────
+    function renderRivalAlert(data) {
+        const panel = document.getElementById('rivalAlertPanel');
+        const body  = document.getElementById('rivalAlertBody');
+        if (!data || data.total_interested === 0) { panel.classList.remove('active'); return; }
+        panel.classList.add('active');
+        const bidders = (data.interest_details || []).filter(r => r.will_bid);
+        body.innerHTML = `
+            <p class="mb-2" style="font-size:0.8rem; color:var(--text-dim);">
+                <strong>${data.total_interested}</strong> rival promotion(s) interested in
+                <strong>${escapeHtml(faData?.wrestler_name || 'this talent')}</strong>.
+            </p>
+            ${bidders.slice(0,3).map(r => `
+                <div class="rival-entry">
+                    <span>
+                        <span class="badge bg-secondary" style="font-size:0.6rem;">${r.tier||''}</span>
+                        ${escapeHtml(r.promotion_name)}
+                    </span>
+                    <span style="color:var(--danger); font-weight:700; font-size:0.82rem;">$${(r.initial_offer||0).toLocaleString()}</span>
+                </div>
+            `).join('')}
+            <div class="mt-2" style="font-size:0.72rem; color:var(--text-muted);">Act fast to avoid a bidding war!</div>
+        `;
+    }
+
+    // ── RENDER: ADVISOR ────────────────────────────────────────────────────
+    function updateAdvisor() {
+        if (!faData) return;
+        const fa      = faData;
+        const demands = fa.demands || {};
+        const mood    = fa.mood || 'patient';
+        const pop     = fa.popularity || 50;
+        const weeks   = fa.weeks_unemployed || 0;
+        const asking  = demands.asking_salary || 0;
+        const minimum = demands.minimum_salary || 0;
+        const recs    = [];
+
+        let primarySalary = asking, primaryMsg = '';
+        if (mood === 'desperate' || weeks >= 10) {
+            primarySalary = Math.round(((asking + minimum) / 2) / 500) * 500;
+            primaryMsg = `This talent is eager to sign. Offer <strong>$${primarySalary.toLocaleString()}/show</strong> — between minimum and asking — and they'll likely accept in Round 1.`;
+        } else if (mood === 'arrogant' || pop >= 80) {
+            primarySalary = Math.round(asking * 1.05 / 500) * 500;
+            primaryMsg = `High-profile talent requires respect. Open at or above asking (<strong>$${primarySalary.toLocaleString()}/show</strong>). Add a title guarantee to seal it.`;
+        } else if (mood === 'hungry') {
+            primarySalary = Math.round(asking * 0.92 / 500) * 500;
+            primaryMsg = `Money-motivated. Counter slightly below asking (<strong>$${primarySalary.toLocaleString()}/show</strong>) with a strong signing bonus.`;
+        } else {
+            primarySalary = Math.round(asking * 0.88 / 500) * 500;
+            primaryMsg = `Patient and selective. Open conservatively at <strong>$${primarySalary.toLocaleString()}/show</strong> to leave room to come up over rounds.`;
+        }
+        recs.push({ type:'primary', title:'💡 Recommended Opening', msg:primaryMsg });
+        if (pop >= 70 || fa.is_legend) recs.push({ type:'primary', title:'🎭 Creative Control', msg:'High-popularity talent values <strong>consultation rights</strong> over extra salary. It costs little and adds significant appeal.' });
+        if (computePatience() < 40) recs.push({ type:'danger', title:'🚨 Act Now', msg:'Patience is critical — if talks extend further without progress, they may sign elsewhere.' });
+        recs.push({ type:'warning', title:'⚠️ Bidding War Risk', msg:'Check the Rival Activity panel. If interest is high, move fast.' });
+
+        document.getElementById('advisorBody').innerHTML = recs.map(r => `
+            <div class="advisor-rec ${r.type}">
+                <div class="advisor-rec-title">${r.title}</div>
+                ${r.msg}
+            </div>
+        `).join('') + `
+            <div class="d-flex flex-wrap mt-2">
+                <span class="advisor-stat-chip"><i class="bi bi-cash me-1"></i>Ask: $${asking.toLocaleString()}</span>
+                <span class="advisor-stat-chip"><i class="bi bi-arrow-down me-1"></i>Min: $${minimum.toLocaleString()}</span>
+                <span class="advisor-stat-chip"><i class="bi bi-emoji-smile me-1"></i>${capitalize(mood)}</span>
+            </div>
+        `;
+    }
+
+    // ── CALIBRATE SLIDER ───────────────────────────────────────────────────
+    function calibrateSalarySlider() {
+        if (!faData?.demands) return;
+        const asking = faData.demands.asking_salary || 50000;
+        const lo = Math.floor(asking * 0.4 / 1000) * 1000;
+        const hi = Math.ceil(asking * 2.5 / 1000) * 1000;
+        const slider = document.getElementById('salarySlider');
+        slider.min = lo; slider.max = hi;
+        slider.value = Math.floor(asking * 0.9 / 1000) * 1000;
+        document.getElementById('salaryMin').textContent = '$' + shortFmt(lo);
+        document.getElementById('salaryMax').textContent = '$' + shortFmt(hi);
+        document.getElementById('salaryDisplay').textContent = parseInt(slider.value).toLocaleString();
+    }
+
+    // ── LIVE OFFER UPDATES ─────────────────────────────────────────────────
+    let _debounce = null;
+
+    function onOfferChange() {
+        updateSalaryDisplay();
+        updateMerchSync();
+        updateDownsideFields();
+        updateCostPreview();
+        updateOfferBar();
+        updateSubmitBtn();
+        clearTimeout(_debounce);
+        _debounce = setTimeout(updateProbability, 300);
+    }
+
+    function updateSalaryDisplay() {
+        document.getElementById('salaryDisplay').textContent = (parseInt(document.getElementById('salarySlider').value) || 0).toLocaleString();
+        document.getElementById('lengthDisplay').textContent = parseInt(document.getElementById('lengthSlider').value) || 52;
+    }
+    function updateMerchSync() {
+        document.getElementById('merchWrestler').value = 100 - (parseInt(document.getElementById('merchPromo').value) || 70);
+    }
+    function updateDownsideFields() {
+        document.getElementById('downsideFields').style.display = document.getElementById('downsideActive').checked ? 'block' : 'none';
+    }
+    function updateCostPreview() {
+        const salary = parseInt(document.getElementById('salarySlider').value) || 0;
+        const bonus  = parseInt(document.getElementById('signingBonus').value) || 0;
+        const perYear = salary * SHOWS_PER_YEAR;
+        document.getElementById('costPerShow').textContent = '$' + salary.toLocaleString();
+        document.getElementById('costPerYear').textContent = '$' + perYear.toLocaleString();
+        document.getElementById('costBonus').textContent   = '$' + bonus.toLocaleString();
+        document.getElementById('costTotal').textContent   = '$' + (perYear + bonus).toLocaleString();
+    }
+
+    function updateOfferBar() {
+        if (!faData?.demands) return;
+        const asking  = faData.demands.asking_salary || 1;
+        const minimum = faData.demands.minimum_salary || 1;
+        const salary  = parseInt(document.getElementById('salarySlider').value) || 0;
+        const bar     = document.getElementById('offerBar');
+        const caption = document.getElementById('barCaption');
+        const hint    = document.getElementById('salaryHint');
+        if (!salary) { bar.style.width = '0%'; caption.textContent = 'Set a salary to see where you stand'; return; }
+        bar.style.width = Math.min(100, (salary / asking) * 100) + '%';
+        if (salary < minimum) {
+            bar.style.background = 'var(--danger)';
+            caption.textContent = `⚠️ Below minimum ($${minimum.toLocaleString()}) — will be rejected`;
+            if (hint) { hint.textContent = 'Too low — raise above the minimum'; hint.className = 'input-hint warn'; }
+        } else if (salary < asking * 0.8) {
+            bar.style.background = 'linear-gradient(90deg, #fd7e14, #f0b429)';
+            caption.textContent = `Low offer — ${Math.round((asking - salary) / asking * 100)}% below asking`;
+            if (hint) { hint.textContent = 'Low offer — may trigger multiple counter rounds'; hint.className = 'input-hint warn'; }
+        } else if (salary < asking) {
+            bar.style.background = 'linear-gradient(90deg, #f0b429, var(--accent-2))';
+            caption.textContent = `Good offer — ${Math.round((asking - salary) / asking * 100)}% below asking`;
+            if (hint) { hint.textContent = 'Solid offer with room to negotiate'; hint.className = 'input-hint'; }
+        } else {
+            bar.style.background = 'var(--gradient-green)';
+            caption.textContent = 'Strong offer — at or above asking price';
+            if (hint) { hint.textContent = 'Likely to accept on first offer ✓'; hint.className = 'input-hint ok'; }
+        }
+        updateOpeningQuality(salary, asking);
+    }
+
+    function updateOpeningQuality(salary, asking) {
+        const ratio = salary / asking;
+        const badge = document.getElementById('openingQuality');
+        if (currentRound === 1) {
+            if (ratio < 0.7) { badge.textContent = '⚠️ Lowball'; badge.className = 'badge bg-danger'; }
+            else if (ratio < 0.95) { badge.textContent = 'Fair'; badge.className = 'badge bg-warning text-dark'; }
+            else { badge.textContent = '✅ Generous'; badge.className = 'badge bg-success'; }
+        } else {
+            badge.textContent = `Round ${currentRound}`;
+            badge.className = 'badge bg-secondary';
+        }
+    }
+
+    function updateSubmitBtn() {
+        const salary = parseInt(document.getElementById('salarySlider').value) || 0;
+        const min    = faData?.demands?.minimum_salary || 0;
+        document.getElementById('submitOfferBtn').disabled = (!salary || salary < min);
+    }
+
+    // ── PROBABILITY ────────────────────────────────────────────────────────
+    async function updateProbability() {
+        if (sessionId) {
+            try {
+                const res = await postAPI(`/api/negotiation/${sessionId}/probability`, buildOffer());
+                if (res?.success && res.probability_breakdown) {
+                    updateProbRing(res.probability_breakdown.final_probability || 0);
+                    if (res.probability_breakdown.recommendation) {
+                        document.getElementById('probRecommendation').textContent = res.probability_breakdown.recommendation;
+                    }
+                    return;
+                }
+            } catch(e) { console.warn('Probability API failed:', e); }
+        }
+        updateProbRing(calculateLocalProbability());
+    }
+
+    function calculateLocalProbability() {
+        if (!faData?.demands) return 50;
+        const asking  = faData.demands.asking_salary || 1;
+        const minimum = faData.demands.minimum_salary || 1;
+        const salary  = parseInt(document.getElementById('salarySlider').value) || 0;
+        if (salary < minimum) return 0;
+        let prob = salary >= asking
+            ? 75 + Math.min(25, ((salary - asking) / asking) * 100)
+            : 30 + (((salary - minimum) / (asking - minimum)) * 45);
+        const bonus = parseInt(document.getElementById('signingBonus').value) || 0;
+        if (bonus > 0) prob += Math.min(10, bonus / 10000);
+        const creative = document.getElementById('creativeControl').value;
+        if (creative === 'consultation') prob += 3;
+        if (creative === 'approval') prob += 5;
+        if (creative === 'full') prob += 8;
+        if (document.getElementById('titleGuaranteeCheck').checked) prob += 7;
+        const mood = faData.mood || 'patient';
+        if (mood === 'desperate') prob += 15;
+        if (mood === 'hungry') prob += 5;
+        if (mood === 'bitter') prob -= 10;
+        if (mood === 'arrogant') prob -= 5;
+        return Math.max(0, Math.min(100, prob));
+    }
+
+    function updateProbRing(prob) {
+        const circle = document.getElementById('probCircle');
+        const label  = document.getElementById('probPct');
+        circle.style.strokeDashoffset = 263.89 - (263.89 * prob / 100);
+        circle.style.stroke = prob >= 75 ? 'var(--accent-2)' : prob >= 50 ? 'var(--amber)' : 'var(--danger)';
+        label.textContent = Math.round(prob) + '%';
+    }
+
+    // ── BUILD OFFER ────────────────────────────────────────────────────────
+    function buildOffer() {
+        return {
+            salary_per_show:  parseInt(document.getElementById('salarySlider').value) || 0,
+            contract_weeks:   parseInt(document.getElementById('lengthSlider').value) || 52,
+            signing_bonus:    parseInt(document.getElementById('signingBonus').value) || 0,
+            salary_structure: document.getElementById('salaryStructure').value,
+            merch_deal: {
+                promotion_pct: parseInt(document.getElementById('merchPromo').value) || 70,
+                wrestler_pct:  parseInt(document.getElementById('merchWrestler').value) || 30,
+            },
+            downside_guarantee: {
+                is_active:        document.getElementById('downsideActive').checked,
+                weekly_guarantee: parseInt(document.getElementById('downsideAmount').value) || 0,
+            },
+            ppv_bonuses: {
+                base_appearance_bonus:    parseInt(document.getElementById('ppvBase').value) || 0,
+                main_event_bonus:         parseInt(document.getElementById('ppvMain').value) || 0,
+                championship_match_bonus: parseInt(document.getElementById('ppvChamp').value) || 0,
+                guaranteed_ppv_minimum:   parseInt(document.getElementById('ppvMin').value) || 0,
+            },
+            incentives: {
+                match_quality_bonus: parseInt(document.getElementById('incQuality').value) || 0,
+                championship_bonus:  parseInt(document.getElementById('incChamp').value) || 0,
+                loyalty_bonus:       parseInt(document.getElementById('incLoyalty').value) || 0,
+            },
+            creative_clauses: {
+                creative_control:      document.getElementById('creativeControl').value,
+                title_guarantee:       document.getElementById('titleGuarantee').value,
+                title_guarantee_check: document.getElementById('titleGuaranteeCheck').checked,
+                brand_preference:      document.getElementById('brandPref').value,
+                promo_style:           document.getElementById('promoStyle').value,
+                promo_time_minimum:    parseInt(document.getElementById('promoTime').value) || 0,
+                storyline_veto_rights: document.getElementById('storylineVeto').checked,
+                finish_protection:     document.getElementById('finishProtection').checked,
+            },
+            lifestyle_clauses: {
+                max_appearances_per_year: parseInt(document.getElementById('maxAppearances').value) || 0,
+                first_class_travel:       document.getElementById('firstClass').checked,
+                private_car_service:      document.getElementById('privateCar').checked,
+                minimum_hotel_tier:       document.getElementById('hotelTier').value,
+                outside_projects_allowed: document.getElementById('outsideProjects').checked,
+                family_time_off:          document.getElementById('familyTime').checked,
+                injury_pay_protection:    document.getElementById('injuryPay').checked,
+                injury_job_security:      document.getElementById('injuryJobSecurity').checked,
+            },
+            round: currentRound,
+        };
+    }
+
+    // ── SUBMIT OFFER ───────────────────────────────────────────────────────
+    async function submitOffer() {
+        const btn = document.getElementById('submitOfferBtn');
+        const offer = buildOffer();
+        const min = faData?.demands?.minimum_salary || 0;
+        if (offer.salary_per_show < min) { showToast(`Below minimum of $${min.toLocaleString()}`, 'danger'); return; }
+
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting…';
+        btn.disabled = true;
+
+        addChatBubble(
+            `Round ${currentRound} offer: $${offer.salary_per_show.toLocaleString()}/show × ${offer.contract_weeks}w` +
+            (offer.signing_bonus ? ` + $${offer.signing_bonus.toLocaleString()} bonus` : ''), 'you', '📤'
+        );
+
+        appendLogEntry({
+            who: 'player',
+            message: `Round ${currentRound} offer: <span class="history-salary">$${offer.salary_per_show.toLocaleString()}/show</span> · ${offer.contract_weeks}w` +
+                     `${offer.signing_bonus ? ` · $${offer.signing_bonus.toLocaleString()} bonus` : ''}` +
+                     `${offer.creative_clauses.creative_control !== 'none' ? ` · ${offer.creative_clauses.creative_control.replace(/_/g,' ')}` : ''}` +
+                     `${offer.creative_clauses.title_guarantee_check ? ' · Title guarantee' : ''}`,
+            time: `Round ${currentRound}`
+        });
+
+        try {
+            const res = sessionId
+                ? await postAPI(`/api/negotiation/${sessionId}/offer`, offer)
+                : await postAPI(`/api/free-agents/${faId}/negotiate`, offer);
+            if (!res || !res.success) throw new Error(res?.error || 'Negotiation failed');
+            handleNegotiationResponse(res);
+        } catch(e) {
+            console.error('Submit error:', e);
+            addChatBubble('Error: ' + e.message, 'them', '❌');
+            showToast('Error: ' + e.message, 'danger');
+        } finally {
+            btn.innerHTML = `<i class="bi bi-send-fill me-2"></i>Submit Offer <span class="opacity-75" style="font-size:.85em;">(Round ${currentRound}/${maxRounds})</span>`;
+            btn.disabled = false;
+            updateSubmitBtn();
+        }
+    }
+
+    function handleNegotiationResponse(res) {
+        if (res.session) { session = res.session; if (session.flexibility) renderFlexibilityFromSession(session.flexibility); }
+        const outcome = res.outcome || res.status;
+
+        if (outcome === 'accepted' || outcome === 'signed') {
+            addChatBubble(res.message || 'Deal accepted!', 'them', '🎉');
+            appendLogEntry({ who:'fa', message:res.message || 'Deal accepted!', time:`Round ${currentRound}` });
+            showOutcomeBanner({ status:'accepted', ...res });
+            showResultOverlay('accepted', res.message, res.signing_result);
+
+        } else if (outcome === 'countered' || outcome === 'counter') {
+            addChatBubble(res.message || 'Counter-offer received', 'them', '💬');
+            appendLogEntry({ who:'fa', message:res.message || 'Counter-offer received.', time:`Round ${currentRound}` });
+            if (res.tell) addChatBubble(`📎 ${res.tell}`, 'them', '🔍');
+            if (res.counter_offer) {
+                lastCounterOffer = res.counter_offer;
+                showAcceptCounterPanel(res.counter_offer);
+                document.getElementById('salarySlider').value = res.counter_offer.salary_per_show;
+                document.getElementById('lengthSlider').value = res.counter_offer.contract_weeks || 52;
+                onOfferChange();
+                appendLogEntry({ who:'fa', message:`Counter: <span class="history-salary">$${res.counter_offer.salary_per_show.toLocaleString()}/show</span>. Ball is in your court.`, time:`Round ${currentRound} → ${currentRound+1}` });
+            }
+            currentRound = Math.min(currentRound + 1, maxRounds);
+            renderRoundTracker(); updateRoundLabels(); renderPatienceMeter(); updateAdvisor();
+            if (currentRound > maxRounds) showOutcomeBanner({ status:'stalled', reason:'Maximum rounds reached.' });
+            else showToast(`Round ${currentRound-1} complete. Advance to Round ${currentRound}.`, 'info');
+
+        } else if (outcome === 'rejected' || outcome === 'walked_away') {
+            addChatBubble(res.message || 'Offer rejected.', 'them', '❌');
+            appendLogEntry({ who:'fa', message:res.message || 'Offer rejected.', time:`Round ${currentRound}` });
+            showOutcomeBanner({ status:'rejected', reason:res.reason || res.message });
+            showResultOverlay('rejected', res.message || res.reason);
+
+        } else if (outcome === 'expired') {
+            addChatBubble(res.message || 'Negotiation expired.', 'them', '⏰');
+            showOutcomeBanner({ status:'expired', reason:res.message });
+            showResultOverlay('expired', res.message);
+
+        } else {
+            addChatBubble(res.message || 'Response received.', 'them', '❓');
+        }
+
+        if (res.events?.length) {
+            res.events.forEach(ev => appendLogEntry({ who:'event', message:ev.description || ev.event_type, time:`Round ${currentRound}` }));
+        }
+        onOfferChange();
+    }
+
+    // ── ACCEPT COUNTER ─────────────────────────────────────────────────────
+    function showAcceptCounterPanel(counter) {
+        const panel = document.getElementById('acceptCounterPanel');
+        panel.style.display = 'block';
+        document.getElementById('counterOfferSummary').innerHTML =
+            `<strong>$${counter.salary_per_show.toLocaleString()}/show</strong> × ${counter.contract_weeks || 52} weeks`;
+    }
+
+    async function acceptCounterOffer() {
+        if (!lastCounterOffer) { showToast('No counter-offer to accept', 'warning'); return; }
+        const btn = document.getElementById('acceptCounterBtn');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Accepting…';
+        btn.disabled = true;
+        try {
+            const res = sessionId
+                ? await postAPI(`/api/negotiation/${sessionId}/counter-accept`)
+                : await postAPI(`/api/free-agents/${faId}/negotiate`, { ...lastCounterOffer, round:currentRound, accept_counter:true });
+            if (res?.success) { addChatBubble('Counter-offer accepted!', 'you', '✅'); showResultOverlay('accepted', res.message, res.signing_result); }
+            else throw new Error(res?.error || 'Failed to accept counter');
+        } catch(e) { console.error('Accept counter error:', e); showToast('Error: ' + e.message, 'danger'); }
+        finally { btn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Accept Counter-Offer'; btn.disabled = false; }
+    }
+
+    // ── QUICK ACTIONS ──────────────────────────────────────────────────────
+    function updateQuickActions() {
+        if (!faData?.demands) return;
+        document.getElementById('matchAskBtn').disabled = false;
+        document.getElementById('meetMidBtn').disabled = false;
+        document.getElementById('lowestAcceptBtn').disabled = false;
+    }
+
+    function applyQuickAction(type) {
+        if (!faData?.demands) return;
+        const asking  = faData.demands.asking_salary || 0;
+        const minimum = faData.demands.minimum_salary || 0;
+        const mid     = Math.round(((asking + minimum) / 2) / 500) * 500;
+        const val     = { match:asking, mid, lowest:minimum }[type] || asking;
+        document.getElementById('salarySlider').value = val;
+        onOfferChange();
+        showToast(`Salary set to $${val.toLocaleString()}/show`, 'info');
+    }
+
+    // ── WALK AWAY ──────────────────────────────────────────────────────────
+    async function walkAway() {
+        const name = faData?.wrestler_name || 'this talent';
+        if (!confirm(`Walk away from negotiations with ${name}?`)) return;
+        try {
+            if (sessionId) {
+                const res = await postAPI(`/api/negotiation/${sessionId}/pause`);
+                addChatBubble(res.message || 'You walked away.', 'them', '🚪');
+                if (res.warning) addChatBubble(res.warning, 'them', '⚠️');
+            } else {
+                await postAPI(`/api/free-agents/${faId}/negotiate`, { action:'walk_away', round:currentRound });
+            }
+        } catch(e) { console.warn('Walk away API failed:', e); }
+        appendLogEntry({ who:'system', message:'You chose to walk away from negotiations.', time:`Round ${currentRound}` });
+        showOutcomeBanner({ status:'rejected', reason:'You walked away from negotiations.' });
+    }
+
+    // ── THIRD-PARTY ALLY ───────────────────────────────────────────────────
+    async function applyThirdParty() {
+        const allyId   = document.getElementById('tpAlly').value;
+        const allyType = document.getElementById('tpType').value;
+        const allyName = document.getElementById('tpAlly').selectedOptions[0]?.text || 'Ally';
+        const btn    = document.getElementById('tpBtn');
+        const result = document.getElementById('tpResult');
+        if (!allyId) { result.innerHTML = '<span style="color:var(--amber)">Please select a roster member</span>'; return; }
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        try {
+            const res = await postAPI(`/api/negotiation/${sessionId}/third-party`, { ally_id:allyId, ally_type:allyType, ally_name:allyName });
+            if (res?.success) {
+                result.innerHTML = `<span style="color:var(--accent-2)">✅ ${res.message || 'Ally applied!'}</span>`;
+                addChatBubble(`${allyName} put in a good word for you.`, 'them', '🤝');
+                onOfferChange();
+            } else { result.innerHTML = `<span style="color:var(--danger)">❌ ${res?.error || 'Failed'}</span>`; }
+        } catch(e) { result.innerHTML = `<span style="color:var(--danger)">❌ ${e.message}</span>`; }
+        finally { btn.innerHTML = '<i class="bi bi-handshake me-1"></i>Apply'; }
+    }
+
+    // ── OUTCOME DISPLAYS ───────────────────────────────────────────────────
+    function showOutcomeBanner(state) {
+        const banner = document.getElementById('outcomeBanner');
+        banner.classList.add('active');
+        if (state.status === 'accepted') {
+            banner.className = 'outcome-banner active win mb-3';
+            document.getElementById('outcomeIcon').textContent = '🏆';
+            document.getElementById('outcomeTitle').textContent = 'Deal Signed!';
+            const s = state.salary || state.final_salary || 0;
+            document.getElementById('outcomeDetail').innerHTML = `<strong>${escapeHtml(faData?.wrestler_name || 'Talent')}</strong> has joined your promotion` + (s ? ` at <strong>$${s.toLocaleString()}/show</strong>` : '') + '.';
+            const ob = document.getElementById('offerBuilderPanel'); if (ob) ob.style.display = 'none';
+        } else if (state.status === 'rejected' || state.status === 'walked_away') {
+            banner.className = 'outcome-banner active loss mb-3';
+            document.getElementById('outcomeIcon').textContent = '❌';
+            document.getElementById('outcomeTitle').textContent = 'No Deal';
+            document.getElementById('outcomeDetail').textContent = state.reason || 'Negotiations ended without an agreement.';
+        } else {
+            banner.className = 'outcome-banner active wait mb-3';
+            document.getElementById('outcomeIcon').textContent = '⏸️';
+            document.getElementById('outcomeTitle').textContent = state.status === 'expired' ? 'Expired' : 'Talks Stalled';
+            document.getElementById('outcomeDetail').textContent = state.reason || 'Maximum rounds reached. Consider returning later.';
+        }
+    }
+
+    function showResultOverlay(type, message, signingResult) {
+        const overlay = document.getElementById('resultOverlay');
+        const iconMap = { accepted:'🎉', rejected:'❌', expired:'⏰' };
+        const titleMap = { accepted:'Signed!', rejected:'Rejected', expired:'Expired' };
+        document.getElementById('resultIcon').textContent = iconMap[type] || '❓';
+        document.getElementById('resultTitle').textContent = titleMap[type] || type;
+        document.getElementById('resultBody').textContent = signingResult?.message || message || '';
+        document.getElementById('resultActions').innerHTML = type === 'accepted'
+            ? `<a href="/roster" class="btn btn-sign me-2"><i class="bi bi-people-fill me-1"></i>View Roster</a><a href="/free-agents" class="btn btn-outline-secondary">Free Agents</a>`
+            : `<a href="/free-agents" class="btn btn-outline-secondary">Back to Free Agents</a>`;
+        overlay.classList.add('show');
+    }
+
+    // ── HISTORY LOG ────────────────────────────────────────────────────────
+    function appendLogEntry(entry) {
+        logEntries.push(entry);
+        const container = document.getElementById('historyLog');
+        const count     = document.getElementById('logCount');
+        const iconMeta  = { player:{cls:'player',ico:'🏢'}, fa:{cls:'fa',ico:'🤼'}, event:{cls:'event',ico:'⚡'}, system:{cls:'system',ico:'ℹ️'} };
+        const { cls, ico } = iconMeta[entry.who] || iconMeta.system;
+        const whoLabel = { player:'You', fa:escapeHtml(faData?.wrestler_name || 'FA'), event:'Event', system:'System' }[entry.who] || entry.who;
+
+        const placeholder = container.querySelector('.text-center');
+        if (placeholder) placeholder.remove();
+
+        const el = document.createElement('div');
+        el.className = 'history-entry';
+        el.innerHTML = `
+            <div class="history-icon ${cls}">${ico}</div>
+            <div class="history-content">
+                <div class="history-who ${cls}">${whoLabel}</div>
+                <div class="history-msg">${entry.message}</div>
+                <div class="history-time">${entry.time || ''}</div>
+            </div>
+        `;
+        container.appendChild(el);
+        count.textContent = `${logEntries.length} ${logEntries.length === 1 ? 'entry' : 'entries'}`;
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function addChatBubble(text, side, emoji = '') {
+        if (!text) return;
+        appendLogEntry({ who: side === 'you' ? 'player' : 'fa', message: (emoji ? emoji + ' ' : '') + text, time: `Round ${currentRound}` });
+    }
+
+    // ── EVENT LISTENERS ────────────────────────────────────────────────────
+    function setupEventListeners() {
+        const ids = [
+            'salarySlider','lengthSlider','signingBonus','salaryStructure','merchPromo',
+            'downsideActive','downsideAmount','ppvBase','ppvMain','ppvChamp','ppvMin',
+            'incQuality','incChamp','incLoyalty','creativeControl','promoStyle','promoTime',
+            'titleGuarantee','titleGuaranteeCheck','brandPref','storylineVeto','finishProtection',
+            'maxAppearances','hotelTier','firstClass','privateCar','outsideProjects','familyTime',
+            'injuryPay','injuryJobSecurity'
+        ];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.addEventListener('input', onOfferChange); el.addEventListener('change', onOfferChange); }
+        });
+
+        document.getElementById('submitOfferBtn').addEventListener('click', submitOffer);
+        document.getElementById('matchAskBtn').addEventListener('click', () => applyQuickAction('match'));
+        document.getElementById('meetMidBtn').addEventListener('click', () => applyQuickAction('mid'));
+        document.getElementById('lowestAcceptBtn').addEventListener('click', () => applyQuickAction('lowest'));
+        document.getElementById('walkAwayBtn').addEventListener('click', walkAway);
+        document.getElementById('acceptCounterBtn').addEventListener('click', acceptCounterOffer);
+        document.getElementById('tpBtn').addEventListener('click', applyThirdParty);
+    }
+
+    function setupTabs() {
+        const tabs     = document.querySelectorAll('.offer-tab');
+        const contents = document.querySelectorAll('.offer-tab-content');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.dataset.tab;
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                contents.forEach(c => { c.style.display = c.id === `tab-${target}` ? 'block' : 'none'; });
+            });
+        });
+    }
+
+    // ── UTILITIES ──────────────────────────────────────────────────────────
+    function hideLoader() {
+        const el = document.getElementById('loadingOverlay');
+        el.classList.add('hidden');
+        setTimeout(() => el.remove(), 400);
+    }
+
+    function showError(msg) {
+        document.getElementById('negoLayout').innerHTML = `
+            <div style="grid-column:1/-1; padding:4rem; text-align:center;">
+                <i class="bi bi-exclamation-circle" style="font-size:3rem; color:var(--danger);"></i>
+                <p class="mt-3" style="color:var(--text-dim);">${msg}</p>
+            </div>
+        `;
+    }
+
+    function escapeHtml(text) {
+        if (text == null) return '';
+        const d = document.createElement('div');
+        d.textContent = String(text);
+        return d.innerHTML;
+    }
+
+    function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : ''; }
+
+    function shortFmt(n) {
+        if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+        if (n >= 1000) return (n/1000).toFixed(0) + 'K';
+        return n;
+    }
+
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const id = 'toast-' + Date.now();
+        const bg = { success:'bg-success', danger:'bg-danger', warning:'bg-warning text-dark', info:'bg-info text-dark' }[type] || 'bg-info text-dark';
+        container.insertAdjacentHTML('beforeend', `
+            <div id="${id}" class="toast ${bg}" role="alert" style="border-radius:8px; border:none; box-shadow:0 4px 20px rgba(0,0,0,0.4);">
+                <div class="toast-body d-flex justify-content-between align-items-center" style="font-size:0.84rem; font-family:'DM Sans',sans-serif;">
+                    <span>${escapeHtml(message)}</span>
+                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `);
+        const el = document.getElementById(id);
+        const toast = new bootstrap.Toast(el, { autohide:true, delay:4000 });
+        toast.show();
+        el.addEventListener('hidden.bs.toast', () => el.remove());
+    }
+
+    // ── API FALLBACKS ──────────────────────────────────────────────────────
+    if (typeof getAPI === 'undefined') {
+        window.getAPI = async function(url) {
+            const res = await fetch(url);
+            if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
+            return res.json();
+        };
+    }
+    if (typeof postAPI === 'undefined') {
+        window.postAPI = async function(url, data) {
+            const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+            if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
+            return res.json();
+        };
+    }
+
+    // ── LAUNCH ─────────────────────────────────────────────────────────────
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+
+})();
+</script>
+</body>
+</html>

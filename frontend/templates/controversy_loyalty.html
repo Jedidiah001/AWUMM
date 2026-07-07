@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controversy &amp; Loyalty — AWUM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+    <style>
+        body{background:#f4f6f8}
+        .page-header{background:linear-gradient(135deg,#c0392b 0%,#8e44ad 100%);color:#fff;padding:1.75rem 2rem;border-radius:.5rem;margin-bottom:1.5rem;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+        .page-header h2{font-size:1.9rem;font-weight:800;margin:0}
+        .nav-tabs .nav-link{color:#495057;font-size:.92rem}
+        .nav-tabs .nav-link.active{color:#c0392b;font-weight:700;border-bottom:2px solid #c0392b}
+
+        /* ── Case cards ── */
+        .case-card{border:2px solid #dee2e6;border-radius:.75rem;background:#fff;transition:all .2s;overflow:hidden}
+        .case-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.12);cursor:pointer}
+        .sev-low {border-color:#28a745!important} .sev-med{border-color:#ffc107!important}
+        .sev-high{border-color:#fd7e14!important} .sev-crit{border-color:#dc3545!important}
+        .sev-badge-low{background:#d4edda;color:#155724} .sev-badge-med{background:#fff3cd;color:#856404}
+        .sev-badge-high{background:#ffe5d0;color:#7d3200} .sev-badge-crit{background:#f8d7da;color:#721c24}
+
+        /* ── Explainer ── */
+        .explainer-box{background:#fff;border-left:4px solid #c0392b;border-radius:0 .5rem .5rem 0;padding:1rem 1.25rem;margin-bottom:1.5rem;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+        .explainer-box h6{color:#c0392b;font-weight:700;margin-bottom:.4rem}
+
+        /* ── Progress bars ── */
+        .prog-wrap{margin-bottom:.6rem}
+        .prog-wrap .label-row{display:flex;justify-content:space-between;font-size:.78rem;color:#6c757d;margin-bottom:.2rem}
+        .prog-bar{height:10px;border-radius:5px;background:#e9ecef;overflow:hidden}
+        .prog-fill{height:100%;border-radius:5px;transition:width .5s}
+
+        /* ── Section card ── */
+        .section-card{background:#fff;border:1px solid #dee2e6;border-radius:.5rem;padding:1.2rem;margin-bottom:1rem}
+        .section-card h6{font-weight:700;color:#2c3e50;border-bottom:1px solid #f0f0f0;padding-bottom:.5rem;margin-bottom:.85rem}
+        .data-pair{display:flex;justify-content:space-between;font-size:.84rem;padding:.3rem 0;border-bottom:1px solid #f5f5f5}
+        .data-pair:last-child{border-bottom:none}
+        .data-label{color:#6c757d} .data-value{font-weight:600;color:#2c3e50}
+
+        /* ── Loyalty ── */
+        .loyalty-badge{border-radius:20px;padding:.2rem .7rem;font-size:.75rem;font-weight:700;display:inline-block}
+        .lt-disgruntled{background:#f8d7da;color:#721c24} .lt-indifferent{background:#fff3cd;color:#856404}
+        .lt-content{background:#d1ecf1;color:#0c5460} .lt-loyal{background:#d4edda;color:#155724}
+        .lt-devoted{background:#cce5ff;color:#004085}
+
+        /* ── Holdout/Signing/FD cards ── */
+        .holdout-row{border-left:4px solid #e67e22;background:#fef9f0;padding:.9rem 1rem;border-radius:.4rem;margin-bottom:.6rem}
+        .signing-card{border-left:4px solid #8e44ad;background:#faf5ff;border-radius:.4rem;padding:1rem;margin-bottom:.75rem}
+        .signing-card.leaked{border-left-color:#c0392b;background:#fff5f5}
+        .signing-card.revealed{border-left-color:#27ae60;background:#f0fff4}
+        .fd-card{border-left:4px solid #2980b9;background:#f0f7ff;border-radius:.4rem;padding:1rem;margin-bottom:.75rem}
+        .tampering-card{border:1px solid #ffc107;background:#fffcf0;border-radius:.5rem;padding:1rem;margin-bottom:.75rem}
+
+        /* ── Rival promo cards ── */
+        .rival-promo-card{border:1px solid #dee2e6;border-radius:.5rem;padding:.9rem;background:#fff;height:100%;transition:all .15s}
+        .rival-promo-card:hover{border-color:#6c757d;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+        .tier-major{border-left:4px solid #dc3545!important} .tier-mid{border-left:4px solid #fd7e14!important}
+        .tier-international{border-left:4px solid #0d6efd!important}
+        .tier-independent{border-left:4px solid #6c757d!important}
+        .rival-roster-chip{font-size:.72rem;padding:.12rem .45rem;background:#f0f0f0;border-radius:.2rem;display:inline-block;margin:.1rem}
+        .rel-bar{height:5px;border-radius:3px;background:#e9ecef;overflow:hidden;margin-top:.3rem}
+        .rel-fill{height:100%;border-radius:3px}
+
+        /* ── Multi-select ── */
+        .wrestler-multiselect{height:175px;font-size:.84rem}
+        .select-hint{font-size:.72rem;color:#6c757d;margin-top:.3rem}
+
+        /* ── stat pill ── */
+        .stat-pill{background:#f8f9fa;border:1px solid #dee2e6;border-radius:20px;padding:.18rem .6rem;font-size:.78rem;display:inline-flex;align-items:center;gap:.3rem;margin:.1rem}
+
+        /* ── empty/loader ── */
+        .empty-state{text-align:center;padding:3rem 1rem;color:#adb5bd}
+        .empty-state i{font-size:3rem;display:block;margin-bottom:.75rem}
+        .tab-loader{text-align:center;padding:3rem;color:#adb5bd}
+
+        /* ── Sign modal steps ── */
+        .step-box{border:1px solid #dee2e6;border-radius:.4rem;padding:.85rem;background:#f8f9fa}
+        .step-number{width:28px;height:28px;border-radius:50%;background:#c0392b;color:#fff;font-weight:700;font-size:.82rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="/"><i class="bi bi-trophy-fill text-warning me-1"></i>AWUM</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="loadView&&loadView('roster');return false;">Roster</a></li>
+        <li class="nav-item"><a class="nav-link" href="/free-agents">Free Agents</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="loadView&&loadView('contracts');return false;">Contracts</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/controversy">Controversy &amp; Loyalty</a></li>
+      </ul>
+      <span class="navbar-text" id="universeStatus" style="font-size:.82rem;opacity:.8"></span>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid mt-3 mb-5">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <h2><i class="bi bi-shield-exclamation me-2"></i>Controversy &amp; Loyalty</h2>
+        <p class="mb-0 mt-1" style="opacity:.85;font-size:.94rem">Manage controversy cases, roster loyalty, secret signings &amp; cross-promotional events</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <span class="stat-pill bg-white text-dark fw-semibold"><i class="bi bi-exclamation-triangle text-danger"></i><span id="hStatControversy">–</span> controversy FA</span>
+        <span class="stat-pill bg-white text-dark fw-semibold"><i class="bi bi-person-dash text-warning"></i><span id="hStatHoldouts">–</span> holdouts</span>
+        <span class="stat-pill bg-white text-dark fw-semibold" style="color:#8e44ad"><i class="bi bi-eye-slash"></i><span id="hStatSecret">–</span> secret signings</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="alertBanner" class="d-none mb-3"></div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-3" id="mainTabs">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#paneControversy" onclick="loadControversyTab()"><i class="bi bi-exclamation-circle me-1"></i>Controversy<span class="badge bg-danger ms-1" id="badgeControversy" style="display:none"></span></button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#paneLoyalty" onclick="loadLoyaltyTab()"><i class="bi bi-heart-pulse me-1"></i>Loyalty</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#paneHoldouts" onclick="loadHoldoutsTab()"><i class="bi bi-person-x me-1"></i>Holdouts<span class="badge bg-warning text-dark ms-1" id="badgeHoldouts" style="display:none"></span></button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#paneSignings" onclick="loadSecretSigningsTab()"><i class="bi bi-eye-slash me-1"></i>Secret Signings</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#paneFD" onclick="loadForbiddenDoorTab()"><i class="bi bi-door-closed me-1"></i>Forbidden Door</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#paneTampering" onclick="loadTamperingTab()"><i class="bi bi-bug me-1"></i>Tampering</button></li>
+  </ul>
+
+  <div class="tab-content">
+
+    <!-- ════════════════ CONTROVERSY ════════════════ -->
+    <div class="tab-pane fade show active" id="paneControversy">
+      <div class="explainer-box">
+        <h6><i class="bi bi-info-circle-fill me-1"></i>What is the Controversy Free Agent Pool?</h6>
+        <p class="mb-1 small">These are free agents who are <strong>currently unemployed because of a public incident</strong> — things like a failed drug test, legal trouble, a social media scandal, or a backstage incident. <strong>No other promotion has signed them</strong> because of the risk involved.</p>
+        <p class="mb-0 small">You can choose to sign them at a <strong>discounted salary</strong>, but there is a risk. Each card below shows you whether the risk is worth taking. <strong>Click any card</strong> to see the full breakdown and your signing options.</p>
+      </div>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Controversy Free Agents</h5>
+        <button class="btn btn-sm btn-outline-secondary" onclick="loadControversyTab()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+      </div>
+      <div id="controversyGrid" class="row g-3">
+        <div class="tab-loader col-12"><i class="bi bi-hourglass-split fs-2"></i><p class="mt-2">Loading…</p></div>
+      </div>
+    </div>
+
+    <!-- ════════════════ LOYALTY ════════════════ -->
+    <div class="tab-pane fade" id="paneLoyalty">
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">At-Risk Roster Members</h5>
+            <button class="btn btn-sm btn-outline-secondary" onclick="loadLoyaltyTab()"><i class="bi bi-arrow-clockwise"></i></button>
+          </div>
+          <div id="loyaltyList"><p class="text-muted">Loading…</p></div>
+        </div>
+        <div class="col-lg-4">
+          <div class="section-card"><h6><i class="bi bi-calendar-lock me-1"></i>Exclusive Negotiating Window</h6><div id="exclusiveWindows"><p class="text-muted small">Click "Excl. Window" on a wrestler.</p></div></div>
+          <div class="section-card"><h6><i class="bi bi-door-open me-1"></i>Re-approach Windows</h6><div id="reapproachWindows"><p class="text-muted small">Loading…</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ HOLDOUTS ════════════════ -->
+    <div class="tab-pane fade" id="paneHoldouts">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Active Holdouts</h5>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalStartHoldout"><i class="bi bi-plus-circle me-1"></i>Log Holdout</button>
+          <button class="btn btn-sm btn-outline-secondary" onclick="loadHoldoutsTab()"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
+      </div>
+      <div id="holdoutsList"><p class="text-muted">Loading…</p></div>
+    </div>
+
+    <!-- ════════════════ SECRET SIGNINGS ════════════════ -->
+    <div class="tab-pane fade" id="paneSignings">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Secret Signings</h5>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalCreateSigning"><i class="bi bi-plus-circle me-1"></i>Plan Secret Signing</button>
+          <button class="btn btn-sm btn-outline-secondary" onclick="loadSecretSigningsTab()"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
+      </div>
+      <div id="signingsList"><p class="text-muted">Loading…</p></div>
+      <hr class="my-4">
+      <h5 class="mb-3">Debut Engineering <span class="text-muted fw-normal fs-6">— score any planned debut</span></h5>
+      <div class="section-card">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3"><label class="form-label small fw-semibold">Wrestler Name</label><input id="debutName" class="form-control form-control-sm" placeholder="e.g. Viper Vance"></div>
+          <div class="col-md-2"><label class="form-label small fw-semibold">Popularity (0–100)</label><input id="debutPop" class="form-control form-control-sm" type="number" value="60" min="0" max="100"></div>
+          <div class="col-md-2"><label class="form-label small fw-semibold">Show Type</label>
+            <select id="debutShow" class="form-select form-select-sm">
+              <option value="weekly_tv">Weekly TV</option>
+              <option value="ppv" selected>PPV / PLE</option>
+              <option value="special_event">Special Event</option>
+              <option value="stadium">Stadium Show</option>
+            </select>
+          </div>
+          <div class="col-md-2"><label class="form-label small fw-semibold">Opponent Level</label>
+            <select id="debutOpp" class="form-select form-select-sm">
+              <option value="curtain_jerker">Curtain Jerker</option>
+              <option value="midcard" selected>Midcard</option>
+              <option value="upper_midcard">Upper Midcard</option>
+              <option value="main_event">Main Event</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <div class="d-flex gap-3 mb-2">
+              <div class="form-check"><input class="form-check-input" type="checkbox" id="debutSurprise" checked><label class="form-check-label small">Surprise entrance</label></div>
+              <div class="form-check"><input class="form-check-input" type="checkbox" id="debutVignette"><label class="form-check-label small">Video vignettes</label></div>
+            </div>
+            <button class="btn btn-sm btn-primary w-100" onclick="engineerDebut()"><i class="bi bi-calculator me-1"></i>Score This Debut</button>
+          </div>
+        </div>
+        <div id="debutResult" class="mt-3"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════ FORBIDDEN DOOR ════════════════ -->
+    <div class="tab-pane fade" id="paneFD">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Cross-Promotional Events</h5>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalFDPropose"><i class="bi bi-plus-circle me-1"></i>New Proposal</button>
+          <button class="btn btn-sm btn-outline-secondary" onclick="loadForbiddenDoorTab()"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
+      </div>
+      <div class="section-card mb-3">
+        <h6><i class="bi bi-building me-1"></i>Rival Promotions &amp; Their Rosters</h6>
+        <p class="text-muted small mb-3">These are the promotions available for cross-promotional events. Relationship score determines which event types you can propose.</p>
+        <div id="rivalPromoGrid" class="row g-2">
+          <div class="col-12 text-muted small"><i class="bi bi-hourglass-split me-1"></i>Loading…</div>
+        </div>
+      </div>
+      <div class="section-card mb-3">
+        <h6><i class="bi bi-list-check me-1"></i>Collaboration Types &amp; Relationship Requirements</h6>
+        <div id="fdTypesList" class="row g-2"></div>
+      </div>
+      <div id="fdProposalsList"></div>
+    </div>
+
+    <!-- ════════════════ TAMPERING ════════════════ -->
+    <div class="tab-pane fade" id="paneTampering">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Detected Tampering Incidents</h5>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalReportTampering"><i class="bi bi-plus-circle me-1"></i>Report Incident</button>
+          <button class="btn btn-sm btn-outline-secondary" onclick="loadTamperingTab()"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
+      </div>
+      <div id="tamperingList"><p class="text-muted">Loading…</p></div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════ MODALS ══════════════════════ -->
+
+<!-- Case Detail Modal -->
+<div class="modal fade modal-xl" id="modalCase" tabindex="-1">
+  <div class="modal-dialog modal-xl"><div class="modal-content">
+    <div class="modal-header" style="background:linear-gradient(90deg,#c0392b,#8e44ad);color:#fff">
+      <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill me-2"></i><span id="modalCaseName"></span></h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body" id="modalCaseBody"></div>
+    <div class="modal-footer">
+      <div class="me-auto">
+        <button class="btn btn-success" onclick="openSignModal()"><i class="bi bi-pen me-1"></i>Sign This Wrestler</button>
+      </div>
+      <button class="btn btn-outline-warning" onclick="generateProbationary()"><i class="bi bi-file-earmark-text me-1"></i>Generate Probationary Terms</button>
+      <button class="btn btn-outline-success" onclick="openRehabModal()"><i class="bi bi-heart-pulse me-1"></i>Set Up Rehab Plan</button>
+      <button class="btn btn-outline-info" onclick="activateRedemption()"><i class="bi bi-stars me-1"></i>Activate Redemption Arc</button>
+      <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- Sign Wrestler Modal (the actual signing step) -->
+<div class="modal fade" id="modalSignControversy" tabindex="-1">
+  <div class="modal-dialog modal-lg"><div class="modal-content">
+    <div class="modal-header bg-success text-white">
+      <h5 class="modal-title"><i class="bi bi-pen-fill me-2"></i>Sign <span id="signModalName"></span></h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-info py-2 small mb-3">
+        <i class="bi bi-info-circle me-1"></i>
+        <strong>How signing works:</strong> You set the terms below and make an offer. The wrestler will accept, counter, or reject based on how the terms compare to their market value. You only pay when they accept — signing is final.
+      </div>
+
+      <!-- Probationary terms pre-fill notice -->
+      <div id="probatonaryPrefillNote" class="alert alert-warning py-2 small mb-3 d-none">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        Terms below have been pre-filled from the <strong>Probationary Contract</strong> you generated. These include a reduced salary and a behaviour clause. You can adjust before offering.
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label small fw-semibold">Salary ($/show)</label>
+          <input id="signSalary" class="form-control form-control-sm" type="number" min="0">
+          <div class="form-text small" id="signSalaryHint"></div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small fw-semibold">Contract Length (weeks)</label>
+          <input id="signWeeks" class="form-control form-control-sm" type="number" value="26" min="4">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small fw-semibold">Signing Bonus ($)</label>
+          <input id="signBonus" class="form-control form-control-sm" type="number" value="0" min="0">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small fw-semibold">Role Promise</label>
+          <select id="signRole" class="form-select form-select-sm">
+            <option value="none">No Promise</option>
+            <option value="midcard">Midcard</option>
+            <option value="upper_midcard">Upper Midcard</option>
+            <option value="main_event">Main Event</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small fw-semibold">Creative Control</label>
+          <select id="signCreative" class="form-select form-select-sm">
+            <option value="none">None</option>
+            <option value="limited">Limited</option>
+            <option value="full">Full</option>
+          </select>
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="signProbationary">
+            <label class="form-check-label small">Include behaviour clause <span class="text-muted">(probationary)</span></label>
+          </div>
+        </div>
+      </div>
+      <div id="signResult" class="mt-3"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-success" onclick="submitSign()"><i class="bi bi-send me-1"></i>Make Offer</button>
+      <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- Rehab Modal -->
+<div class="modal fade" id="modalRehab" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-heart-pulse-fill text-success me-2"></i>Rehabilitation Plan</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <p class="text-muted small mb-3">Configure support for <strong id="rehabTargetName"></strong>. More support = severity drops faster each week.</p>
+      <div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="rCounseling"><label class="form-check-label">Counselling access <small class="text-muted">(reduces severity faster)</small></label></div>
+      <div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="rSobriety"><label class="form-check-label">Sobriety programme <small class="text-muted">(required for substance cases)</small></label></div>
+      <div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="rSchedule"><label class="form-check-label">Reduced schedule <small class="text-muted">(lower profile, lower risk)</small></label></div>
+      <div class="form-check mb-3"><input class="form-check-input" type="checkbox" id="rCheckin"><label class="form-check-label">Weekly check-ins <small class="text-muted">(catch issues early)</small></label></div>
+      <label class="form-label small fw-semibold">Assign Mentor (optional)</label>
+      <select id="rehabMentorSelect" class="form-select form-select-sm"><option value="">— No mentor —</option></select>
+      <small class="text-muted">A respected veteran who keeps them on track.</small>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-success" onclick="submitRehabPlan()"><i class="bi bi-check-circle me-1"></i>Save Plan</button>
+      <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- Start Holdout Modal -->
+<div class="modal fade" id="modalStartHoldout" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-person-x-fill text-danger me-2"></i>Log Holdout</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <p class="text-muted small mb-3">A holdout is when a contracted wrestler refuses to perform until their deal is improved.</p>
+      <div class="row g-2">
+        <div class="col-12"><label class="form-label small fw-semibold">Wrestler</label>
+          <select id="holdoutWrestlerSelect" class="form-select form-select-sm"><option value="">— Select wrestler —</option></select>
+        </div>
+        <div class="col-6"><label class="form-label small fw-semibold">Their Demand ($/show)</label><input id="holdoutDemand" class="form-control form-control-sm" type="number" value="15000" min="0"></div>
+        <div class="col-6"><label class="form-label small fw-semibold">Your Current Offer ($/show)</label><input id="holdoutOffer" class="form-control form-control-sm" type="number" value="10000" min="0"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="submitStartHoldout()"><i class="bi bi-exclamation-triangle me-1"></i>Log Holdout</button>
+      <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- Resolve Holdout Modal -->
+<div class="modal fade" id="modalResolveHoldout" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">Resolve Holdout — <span id="resolveHoldoutName"></span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <label class="form-label small fw-semibold">Agreed Salary ($/show)</label>
+      <input id="resolveHoldoutSalary" class="form-control" type="number" min="0">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-success" onclick="submitResolveDeal()"><i class="bi bi-handshake me-1"></i>Agree Deal</button>
+      <button class="btn btn-danger" onclick="submitResolveRelease()"><i class="bi bi-person-x me-1"></i>Release Wrestler</button>
+      <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- Create Secret Signing Modal -->
+<div class="modal fade" id="modalCreateSigning" tabindex="-1">
+  <div class="modal-dialog modal-lg"><div class="modal-content">
+    <div class="modal-header bg-dark text-white"><h5 class="modal-title"><i class="bi bi-eye-slash-fill me-2"></i>Plan Secret Signing</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <div class="alert alert-info py-2 small mb-3"><i class="bi bi-info-circle me-1"></i>A secret signing lets you bring someone in quietly before their debut. Build anticipation with tease videos, then control when their arrival is announced.</div>
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label small fw-semibold">Free Agent to Sign</label>
+          <select id="ssFASelect" class="form-select form-select-sm"><option value="">— Select free agent —</option></select>
+        </div>
+        <div class="col-md-6"><label class="form-label small fw-semibold">Secrecy Level</label>
+          <select id="ssLevel" class="form-select form-select-sm">
+            <option value="loose">Loose — High leak risk (~45%/week)</option>
+            <option value="tight" selected>Tight — Moderate leak risk (~15%/week)</option>
+            <option value="iron_clad">Iron Clad — Very low leak risk (~4%/week)</option>
+          </select>
+        </div>
+        <div class="col-4"><label class="form-label small fw-semibold">Salary ($/show)</label><input id="ssSalary" class="form-control form-control-sm" type="number" value="10000" min="0"></div>
+        <div class="col-4"><label class="form-label small fw-semibold">Contract Length (weeks)</label><input id="ssWeeks" class="form-control form-control-sm" type="number" value="52" min="1"></div>
+        <div class="col-4"><label class="form-label small fw-semibold">Signing Bonus ($)</label><input id="ssBonus" class="form-control form-control-sm" type="number" value="0" min="0"></div>
+        <div class="col-md-8"><label class="form-label small fw-semibold">Planned Debut Show</label>
+          <select id="ssShowSelect" class="form-select form-select-sm"><option value="">— Select show —</option></select>
+        </div>
+        <div class="col-md-4"><label class="form-label small fw-semibold">Target Debut Week #</label><input id="ssWeek" class="form-control form-control-sm" type="number" value="8" min="1" max="52"></div>
+        <div class="col-12"><label class="form-label small fw-semibold">Planned Opponent <span class="text-muted fw-normal">(from your roster — optional)</span></label>
+          <select id="ssOpponentSelect" class="form-select form-select-sm"><option value="">— No specific opponent planned yet —</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-dark" onclick="submitCreateSigning()"><i class="bi bi-lock-fill me-1"></i>Create Secret Signing</button>
+      <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- FD Propose Modal -->
+<div class="modal fade" id="modalFDPropose" tabindex="-1">
+  <div class="modal-dialog modal-xl"><div class="modal-content">
+    <div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="bi bi-door-open-fill me-2"></i>Propose Cross-Promotional Collaboration</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label small fw-semibold">Collaboration Type</label>
+          <select id="fdType" class="form-select form-select-sm" onchange="updateFDTypeInfo()">
+            <option value="talent_loan">Talent Loan — Send your wrestler to their show</option>
+            <option value="talent_borrow">Talent Borrow — Bring their wrestler to your show</option>
+            <option value="dream_match" selected>Dream Match — One-off match between promotions</option>
+            <option value="co_promoted_event">Co-Promoted Event — Joint PPV/PLE</option>
+            <option value="title_unification">Title Unification — Merge two titles</option>
+          </select>
+          <div id="fdTypeInfo" class="alert alert-light py-2 mt-2 small mb-0"></div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small fw-semibold">Rival Promotion</label>
+          <select id="fdRivalSelect" class="form-select form-select-sm" onchange="onFDRivalChange()">
+            <option value="">— Select promotion —</option>
+          </select>
+          <div id="fdRivalInfo" class="mt-2"></div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small fw-semibold">Your Wrestlers Involved</label>
+          <select id="fdOurWrestlersSelect" class="form-select wrestler-multiselect" multiple></select>
+          <div class="select-hint"><i class="bi bi-info-circle me-1"></i>Hold <kbd>Ctrl</kbd> (or <kbd>Cmd</kbd> on Mac) to select multiple wrestlers</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small fw-semibold">Their Wrestlers Involved</label>
+          <div id="theirWrestlerContainer">
+            <div class="text-muted small p-3 border rounded bg-light">← Select a rival promotion first to see their known roster</div>
+          </div>
+        </div>
+        <div class="col-4"><label class="form-label small fw-semibold">We Pay ($)</label><input id="fdOurPay" class="form-control form-control-sm" type="number" value="0" min="0"></div>
+        <div class="col-4"><label class="form-label small fw-semibold">They Pay ($)</label><input id="fdTheirPay" class="form-control form-control-sm" type="number" value="0" min="0"></div>
+        <div class="col-4"><label class="form-label small fw-semibold">Our Revenue Share %</label><input id="fdRevSplit" class="form-control form-control-sm" type="number" value="50" min="0" max="100"></div>
+        <div class="col-6"><label class="form-label small fw-semibold">Event Name</label><input id="fdEvent" class="form-control form-control-sm" placeholder="e.g. Battle of Champions"></div>
+        <div class="col-3"><label class="form-label small fw-semibold">Year</label><input id="fdYear" class="form-control form-control-sm" type="number" value="1" min="1"></div>
+        <div class="col-3"><label class="form-label small fw-semibold">Week #</label><input id="fdWeek" class="form-control form-control-sm" type="number" value="12" min="1" max="52"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="submitFDProposal()"><i class="bi bi-send me-1"></i>Send Proposal</button>
+      <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- Report Tampering Modal -->
+<div class="modal fade" id="modalReportTampering" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-bug-fill text-danger me-2"></i>Report Tampering Incident</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <p class="text-muted small mb-3">Tampering = a rival promotion secretly contacting your contracted wrestler to lure them away. Log it to trigger a counter-response and stop the loyalty erosion.</p>
+      <div class="row g-2">
+        <div class="col-12"><label class="form-label small fw-semibold">Affected Wrestler</label>
+          <select id="tampWrestlerSelect" class="form-select form-select-sm"><option value="">— Select wrestler —</option></select>
+        </div>
+        <div class="col-6"><label class="form-label small fw-semibold">Rival Promotion</label>
+          <select id="tampPromoSelect" class="form-select form-select-sm"><option value="">— Select promotion —</option></select>
+        </div>
+        <div class="col-6"><label class="form-label small fw-semibold">How Serious?</label>
+          <select id="tampIntensity" class="form-select form-select-sm">
+            <option value="feelers">Feelers — Just testing the water</option>
+            <option value="contact" selected>Contact — They've been in touch</option>
+            <option value="offer">Formal Offer — A real offer was made</option>
+            <option value="aggressive">Aggressive — Actively poaching</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="submitReportTampering()"><i class="bi bi-flag me-1"></i>Report Incident</button>
+      <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- ══════════════════════ SCRIPTS ══════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STATIC DATA — rival promotions from backend/data/rival_promotions.json
+// This mirrors the JSON file so the page works even before the API is live
+// ═══════════════════════════════════════════════════════════════════════════
+const RIVAL_PROMOTIONS_STATIC = [
+  { promotion_id:"dynasty_pro",       name:"Dynasty Pro Wrestling",          abbreviation:"DPW",   tier:"major",        brand_identity:"Sports Entertainment",      relationship:45, prestige:82, roster_size:45, known_wrestlers:["The Titan","Scarlett Blaze","Iron Colt","Vex Mercer","Diamond Rose","Kael Storm","Phantom Reed","Luxe Adonis"] },
+  { promotion_id:"global_impact",     name:"Global Impact Wrestling",        abbreviation:"GIW",   tier:"mid",          brand_identity:"High Octane Action",         relationship:30, prestige:58, roster_size:35, known_wrestlers:["Neon Striker","Blaze Havoc","Cassidy Wild","Rex Voltage","Sierra Kane","Draven Cross","Viper Nash"] },
+  { promotion_id:"extreme_combat",    name:"Extreme Combat Wrestling",       abbreviation:"ECW2",  tier:"independent",  brand_identity:"Hardcore / Extreme",         relationship:20, prestige:35, roster_size:25, known_wrestlers:["Carnage","Barb Wire Betty","Rusty Cage","The Butcher","Mad Dog Merrill"] },
+  { promotion_id:"japan_puro",        name:"Japan Puroresu Federation",      abbreviation:"JPF",   tier:"international",brand_identity:"Strong Style / Puroresu",    relationship:60, prestige:78, roster_size:40, known_wrestlers:["Kenji Osakai","Ryu Tanaka","Hiro Matsuda","Taka Yoshida","Iron Dragon Sato","Ghost of Tokyo","Naomi Fujiwara"] },
+  { promotion_id:"lucha_mexico",      name:"Lucha Libre Mexico",             abbreviation:"LLM",   tier:"international",brand_identity:"Lucha / High Flying",        relationship:55, prestige:72, roster_size:38, known_wrestlers:["El Aguila Dorado","La Sombra Roja","Principe del Aire","Serpiente Verde","Reina del Ring","El Fantasma Jr."] },
+  { promotion_id:"american_classic",  name:"American Classic Wrestling",     abbreviation:"ACW",   tier:"major",        brand_identity:"Old School / Traditional",   relationship:40, prestige:80, roster_size:50, known_wrestlers:["Steel Duke","The All-American","Patriot Prime","Ace Montana","Bella Rampage","Cowboy Rick Stanton","The Crusher","Liberty Belle"] },
+  { promotion_id:"uk_wrestling",      name:"British Championship Wrestling", abbreviation:"BCW",   tier:"mid",          brand_identity:"British Strong Style",       relationship:50, prestige:65, roster_size:32, known_wrestlers:["Benny Blackpool","Victoria Crown","The Guvnor","Camden Crusher","Lord Ashworth","Scarlett London","Bristol Bruiser"] },
+  { promotion_id:"women_elite",       name:"Women's Elite Wrestling",        abbreviation:"WEW",   tier:"mid",          brand_identity:"Women's Sports Entertainment",relationship:55,prestige:60, roster_size:28, known_wrestlers:["Athena Storm","Nova Blaze","The Phoenix Queen","Crystal Viper","Iron Lotus","Jade Empress","Roxanne Riot","Valentina Cruz"] },
+  { promotion_id:"underground_wrestling",name:"Underground Chaos Wrestling", abbreviation:"UCW",   tier:"independent",  brand_identity:"Underground / Outlaw",       relationship:15, prestige:22, roster_size:20, known_wrestlers:["Razorblade Ronnie","The Outlaw","Chaos King","Deathwish Danny","Wreckage"] },
+  { promotion_id:"canada_pro",        name:"Canadian Pro Wrestling Alliance",abbreviation:"CPWA",  tier:"mid",          brand_identity:"Athleticism & Grappling",    relationship:65, prestige:55, roster_size:30, known_wrestlers:["Maple Leaf Titan","Pierre Beaumont","Cold Front","The Lumberjack","Aurora Borealis","Icebreaker Ike"] },
+  { promotion_id:"european_grappling",name:"European Grappling League",      abbreviation:"EGL",   tier:"international",brand_identity:"Technical / Sport",          relationship:35, prestige:62, roster_size:33, known_wrestlers:["Franz Steiner Jr.","Klaus Von Hammer","Renata Delvaux","Marco Ricci","The Swede","Erika Blom"] },
+  { promotion_id:"pacific_wrestling", name:"Pacific Rim Wrestling",          abbreviation:"PRW",   tier:"international",brand_identity:"Hybrid Style / International",relationship:50, prestige:50, roster_size:27, known_wrestlers:["Pacific Storm","The Outback Warrior","Dragon Pacific","Sydney Blaze","Kai Hana","Reef Rider"] },
+];
+
+// Show schedule — mirrors the game calendar (3 brands, 8 major + 5 minor PPV + weekly TV)
+const SHOW_SCHEDULE = {
+  "Major PPV / PLE": [
+    "Royal Rumble","Elimination Chamber","WrestleMania",
+    "Money in the Bank","SummerSlam","Clash of Champions",
+    "Survivor Series","Starrcade"
+  ],
+  "Minor PPV / PLE": [
+    "Backlash","Night of Champions","Extreme Rules",
+    "Crown Jewel","War Games"
+  ],
+  "ROC Alpha Weekly TV": ["ROC Alpha — Onslaught","ROC Alpha — Battleground"],
+  "ROC Velocity Weekly TV": ["ROC Velocity — Rampage","ROC Velocity — Overdrive"],
+  "ROC Vanguard Weekly TV": ["ROC Vanguard — Uprising","ROC Vanguard — Frontline"]
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GLOBAL CACHES
+// ═══════════════════════════════════════════════════════════════════════════
+let _roster      = [];
+let _rivals      = [...RIVAL_PROMOTIONS_STATIC]; // start with static, may update from API
+let _freeAgents  = [];
+let _debutShows  = [];
+let _currentCaseFaId   = null;
+let _resolveHoldoutWid = null;
+let _cachedProbationary = null; // stores generated probationary contract terms
+
+// ═══════════════════════════════════════════════════════════════════════════
+// API HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+async function apiGet(url) {
+    const r = await fetch(url, { headers:{"Content-Type":"application/json"} });
+    return r.json();
+}
+async function apiPost(url, body) {
+    const r = await fetch(url, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) });
+    return r.json();
+}
+function flash(msg, type="success") {
+    const el = document.getElementById("alertBanner");
+    el.className = `alert alert-${type} alert-dismissible fade show`;
+    el.innerHTML = `${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+    el.classList.remove("d-none");
+    setTimeout(() => el.classList.add("d-none"), 9000);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// POPULATE HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+function buildGroupedRosterSelect(sel, emptyLabel="— Select wrestler —") {
+    sel.innerHTML = `<option value="">${emptyLabel}</option>`;
+    const brands = {};
+    _roster.forEach(w => {
+        const b = w.primary_brand || w.brand || "Unassigned";
+        if (!brands[b]) brands[b] = [];
+        brands[b].push(w);
+    });
+    Object.entries(brands).sort().forEach(([brand, wrestlers]) => {
+        const grp = document.createElement("optgroup");
+        grp.label = brand;
+        wrestlers.sort((a,b) => (a.name||"").localeCompare(b.name||"")).forEach(w => {
+            const opt = document.createElement("option");
+            opt.value = w.id || w.wrestler_id;
+            opt.dataset.name = w.name || w.wrestler_name || "";
+            opt.textContent = `${w.name || w.wrestler_name} (${w.role || ""})`;
+            grp.appendChild(opt);
+        });
+        sel.appendChild(grp);
+    });
+}
+
+function buildGroupedRosterMultiSelect(sel) {
+    sel.innerHTML = "";
+    const brands = {};
+    _roster.forEach(w => {
+        const b = w.primary_brand || w.brand || "Unassigned";
+        if (!brands[b]) brands[b] = [];
+        brands[b].push(w);
+    });
+    Object.entries(brands).sort().forEach(([brand, wrestlers]) => {
+        const grp = document.createElement("optgroup");
+        grp.label = brand;
+        wrestlers.sort((a,b) => (a.name||"").localeCompare(b.name||"")).forEach(w => {
+            const opt = document.createElement("option");
+            opt.value = w.name || w.wrestler_name;
+            opt.textContent = `${w.name || w.wrestler_name} (${w.role || ""})`;
+            grp.appendChild(opt);
+        });
+        sel.appendChild(grp);
+    });
+}
+
+function buildShowSelect(sel) {
+    sel.innerHTML = '<option value="">— Select show —</option>';
+    if (_debutShows.length) {
+        const weeklyGrp = document.createElement("optgroup");
+        weeklyGrp.label = "Weekly TV";
+        const ppvGrp = document.createElement("optgroup");
+        ppvGrp.label = "PPV";
+        _debutShows.forEach(s => {
+            const opt = document.createElement("option");
+            opt.value = s.show_id;
+            opt.dataset.showName = s.show_name;
+            opt.dataset.week = s.week;
+            opt.dataset.year = s.year;
+            opt.textContent = s.label;
+            if (s.show_type === "weekly_tv") weeklyGrp.appendChild(opt);
+            else ppvGrp.appendChild(opt);
+        });
+        if (weeklyGrp.children.length) sel.appendChild(weeklyGrp);
+        if (ppvGrp.children.length) sel.appendChild(ppvGrp);
+        return;
+    }
+    Object.entries(SHOW_SCHEDULE).forEach(([grpName, shows]) => {
+        const grp = document.createElement("optgroup");
+        grp.label = grpName;
+        shows.forEach(s => {
+            const opt = document.createElement("option");
+            opt.value = s; opt.textContent = s;
+            grp.appendChild(opt);
+        });
+        sel.appendChild(grp);
+    });
+}
+
+function populateRivalSelects() {
+    const tampPromoSel = document.getElementById("tampPromoSelect");
+    const fdRivalSel   = document.getElementById("fdRivalSelect");
+    [tampPromoSel, fdRivalSel].forEach(sel => {
+        if (!sel) return;
+        sel.innerHTML = '<option value="">— Select promotion —</option>';
+        _rivals.forEach(r => {
+            const opt = document.createElement("option");
+            opt.value = r.promotion_id;
+            opt.textContent = `${r.name} (${r.abbreviation||r.tier}) — Rel: ${r.relationship_with_player??r.relationship??50}/100`;
+            sel.appendChild(opt);
+        });
+    });
+}
+
+function populateAllSelects() {
+    buildGroupedRosterSelect(document.getElementById("holdoutWrestlerSelect"));
+    buildGroupedRosterSelect(document.getElementById("rehabMentorSelect"), "— No mentor —");
+    buildGroupedRosterSelect(document.getElementById("tampWrestlerSelect"));
+    buildGroupedRosterSelect(document.getElementById("ssOpponentSelect"), "— No specific opponent —");
+    buildGroupedRosterMultiSelect(document.getElementById("fdOurWrestlersSelect"));
+    buildShowSelect(document.getElementById("ssShowSelect"));
+    // Free agents
+    const faSel = document.getElementById("ssFASelect");
+    faSel.innerHTML = '<option value="">— Select free agent —</option>';
+    _freeAgents.forEach(f => {
+        const opt = document.createElement("option");
+        opt.value = f.id || f.fa_id;
+        opt.dataset.name = f.wrestler_name || f.name || "";
+        opt.textContent = `${f.wrestler_name || f.name} (${f.role||"?"}) — $${(f.market_value||0).toLocaleString()}/show`;
+        faSel.appendChild(opt);
+    });
+    populateRivalSelects();
+    updateFDTypeInfo();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GLOBAL DATA LOAD
+// ═══════════════════════════════════════════════════════════════════════════
+async function loadGlobalData() {
+    try {
+        const [rResp, rivResp, faResp, showsResp] = await Promise.all([
+            apiGet("/api/roster"),
+            apiGet("/api/rivals"),
+            apiGet("/api/free-agents"),
+            apiGet("/api/secret-signings/debut-shows"),
+        ]);
+        _roster     = rResp?.wrestlers || rResp?.roster || [];
+        // Merge API rivals with static (API wins, keeping known_wrestlers from static as fallback)
+        if (rivResp?.rivals?.length) {
+            _rivals = rivResp.rivals.map(apiR => {
+                const stat = RIVAL_PROMOTIONS_STATIC.find(s => s.promotion_id === apiR.promotion_id) || {};
+                return { ...stat, ...apiR, known_wrestlers: apiR.roster_members || apiR.wrestlers || stat.known_wrestlers || [] };
+            });
+            // Add any static promotions not yet in DB
+            RIVAL_PROMOTIONS_STATIC.forEach(s => {
+                if (!_rivals.find(r => r.promotion_id === s.promotion_id)) _rivals.push(s);
+            });
+        }
+        _freeAgents = faResp?.free_agents || [];
+        _debutShows = showsResp?.shows || [];
+        populateAllSelects();
+    } catch(e) {
+        console.error("Failed to load global data:", e);
+        populateAllSelects(); // use whatever is cached (static rivals)
+    }
+    try {
+        const s = await apiGet("/api/universe/state");
+        const el = document.getElementById("universeStatus");
+        if (el && s) el.textContent = `Year ${s.year||1}, Week ${s.week||1} | $${(s.balance||0).toLocaleString()}`;
+    } catch(_) {}
+}
+
+async function loadHeaderStats() {
+    try {
+        const [c, h, s] = await Promise.all([
+            apiGet("/api/controversy/all"),
+            apiGet("/api/holdouts/active"),
+            apiGet("/api/secret-signings/all"),
+        ]);
+        document.getElementById("hStatControversy").textContent = c.total ?? 0;
+        document.getElementById("hStatHoldouts").textContent    = h.total ?? 0;
+        document.getElementById("hStatSecret").textContent      = s.summary?.active_secret_signings ?? s.total ?? 0;
+        if ((c.total||0)>0) { const b=document.getElementById("badgeControversy"); b.textContent=c.total; b.style.display=""; }
+        if ((h.total||0)>0) { const b=document.getElementById("badgeHoldouts");    b.textContent=h.total; b.style.display=""; }
+    } catch(_) {}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONTROVERSY TAB
+// ═══════════════════════════════════════════════════════════════════════════
+function sevCardClass(s)  { return s>=75?"sev-crit":s>=55?"sev-high":s>=30?"sev-med":"sev-low"; }
+function sevBadgeClass(s) { return s>=75?"sev-badge-crit":s>=55?"sev-badge-high":s>=30?"sev-badge-med":"sev-badge-low"; }
+function riskColor(s)     { return s>=75?"#dc3545":s>=55?"#fd7e14":s>=35?"#ffc107":"#28a745"; }
+function rewardColor(s)   { return s>=75?"#28a745":s>=55?"#20c997":s>=35?"#ffc107":"#adb5bd"; }
+function progBar(label, tooltip, val, color) {
+    return `<div class="prog-wrap">
+      <div class="label-row"><span>${label} <i class="bi bi-question-circle text-muted" style="font-size:.68rem" title="${tooltip}"></i></span><span style="color:${color};font-weight:600">${val}/100</span></div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${val}%;background:${color}"></div></div>
+    </div>`;
+}
+const INCIDENT_PLAIN = {
+    behavioral_incident:  "Had a backstage altercation or conduct issue",
+    substance_abuse:      "Substance abuse problem requiring treatment",
+    social_media_scandal: "Made controversial public statements online",
+    legal_trouble:        "Facing or recently faced legal proceedings",
+    locker_room_issue:    "Refused to cooperate with management or talent",
+    performance_decline:  "Showed attitude problems or lack of effort",
+    contract_dispute:     "Publicly fought their last employer over a contract",
+    wellness_violation:   "Failed a wellness/drug policy test",
+    financial_misconduct: "Accused of financial fraud or misuse of funds",
+};
+
+async function loadControversyTab() {
+    const grid = document.getElementById("controversyGrid");
+    grid.innerHTML = '<div class="tab-loader col-12"><i class="bi bi-hourglass-split fs-2"></i><p class="mt-2">Loading controversy cases…</p></div>';
+    let data;
+    try { data = await apiGet("/api/controversy/all"); }
+    catch(e) { grid.innerHTML = '<div class="col-12"><div class="alert alert-danger">Failed to load cases.</div></div>'; return; }
+
+    if (!data.success || !data.cases?.length) {
+        grid.innerHTML = `<div class="empty-state col-12"><i class="bi bi-emoji-smile"></i>
+          <p>No controversy free agents right now.</p>
+          <small class="text-muted">They appear when free agents with public incidents become available in the pool.</small></div>`;
+        return;
+    }
+    grid.innerHTML = data.cases.map(c => {
+        const cv  = c.controversy, ass = cv.assessment||{};
+        const sev    = cv.severity||0;
+        const risk   = ass.overall_risk_score||sev;
+        const reward = ass.overall_reward_score||50;
+        let emoji="⚪", vt="Marginal — monitor before committing", vbg="bg-light text-secondary";
+        if (risk<=30 && reward>=60) { emoji="✅"; vt="Low risk, real upside — solid signing right now";          vbg="bg-success bg-opacity-10 text-success"; }
+        else if (risk>=75)          { emoji="🚨"; vt="Very high risk — only sign with strict conditions";        vbg="bg-danger bg-opacity-10 text-danger"; }
+        else if (reward>=65)        { emoji="🟡"; vt="Risky but strong potential — try a probationary deal";    vbg="bg-warning bg-opacity-25 text-dark"; }
+        else if (ass.recommendation){ emoji="💬"; vt=ass.recommendation; }
+        const incidentDesc = INCIDENT_PLAIN[cv.controversy_type] || cv.controversy_description || cv.controversy_type_label;
+        return `<div class="col-md-6 col-xl-4">
+          <div class="case-card h-100 ${sevCardClass(sev)}" onclick="openCaseModal('${c.fa_id}')">
+            <div class="p-3 pb-2 border-bottom">
+              <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                <div><div class="fw-bold">${c.wrestler_name}</div>
+                  <div class="text-muted small">${c.role||"Unknown"} · Age ${c.age} · $${(c.market_value||0).toLocaleString()}/show</div>
+                </div>
+                <span class="badge rounded-pill ${sevBadgeClass(sev)} flex-shrink-0">Sev ${sev}/100</span>
+              </div>
+              <div class="rounded p-2 mt-1" style="background:#f8f9fa;font-size:.82rem">
+                <strong>What happened:</strong> ${incidentDesc}
+                ${cv.is_public_knowledge?"<span class='badge bg-warning text-dark ms-1' style='font-size:.68rem'>Publicly known</span>":""}
+                <div class="text-muted mt-1">Unemployed for <strong>${cv.time_since_incident_weeks}</strong> weeks</div>
+              </div>
+            </div>
+            <div class="p-3 pb-2">
+              ${progBar("Signing Risk","How likely this signing is to backfire on you",risk,riskColor(risk))}
+              ${progBar("Reward Potential","How much they could contribute if things go well",reward,rewardColor(reward))}
+              <div class="d-flex flex-wrap gap-1 mt-2">
+                <span class="badge bg-secondary" style="font-size:.7rem">${cv.locker_room_reaction_label||"?"} locker room</span>
+                <span class="badge ${cv.redemption_arc_active?"bg-success":"bg-light text-dark"}" style="font-size:.7rem">${cv.redemption_arc_active?"🌟 Redemption active":cv.redemption_potential_label+" redemption potential"}</span>
+              </div>
+            </div>
+            <div class="px-3 pb-2 pt-0">
+              <div class="rounded px-2 py-1 small fw-semibold ${vbg}">${emoji} ${vt}</div>
+              <div class="text-center mt-1"><small class="text-muted" style="font-size:.7rem">↓ Click to see full details &amp; sign this wrestler</small></div>
+            </div>
+          </div>
+        </div>`;
+    }).join("");
+}
+
+async function openCaseModal(faId) {
+    _currentCaseFaId = faId;
+    _cachedProbationary = null;
+    let data;
+    try { data = await apiGet(`/api/controversy/${faId}/case`); }
+    catch(e) { flash("Error loading case","danger"); return; }
+    if (!data.success) { flash("Error: "+data.error,"danger"); return; }
+    document.getElementById("modalCaseName").textContent = data.wrestler_name;
+    const cv=data.controversy, ass=cv.assessment||{}, si=cv.sponsor_impact||{}, pc=cv.probationary_contract, rp=cv.rehabilitation_plan;
+    const incidentDesc = INCIDENT_PLAIN[cv.controversy_type] || cv.controversy_description || cv.controversy_type_label;
+    document.getElementById("modalCaseBody").innerHTML = `
+    <div class="row g-3">
+      <div class="col-12">
+        <div class="alert alert-secondary py-2 mb-0 small">
+          <strong>${data.wrestler_name}</strong> has been unemployed for <strong>${cv.time_since_incident_weeks} weeks</strong>
+          because of a <strong>${cv.controversy_type_label}</strong> — "${incidentDesc}". Severity: <strong>${cv.severity}/100</strong>.
+          ${cv.is_public_knowledge?"<span class='badge bg-warning text-dark ms-1'>Publicly known</span>":"<span class='badge bg-secondary ms-1'>Not yet public</span>"}
+          <br><em class="text-muted">${ass.recommendation||""}</em>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="section-card">
+          <h6><i class="bi bi-graph-up-arrow me-1"></i>Risk vs. Reward — Should You Sign Them?</h6>
+          ${progBar("Signing Risk","How likely this signing is to cause you PR, sponsor or locker-room problems",ass.overall_risk_score||0,riskColor(ass.overall_risk_score||0))}
+          ${progBar("Reward Potential","Upside if they perform well and behave themselves",ass.overall_reward_score||0,rewardColor(ass.overall_reward_score||0))}
+          <div class="small text-muted mt-2">
+            <strong>Sponsor concern level:</strong> ${si.affected_sponsors?.length?si.affected_sponsors.join(", ")+" at risk":"No major sponsor concerns"}
+            ${si.tv_network_concern?"<br><span class='text-danger'><i class='bi bi-exclamation-triangle me-1'></i>TV network has concerns about this signing</span>":""}
+          </div>
+        </div>
+        <div class="section-card">
+          <h6><i class="bi bi-people me-1"></i>How Will Your Locker Room React?</h6>
+          <div class="data-pair"><span class="data-label">Reaction</span><span class="data-value">${cv.locker_room_reaction_label}</span></div>
+          <div class="data-pair"><span class="data-label">Morale effect on others</span><span class="data-value ${(cv.locker_room_morale_impact||0)>=0?"text-success":"text-danger"}">${(cv.locker_room_morale_impact||0)>0?"+":""}${cv.locker_room_morale_impact||0} morale</span></div>
+          <p class="small text-muted mt-2 mb-0">${cv.locker_room_guidance||""}</p>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="section-card">
+          <h6><i class="bi bi-stars me-1"></i>Redemption Arc</h6>
+          <p class="small text-muted mb-2">A storyline where they publicly overcome their past. Fans love a comeback — it can dramatically boost their popularity.</p>
+          <div class="data-pair"><span class="data-label">Arc potential</span><span class="data-value">${cv.redemption_potential_label}</span></div>
+          <div class="data-pair"><span class="data-label">Booking bonus if activated</span><span class="data-value text-success fw-bold">+${cv.redemption_booking_bonus||0} popularity</span></div>
+          <div class="data-pair"><span class="data-label">Currently active</span><span class="data-value">${cv.redemption_arc_active?"✅ Yes":"❌ No"}</span></div>
+          ${cv.redemption_description?`<p class="small text-muted mt-2 mb-0">${cv.redemption_description}</p>`:""}
+        </div>
+        ${pc?`<div class="section-card border-warning">
+          <h6><i class="bi bi-file-earmark-text text-warning me-1"></i>Probationary Contract Terms</h6>
+          <p class="small text-muted mb-2">Shorter deal with a behaviour clause — gives you an immediate-release option if they cause problems.</p>
+          <div class="data-pair"><span class="data-label">Salary</span><span class="data-value">$${(pc.salary_per_show||0).toLocaleString()}/show</span></div>
+          <div class="data-pair"><span class="data-label">Length</span><span class="data-value">${pc.contract_length_weeks} weeks</span></div>
+          <div class="data-pair"><span class="data-label">Strikes before release</span><span class="data-value text-danger">${pc.max_strikes_before_release||3} max</span></div>
+          <div class="alert alert-success py-2 small mt-2 mb-0"><i class="bi bi-check-circle me-1"></i>Click <strong>"Sign This Wrestler"</strong> in the footer — salary &amp; terms will be pre-filled from these probationary terms.</div>
+        </div>`:""}
+        ${rp?`<div class="section-card border-success">
+          <h6><i class="bi bi-heart-pulse text-success me-1"></i>Rehab Plan Active</h6>
+          <div class="data-pair"><span class="data-label">Plan quality</span><span class="data-value">${rp.plan_quality||0}/100</span></div>
+          <div class="data-pair"><span class="data-label">Severity drops by</span><span class="data-value text-success">${rp.severity_reduction_per_week||0} pts/week</span></div>
+          ${rp.mentor_wrestler_name?`<div class="data-pair"><span class="data-label">Mentor</span><span class="data-value">${rp.mentor_wrestler_name}</span></div>`:""}
+        </div>`:""}
+      </div>
+    </div>`;
+    new bootstrap.Modal(document.getElementById("modalCase")).show();
+}
+
+async function generateProbationary() {
+    if (!_currentCaseFaId) return;
+    const r = await apiPost(`/api/controversy/${_currentCaseFaId}/probationary-contract`, {});
+    if (r.success) {
+        _cachedProbationary = r.probationary_contract;
+        const pc = r.probationary_contract;
+        const diff = r.vs_standard_contract;
+        flash(`✅ Probationary terms generated — $${(pc.salary_per_show||0).toLocaleString()}/show for ${pc.contract_length_weeks} weeks (${diff.difference>0?"saves you $"+diff.difference.toLocaleString()+"/show vs standard":""}). Now click <strong>Sign This Wrestler</strong> to make the offer.`);
+        openCaseModal(_currentCaseFaId); // refresh modal to show terms
+    } else flash("Error: "+r.error,"danger");
+}
+
+function openSignModal() {
+    const wname = document.getElementById("modalCaseName").textContent;
+    document.getElementById("signModalName").textContent = wname;
+    document.getElementById("signResult").innerHTML = "";
+
+    if (_cachedProbationary) {
+        document.getElementById("probatonaryPrefillNote").classList.remove("d-none");
+        document.getElementById("signSalary").value  = _cachedProbationary.salary_per_show || 10000;
+        document.getElementById("signWeeks").value   = _cachedProbationary.contract_length_weeks || 26;
+        document.getElementById("signBonus").value   = 0;
+        document.getElementById("signProbationary").checked = true;
+    } else {
+        document.getElementById("probatonaryPrefillNote").classList.add("d-none");
+        // Try to find market value hint
+        const fa = _freeAgents.find(f => f.id === _currentCaseFaId || f.fa_id === _currentCaseFaId);
+        const mv = fa?.market_value || 10000;
+        document.getElementById("signSalary").value  = mv;
+        document.getElementById("signWeeks").value   = 26;
+        document.getElementById("signSalaryHint").textContent = `Market value: $${mv.toLocaleString()}/show`;
+        document.getElementById("signProbationary").checked = false;
+    }
+
+    bootstrap.Modal.getInstance(document.getElementById("modalCase"))?.hide();
+    setTimeout(() => new bootstrap.Modal(document.getElementById("modalSignControversy")).show(), 300);
+}
+
+async function submitSign() {
+    if (!_currentCaseFaId) return;
+    const btn = document.querySelector('#modalSignControversy .btn-success');
+    btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Making offer…';
+
+    const r = await apiPost("/api/free-agents/negotiate", {
+        fa_id:           _currentCaseFaId,
+        salary:          parseInt(document.getElementById("signSalary").value)||0,
+        contract_length: parseInt(document.getElementById("signWeeks").value)||26,
+        signing_bonus:   parseInt(document.getElementById("signBonus").value)||0,
+        role_promise:    document.getElementById("signRole").value,
+        creative_control:document.getElementById("signCreative").value,
+    });
+
+    btn.disabled = false; btn.innerHTML = '<i class="bi bi-send me-1"></i>Make Offer';
+    const el = document.getElementById("signResult");
+
+    if (r.accepted) {
+        el.innerHTML = `<div class="alert alert-success"><i class="bi bi-check-circle-fill me-2"></i><strong>Signed!</strong> ${r.message}${document.getElementById("signProbationary").checked?" A behaviour clause has been noted on this contract.":""}</div>`;
+        flash("✅ "+r.message);
+        setTimeout(() => { bootstrap.Modal.getInstance(document.getElementById("modalSignControversy"))?.hide(); loadHeaderStats(); loadControversyTab(); }, 2000);
+    } else if (r.counter_offer) {
+        el.innerHTML = `<div class="alert alert-warning"><i class="bi bi-arrow-left-right me-2"></i><strong>Counter offer:</strong> ${r.message}<br><small class="text-muted">Adjust your salary above and make another offer if you want to accept.</small></div>`;
+        document.getElementById("signSalary").value = r.counter_salary || document.getElementById("signSalary").value;
+    } else if (!r.success) {
+        el.innerHTML = `<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>${r.error||"Offer failed."}</div>`;
+    } else {
+        el.innerHTML = `<div class="alert alert-secondary"><i class="bi bi-x-circle me-2"></i>${r.message||"Offer declined."}</div>`;
+    }
+}
+
+function openRehabModal() {
+    bootstrap.Modal.getInstance(document.getElementById("modalCase"))?.hide();
+    setTimeout(() => {
+        document.getElementById("rehabTargetName").textContent = document.getElementById("modalCaseName").textContent;
+        new bootstrap.Modal(document.getElementById("modalRehab")).show();
+    }, 300);
+}
+async function submitRehabPlan() {
+    if (!_currentCaseFaId) return;
+    const mentorSel = document.getElementById("rehabMentorSelect");
+    const r = await apiPost(`/api/controversy/${_currentCaseFaId}/rehab-plan`, {
+        counseling_access: document.getElementById("rCounseling").checked,
+        sobriety_support:  document.getElementById("rSobriety").checked,
+        reduced_schedule:  document.getElementById("rSchedule").checked,
+        weekly_check_in:   document.getElementById("rCheckin").checked,
+    });
+    if (r.success) {
+        flash(`✅ Rehab plan saved — quality ${r.rehabilitation_plan.plan_quality}/100, severity drops ${r.rehabilitation_plan.severity_reduction_per_week}pts/week`);
+        bootstrap.Modal.getInstance(document.getElementById("modalRehab"))?.hide();
+        const mentorId = mentorSel?.value;
+        if (mentorId) {
+            const mn = mentorSel.options[mentorSel.selectedIndex]?.dataset?.name||"";
+            await apiPost(`/api/controversy/${_currentCaseFaId}/rehab-plan/mentor`, { wrestler_id:mentorId, wrestler_name:mn });
+        }
+    } else flash("Error: "+r.error,"danger");
+}
+async function activateRedemption() {
+    if (!_currentCaseFaId) return;
+    const r = await apiPost(`/api/controversy/${_currentCaseFaId}/activate-redemption`, {});
+    if (r.success) { flash(`✅ Redemption arc activated! +${r.booking_bonus} popularity booking bonus unlocked`); openCaseModal(_currentCaseFaId); }
+    else flash("Error: "+r.error,"danger");
+}
+async function issueStrike(faId) {
+    const reason = prompt("What did they do? (logged against the wrestler):");
+    if (!reason) return;
+    const r = await apiPost(`/api/controversy/${faId}/issue-strike`, { reason });
+    if (r.success) { flash(r.strike_result?.message||"Strike issued", r.strike_result?.terminated?"danger":"warning"); }
+    else flash("Error: "+r.error,"danger");
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOYALTY TAB
+// ═══════════════════════════════════════════════════════════════════════════
+function tierClass(t) { return {disgruntled:"lt-disgruntled",indifferent:"lt-indifferent",content:"lt-content",loyal:"lt-loyal",devoted:"lt-devoted"}[t]||"lt-indifferent"; }
+
+async function loadLoyaltyTab() {
+    document.getElementById("loyaltyList").innerHTML      = '<p class="text-muted">Loading…</p>';
+    document.getElementById("reapproachWindows").innerHTML = '<p class="text-muted small">Loading…</p>';
+    const [atRisk, reApp] = await Promise.all([apiGet("/api/loyalty/at-risk"), apiGet("/api/failed-negotiations/re-approach-windows")]);
+    const ll = document.getElementById("loyaltyList");
+    if (!atRisk.success||!atRisk.wrestlers?.length) {
+        ll.innerHTML = '<div class="empty-state"><i class="bi bi-emoji-smile"></i><p>All roster members have adequate loyalty.</p></div>'; }
+    else ll.innerHTML = atRisk.wrestlers.map(w => `
+      <div class="section-card">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+          <div><strong>${w.wrestler_name}</strong>
+            <span class="loyalty-badge ${tierClass(w.tier)} ms-2">${w.tier_label}</span>
+            <span class="text-muted small ms-2">${w.brand||""} · ${w.role||""}</span></div>
+          <div class="text-end small">
+            <div>Loyalty: <strong>${w.loyalty_score}/100</strong></div>
+            <div class="text-muted">${w.weeks_remaining}w contract left</div>
+          </div>
+        </div>
+        <div class="mt-2 d-flex flex-wrap gap-1">
+          <span class="stat-pill"><i class="bi bi-emoji-frown text-danger"></i>Morale ${w.morale}</span>
+          <span class="stat-pill"><i class="bi bi-bug text-warning"></i>Tampering risk ${w.tampering_vulnerability}%</span>
+          <span class="stat-pill"><i class="bi bi-person-x text-danger"></i>Holdout risk ${w.holdout_risk}%</span>
+        </div>
+        <div class="mt-2 d-flex gap-2 flex-wrap">
+          <button class="btn btn-sm btn-outline-success" onclick="payLoyaltyBonus('${w.wrestler_id}','${w.wrestler_name}')"><i class="bi bi-gift me-1"></i>Loyalty Bonus</button>
+          <button class="btn btn-sm btn-outline-primary"  onclick="checkExclWindow('${w.wrestler_id}','${w.wrestler_name}')"><i class="bi bi-calendar-lock me-1"></i>Excl. Window</button>
+        </div>
+      </div>`).join("");
+    const raw = document.getElementById("reapproachWindows");
+    if (!reApp.success||!reApp.windows?.length) raw.innerHTML = '<p class="small text-muted">No blocked windows.</p>';
+    else raw.innerHTML = reApp.windows.map(w => `
+      <div class="mb-2 small"><strong>${w.wrestler_name}</strong>
+        <span class="badge ${w.is_open?"bg-success":"bg-secondary"} ms-1">${w.is_open?"Open":w.weeks_until_open+"w blocked"}</span>
+        <div class="text-muted">${w.cooldown_reason||""}</div>
+        ${!w.is_open?`<button class="btn btn-link btn-sm p-0 mt-1" onclick="goodwillAction('${w.wrestler_id}')">+ Take goodwill action</button>`:""}
+      </div>`).join("");
+}
+async function payLoyaltyBonus(wid, wname) {
+    const amount = parseInt(prompt(`Loyalty bonus for ${wname} ($):`,"10000"));
+    if (!amount||amount<=0) return;
+    const type = prompt("Type: monetary / creative / title_push","monetary");
+    const r = await apiPost(`/api/loyalty/${wid}/loyalty-bonus`, { bonus_type:type||"monetary", amount });
+    if (r.success) flash(r.message||"Bonus applied!"); else flash("Error: "+r.error,"danger");
+}
+async function checkExclWindow(wid, wname) {
+    const r = await apiGet(`/api/loyalty/exclusive-window/${wid}`);
+    const el = document.getElementById("exclusiveWindows");
+    if (!r.success) { el.innerHTML=`<p class="text-danger small">${r.error}</p>`; return; }
+    el.innerHTML = `<strong class="small">${wname}</strong><br>
+      <span class="badge ${r.has_window?"bg-success":"bg-secondary"}">${r.has_window?"ACTIVE":"Inactive"}</span>
+      ${r.has_window?`<div class="small mt-1">${r.weeks_remaining}w remaining</div>`:""}
+      ${r.can_open_window?`<div class="alert alert-warning small mt-2 p-2 mb-0">Contract ≤12w — you can open an exclusive window to block rival approaches.</div>`:""}
+      <div class="small text-muted mt-1">Contract weeks left: ${r.contract_weeks_left}</div>`;
+}
+async function goodwillAction(wid) {
+    const action = prompt("Goodwill action:\n• public_apology\n• tribute_video\n• mutual_friend\n• public_praise\n• hall_of_fame_hint","public_praise");
+    if (!action) return;
+    const r = await apiPost("/api/failed-negotiations/goodwill-action", { wrestler_id:wid, action });
+    if (r.success) { flash(r.action_result?.message||"Done!"); loadLoyaltyTab(); } else flash("Error: "+r.error,"danger");
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HOLDOUTS TAB
+// ═══════════════════════════════════════════════════════════════════════════
+async function loadHoldoutsTab() {
+    const el = document.getElementById("holdoutsList");
+    el.innerHTML = '<p class="text-muted">Loading…</p>';
+    const data = await apiGet("/api/holdouts/active");
+    if (!data.success||!data.holdouts?.length) { el.innerHTML='<div class="empty-state"><i class="bi bi-emoji-smile"></i><p>No active holdouts.</p></div>'; return; }
+    el.innerHTML = data.holdouts.map(h => `
+      <div class="holdout-row">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+          <div><strong>${h.wrestler_name}</strong>
+            <span class="badge bg-danger ms-2">Week ${h.weeks_in_holdout}</span>
+            ${h.locker_room_aware?"<span class='badge bg-warning text-dark ms-1'>Locker room aware</span>":""}
+            ${h.media_leaks>0?`<span class='badge bg-danger ms-1'>${h.media_leaks} press leak(s)</span>`:""}
+          </div>
+          <div class="text-end small">
+            <div>Their demand: <strong>$${(h.original_demand||0).toLocaleString()}/show</strong></div>
+            <div>Your offer: $${(h.current_offer||0).toLocaleString()}/show</div>
+            <div class="text-danger fw-semibold">Gap: $${(h.gap||0).toLocaleString()}</div>
+          </div>
+        </div>
+        <div class="mt-2 d-flex gap-2 flex-wrap">
+          <button class="btn btn-sm btn-success" onclick="openResolveHoldout('${h.wrestler_id}','${h.wrestler_name}',${h.original_demand||0})"><i class="bi bi-handshake me-1"></i>Resolve with Deal</button>
+          <button class="btn btn-sm btn-danger"  onclick="releaseFromHoldout('${h.wrestler_id}','${h.wrestler_name}')"><i class="bi bi-person-x me-1"></i>Release</button>
+        </div>
+      </div>`).join("");
+}
+async function submitStartHoldout() {
+    const sel = document.getElementById("holdoutWrestlerSelect");
+    if (!sel?.value) { flash("Please select a wrestler","warning"); return; }
+    const wname = sel.options[sel.selectedIndex]?.dataset?.name || sel.options[sel.selectedIndex]?.textContent?.split(" (")[0]||"";
+    const r = await apiPost("/api/holdouts/start", { wrestler_id:sel.value, wrestler_name:wname, original_demand:parseInt(document.getElementById("holdoutDemand").value)||0, current_offer:parseInt(document.getElementById("holdoutOffer").value)||0 });
+    if (r.success) { flash(r.message||"Holdout logged","warning"); bootstrap.Modal.getInstance(document.getElementById("modalStartHoldout"))?.hide(); loadHoldoutsTab(); }
+    else flash("Error: "+r.error,"danger");
+}
+function openResolveHoldout(wid, wname, demand) {
+    _resolveHoldoutWid=wid;
+    document.getElementById("resolveHoldoutName").textContent = wname;
+    document.getElementById("resolveHoldoutSalary").value = demand;
+    new bootstrap.Modal(document.getElementById("modalResolveHoldout")).show();
+}
+async function submitResolveDeal() {
+    if (!_resolveHoldoutWid) return;
+    const r = await apiPost(`/api/holdouts/${_resolveHoldoutWid}/resolve-deal`, { agreed_salary:parseInt(document.getElementById("resolveHoldoutSalary").value)||0 });
+    if (r.success) { flash(r.resolution?.message||"Resolved!"); bootstrap.Modal.getInstance(document.getElementById("modalResolveHoldout"))?.hide(); loadHoldoutsTab(); }
+    else flash("Error: "+r.error,"danger");
+}
+async function submitResolveRelease() {
+    if (!_resolveHoldoutWid||!confirm("Permanently release this wrestler?")) return;
+    const r = await apiPost(`/api/holdouts/${_resolveHoldoutWid}/resolve-release`, {});
+    if (r.success) { flash(r.resolution?.message||"Released","warning"); bootstrap.Modal.getInstance(document.getElementById("modalResolveHoldout"))?.hide(); loadHoldoutsTab(); }
+    else flash("Error: "+r.error,"danger");
+}
+async function releaseFromHoldout(wid, wname) {
+    if (!confirm(`Permanently release ${wname}?`)) return;
+    const r = await apiPost(`/api/holdouts/${wid}/resolve-release`, {});
+    if (r.success) { flash(r.resolution?.message||"Released","warning"); loadHoldoutsTab(); }
+    else flash("Error: "+r.error,"danger");
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SECRET SIGNINGS TAB
+// ═══════════════════════════════════════════════════════════════════════════
+async function loadSecretSigningsTab() {
+    const el = document.getElementById("signingsList");
+    el.innerHTML = '<p class="text-muted">Loading…</p>';
+    const data = await apiGet("/api/secret-signings/all");
+    if (!data.success||!data.signings?.length) { el.innerHTML='<div class="empty-state"><i class="bi bi-eye-slash"></i><p>No active secret signings.</p><small class="text-muted">Use "Plan Secret Signing" to begin one.</small></div>'; return; }
+    el.innerHTML = data.signings.map(s => {
+        const cls = s.status==="leaked"?"leaked":s.status==="revealed"?"revealed":"";
+        return `<div class="signing-card ${cls}">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div><strong>${s.wrestler_name}</strong>
+              <span class="badge bg-secondary ms-2">${s.status_label||s.status}</span>
+              <span class="badge bg-dark ms-1">${s.secret_level_label||s.secret_level}</span>
+            </div>
+            <div class="text-end small">
+              <div>Debut: <strong>${s.planned_show}</strong> (Week ${s.planned_week})</div>
+              ${s.planned_opponent_name?`<div class="text-muted">vs ${s.planned_opponent_name}</div>`:""}
+              <div class="text-muted">Leak risk/wk: ${s.weekly_leak_chance}% · Fan awareness: ${s.total_fan_awareness||0}%</div>
+            </div>
+          </div>
+          ${s.leak_events?.length?`<div class="alert alert-danger py-1 px-2 mt-2 mb-0 small"><i class="bi bi-exclamation-triangle-fill me-1"></i>${s.leak_events.length} leak event(s)</div>`:""}
+          <div class="mt-2 d-flex gap-2 flex-wrap">
+            <button class="btn btn-sm btn-outline-secondary" onclick="addTease('${s.signing_id}')"><i class="bi bi-film me-1"></i>Add Tease Video</button>
+            ${s.status!=="revealed"?`<button class="btn btn-sm btn-success" onclick="revealSigning('${s.signing_id}','${s.planned_show}')"><i class="bi bi-megaphone me-1"></i>Reveal Now</button>`:""}
+          </div>
+        </div>`;
+    }).join("");
+}
+async function submitCreateSigning() {
+    const faSel=document.getElementById("ssFASelect"), showSel=document.getElementById("ssShowSelect"), oppSel=document.getElementById("ssOpponentSelect");
+    if (!faSel?.value) { flash("Please select a free agent","warning"); return; }
+    if (!showSel?.value) { flash("Please select a planned debut show","warning"); return; }
+    const faName  = faSel.options[faSel.selectedIndex]?.dataset?.name || faSel.options[faSel.selectedIndex]?.textContent?.split(" (")[0]||"";
+    const oppName = oppSel?.value?(oppSel.options[oppSel.selectedIndex]?.dataset?.name||oppSel.options[oppSel.selectedIndex]?.textContent?.split(" (")[0]||""):"";
+    const selectedShow = showSel.options[showSel.selectedIndex];
+    const showName = selectedShow?.dataset?.showName || showSel.value;
+    const showWeek = parseInt(selectedShow?.dataset?.week || document.getElementById("ssWeek").value) || 1;
+    const showYear = parseInt(selectedShow?.dataset?.year || 1) || 1;
+    const r = await apiPost("/api/secret-signings/create", {
+        fa_id:faSel.value, wrestler_name:faName,
+        secret_level:document.getElementById("ssLevel").value,
+        salary_per_show:parseInt(document.getElementById("ssSalary").value)||0,
+        contract_weeks:parseInt(document.getElementById("ssWeeks").value)||52,
+        signing_bonus:parseInt(document.getElementById("ssBonus").value)||0,
+        planned_show_id:showSel.value, planned_show:showName, planned_week:showWeek,
+        planned_year:showYear, planned_opponent_name:oppName,
+    });
+    if (r.success) { flash(r.message||"Secret signing created!"); bootstrap.Modal.getInstance(document.getElementById("modalCreateSigning"))?.hide(); loadSecretSigningsTab(); }
+    else flash("Error: "+r.error,"danger");
+}
+async function addTease(id) {
+    const r = await apiPost(`/api/secret-signings/${id}/add-tease`, {});
+    if (r.success) { flash(r.message||"Tease added!"); loadSecretSigningsTab(); } else flash("Error: "+r.error,"danger");
+}
+async function revealSigning(id, defaultShow) {
+    const show = prompt("Confirm show for reveal:", defaultShow||"");
+    if (!show) return;
+    const r = await apiPost(`/api/secret-signings/${id}/reveal`, { show_name:show });
+    if (r.success) { flash(r.message||"Signing revealed!"); loadSecretSigningsTab(); } else flash("Error: "+r.error,"danger");
+}
+async function engineerDebut() {
+    const r = await apiPost("/api/debut/engineer", {
+        wrestler_name:document.getElementById("debutName").value.trim()||"New Signing",
+        popularity:parseInt(document.getElementById("debutPop").value)||60,
+        show_type:document.getElementById("debutShow").value,
+        opponent_role:document.getElementById("debutOpp").value,
+        crowd_size:15000,
+        is_surprise:document.getElementById("debutSurprise").checked,
+        has_vignette_buildup:document.getElementById("debutVignette").checked,
+        planned_result:"win",
+    });
+    const el = document.getElementById("debutResult");
+    if (!r.success) { el.innerHTML=`<div class="alert alert-danger">${r.error}</div>`; return; }
+    const d=r.debut_plan, qc={catastrophic:"danger",poor:"warning",average:"secondary",good:"info",great:"success",legendary:"dark"};
+    el.innerHTML=`<div class="alert alert-light d-flex flex-wrap gap-3 align-items-center mb-0">
+      <span class="badge bg-${qc[d.quality]||"secondary"} fs-6 px-3 py-2">${d.quality_label||d.quality}</span>
+      <span class="stat-pill">Score: ${d.debut_score}/100</span>
+      <span class="stat-pill"><i class="bi bi-star-fill text-warning me-1"></i>+${d.popularity_gain} popularity</span>
+      <span class="stat-pill"><i class="bi bi-calendar2-check text-info me-1"></i>${d.momentum_weeks} momentum weeks</span>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FORBIDDEN DOOR TAB
+// ═══════════════════════════════════════════════════════════════════════════
+async function loadForbiddenDoorTab() {
+    renderRivalPromoGrid();
+    const types = await apiGet("/api/forbidden-door/types");
+    const ftEl  = document.getElementById("fdTypesList");
+    const defaultTypes = [
+        {label:"Talent Loan",relationship_required:40,base_cost:0,desc:"Send your wrestler to their show"},
+        {label:"Talent Borrow",relationship_required:40,base_cost:5000,desc:"Bring their wrestler to your show"},
+        {label:"Dream Match",relationship_required:55,base_cost:10000,desc:"One-off match between promotions"},
+        {label:"Co-Promoted Event",relationship_required:70,base_cost:50000,desc:"Joint PPV/PLE together"},
+        {label:"Title Unification",relationship_required:80,base_cost:25000,desc:"Merge two titles in a match"},
+    ];
+    const typeList = (types.success&&types.types?.length)?types.types:defaultTypes;
+    ftEl.innerHTML = typeList.map(t => `
+      <div class="col-md-4 col-lg-2">
+        <div class="border rounded p-2 h-100" style="font-size:.8rem;background:#f8f9fa">
+          <strong>${t.label}</strong>
+          <div class="text-muted mt-1">${t.desc||""}</div>
+          <div class="text-muted mt-1">Relationship: ≥<strong>${t.relationship_required}</strong></div>
+          <div class="text-muted">Min cost: $${(t.base_cost||0).toLocaleString()}</div>
+        </div>
+      </div>`).join("");
+
+    const data = await apiGet("/api/forbidden-door/proposals");
+    const el   = document.getElementById("fdProposalsList");
+    if (!data.success||!data.proposals?.length) { el.innerHTML=`<h6 class="mb-2">Active Proposals</h6><div class="empty-state" style="padding:2rem"><i class="bi bi-door-closed"></i><p class="mb-0">No proposals yet.</p></div>`; return; }
+    el.innerHTML = `<h6 class="mb-3">Active Proposals</h6>`+data.proposals.map(p => `
+      <div class="fd-card">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+          <div><strong>${p.event_name||p.door_type_label}</strong>
+            <span class="badge bg-primary ms-2">${p.door_type_label||p.door_type}</span>
+            <span class="badge ${p.status==="agreed"?"bg-success":p.status==="cancelled"?"bg-danger":"bg-secondary"} ms-1">${p.status}</span>
+          </div>
+          <div class="text-end small"><div>vs <strong>${p.rival_promotion_name}</strong></div>
+            <div>Week ${p.event_week} · Net: $${Math.abs(p.net_cost||0).toLocaleString()} ${(p.net_cost||0)>0?"(we pay)":(p.net_cost||0)<0?"(we earn)":""}</div>
+          </div>
+        </div>
+        ${p.our_wrestlers?.length?`<div class="small mt-1 text-muted">Our talent: ${p.our_wrestlers.join(", ")}</div>`:""}
+        ${p.their_wrestlers?.length?`<div class="small text-muted">Their talent: ${p.their_wrestlers.join(", ")}</div>`:""}
+        ${p.status==="proposed"?`<div class="mt-2 d-flex gap-2">
+          <button class="btn btn-sm btn-success" onclick="agreeProposal('${p.proposal_id}')"><i class="bi bi-check-circle me-1"></i>Agree</button>
+          <button class="btn btn-sm btn-outline-danger" onclick="cancelProposal('${p.proposal_id}')"><i class="bi bi-x-circle me-1"></i>Cancel</button>
+        </div>`:""}
+      </div>`).join("");
+}
+function renderRivalPromoGrid() {
+    const grid = document.getElementById("rivalPromoGrid");
+    if (!_rivals.length) { grid.innerHTML='<div class="col-12 text-muted">Loading…</div>'; return; }
+    const tierOrder = {major:0,mid:1,international:2,independent:3};
+    const sorted = [..._rivals].sort((a,b) => (tierOrder[a.tier]??9)-(tierOrder[b.tier]??9));
+    grid.innerHTML = sorted.map(r => {
+        const rel   = r.relationship_with_player??r.relationship??50;
+        const rc    = rel>=70?"#28a745":rel>=40?"#e67e22":"#dc3545";
+        const roster = r.known_wrestlers||r.roster_members||r.wrestlers||[];
+        const tierLabel = {major:"Major",mid:"Mid-Size",international:"International",independent:"Independent"}[r.tier]||r.tier;
+        const tierColor = {major:"bg-danger",mid:"bg-warning text-dark",international:"bg-primary",independent:"bg-secondary"}[r.tier]||"bg-secondary";
+        return `<div class="col-md-4 col-lg-3 col-xl-2">
+          <div class="rival-promo-card tier-${r.tier}">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div><strong style="font-size:.88rem">${r.name}</strong>
+                ${r.abbreviation?`<span class="text-muted" style="font-size:.75rem"> (${r.abbreviation})</span>`:""}
+              </div>
+              <span class="badge ${tierColor}" style="font-size:.65rem">${tierLabel}</span>
+            </div>
+            <div class="small text-muted mb-1">${r.brand_identity||""}</div>
+            <div class="small mb-1">Relationship: <strong style="color:${rc}">${rel}/100</strong>
+              <div class="rel-bar"><div class="rel-fill" style="width:${rel}%;background:${rc}"></div></div>
+            </div>
+            <div class="d-flex justify-content-between small text-muted mb-2">
+              <span>Prestige: ${r.prestige||r.prestige_score||"?"}%</span>
+              <span>Roster: ${r.roster_size||r.total_roster_size||"?"}</span>
+            </div>
+            ${roster.length
+              ? `<div><div style="font-size:.72rem;color:#6c757d;margin-bottom:.2rem">Known wrestlers:</div>
+                  ${roster.slice(0,6).map(w=>`<span class="rival-roster-chip">${w.name||w}</span>`).join("")}
+                  ${roster.length>6?`<span class="rival-roster-chip text-muted">+${roster.length-6}</span>`:""}</div>`
+              : `<div class="small text-muted fst-italic">No individual wrestler data</div>`}
+          </div>
+        </div>`;
+    }).join("");
+}
+function onFDRivalChange() {
+    const sel=document.getElementById("fdRivalSelect"), promoId=sel?.value;
+    const promo = _rivals.find(r => r.promotion_id===promoId);
+    const infoEl=document.getElementById("fdRivalInfo"), theirEl=document.getElementById("theirWrestlerContainer");
+    if (!promo) { infoEl.innerHTML=""; theirEl.innerHTML='<div class="text-muted small p-3 border rounded bg-light">← Select a rival promotion first</div>'; return; }
+    const rel=(promo.relationship_with_player??promo.relationship??50), rc=rel>=70?"success":rel>=40?"warning":"danger";
+    infoEl.innerHTML=`<div class="alert alert-${rc} py-2 small mb-0">Relationship: <strong>${rel}/100</strong> · Prestige: ${promo.prestige||promo.prestige_score||"?"}% · Roster: ${promo.roster_size||promo.total_roster_size||"?"}</div>`;
+    const wrestlers = promo.known_wrestlers||promo.roster_members||promo.wrestlers||[];
+    if (!wrestlers.length) { theirEl.innerHTML='<div class="text-muted small p-3 border rounded bg-light">No individual wrestler records for this promotion yet.</div>'; return; }
+    theirEl.innerHTML=`<select id="fdTheirWrestlersSelect" class="form-select wrestler-multiselect" multiple>
+      ${wrestlers.map(w=>`<option value="${w.name||w}">${w.name||w}${w.role?" ("+w.role+")":""}</option>`).join("")}
+    </select>
+    <div class="select-hint"><i class="bi bi-info-circle me-1"></i>Hold <kbd>Ctrl</kbd> to select multiple wrestlers</div>`;
+}
+function updateFDTypeInfo() {
+    const info={
+        talent_loan:"You send one of your wrestlers to perform for them. Builds relationship but you lose them temporarily.",
+        talent_borrow:"One of their wrestlers appears on your show. Great for a surprise pop or cross-promo feud.",
+        dream_match:"A marquee one-off match between promotions. High fan interest — requires a decent relationship.",
+        co_promoted_event:"You co-host a major show together. Expensive but massive revenue and buzz.",
+        title_unification:"One match unifies two titles from different promotions. Requires a very strong relationship.",
+    };
+    const el=document.getElementById("fdTypeInfo");
+    if (el) el.textContent=info[document.getElementById("fdType")?.value]||"";
+}
+async function submitFDProposal() {
+    const rivSel=document.getElementById("fdRivalSelect"), ourSel=document.getElementById("fdOurWrestlersSelect"), theirSel=document.getElementById("fdTheirWrestlersSelect");
+    if (!rivSel?.value) { flash("Please select a rival promotion","warning"); return; }
+    const ourW  =ourSel  ?Array.from(ourSel.selectedOptions).map(o=>o.value):[];
+    const theirW=theirSel?Array.from(theirSel.selectedOptions).map(o=>o.value):[];
+    const r = await apiPost("/api/forbidden-door/propose", {
+        door_type:document.getElementById("fdType").value,
+        rival_promotion_id:rivSel.value,
+        our_wrestlers:ourW, their_wrestlers:theirW,
+        our_payment:parseInt(document.getElementById("fdOurPay").value)||0,
+        their_payment:parseInt(document.getElementById("fdTheirPay").value)||0,
+        revenue_split_pct:parseInt(document.getElementById("fdRevSplit").value)||50,
+        event_name:document.getElementById("fdEvent").value.trim(),
+        event_year:parseInt(document.getElementById("fdYear").value)||1,
+        event_week:parseInt(document.getElementById("fdWeek").value)||1,
+    });
+    if (r.success) { flash(r.message||"Proposal sent!"); bootstrap.Modal.getInstance(document.getElementById("modalFDPropose"))?.hide(); loadForbiddenDoorTab(); }
+    else flash(`Error: ${r.error}${r.required_relationship?" (need "+r.required_relationship+"/100)":""}`, "danger");
+}
+async function agreeProposal(id) {
+    const r=await apiPost(`/api/forbidden-door/${id}/agree`, {});
+    if (r.success) { flash(r.message||"Agreed!"); loadForbiddenDoorTab(); } else flash("Error: "+r.error,"danger");
+}
+async function cancelProposal(id) {
+    if (!confirm("Cancel this proposal? May hurt your relationship.")) return;
+    const r=await apiPost(`/api/forbidden-door/${id}/cancel`, {});
+    if (r.success) { flash(r.message,"warning"); loadForbiddenDoorTab(); } else flash("Error: "+r.error,"danger");
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TAMPERING TAB
+// ═══════════════════════════════════════════════════════════════════════════
+async function loadTamperingTab() {
+    const el=document.getElementById("tamperingList"); el.innerHTML='<p class="text-muted">Loading…</p>';
+    const data=await apiGet("/api/tampering/incidents");
+    if (!data.success||!data.incidents?.length) { el.innerHTML='<div class="empty-state"><i class="bi bi-shield-check"></i><p>No detected tampering.</p></div>'; return; }
+    el.innerHTML=data.incidents.map(i => `
+      <div class="tampering-card">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+          <div><strong>${i.wrestler_name}</strong>
+            <span class="badge bg-warning text-dark ms-2">${i.intensity_label||i.intensity}</span>
+            <span class="badge bg-secondary ms-1">by ${i.promotion_name}</span>
+            <div class="small text-danger mt-1">Loyalty erosion: <strong>−${i.loyalty_erosion_per_week} loyalty/week</strong> until countered</div>
+          </div>
+        </div>
+        ${i.counter_measure_applied
+          ?`<div class="small text-success mt-2"><i class="bi bi-shield-check me-1"></i>Counter: <strong>${i.counter_measure_applied}</strong></div>`
+          :`<div class="mt-2">
+              <div class="small text-muted mb-2 fw-semibold">Choose a counter-measure:</div>
+              <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-sm btn-outline-success" onclick="applyCounter('${i.wrestler_id}','loyalty_bonus')">💰 Pay Loyalty Bonus</button>
+                <button class="btn btn-sm btn-outline-primary" onclick="applyCounter('${i.wrestler_id}','meeting')">🤝 Personal Meeting</button>
+                <button class="btn btn-sm btn-outline-warning" onclick="applyCounter('${i.wrestler_id}','media_statement')">📢 Media Statement</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="applyCounter('${i.wrestler_id}','legal_threat')">⚖️ Legal Warning</button>
+              </div>
+           </div>`}
+      </div>`).join("");
+}
+async function submitReportTampering() {
+    const wSel=document.getElementById("tampWrestlerSelect"), pSel=document.getElementById("tampPromoSelect");
+    if (!wSel?.value||!pSel?.value) { flash("Please select both a wrestler and promotion","warning"); return; }
+    const wname=wSel.options[wSel.selectedIndex]?.dataset?.name||wSel.options[wSel.selectedIndex]?.textContent?.split(" (")[0]||"";
+    const pname=pSel.options[pSel.selectedIndex]?.textContent?.split(" (")[0]||"";
+    const r=await apiPost("/api/tampering/report", { wrestler_id:wSel.value, wrestler_name:wname, promotion_id:pSel.value, promotion_name:pname, intensity:document.getElementById("tampIntensity").value });
+    if (r.success) { flash(r.warning||"Incident logged","warning"); bootstrap.Modal.getInstance(document.getElementById("modalReportTampering"))?.hide(); loadTamperingTab(); }
+    else flash("Error: "+r.error,"danger");
+}
+async function applyCounter(wid, measure) {
+    const r=await apiPost(`/api/tampering/${wid}/counter`, { measure, loyalty_score:50 });
+    if (r.success) { flash(r.effect?.message||"Counter applied!"); loadTamperingTab(); } else flash("Error: "+r.error,"danger");
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════
+loadGlobalData();
+loadHeaderStats();
+loadControversyTab();
+</script>
+</body>
+</html>

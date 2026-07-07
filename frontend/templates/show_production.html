@@ -1,0 +1,1508 @@
+<!-- Show Production Dashboard - Steps 58-72 -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="bi bi-camera-video"></i> Show Production</h2>
+        <p class="lead">Manage show structure, themes, pacing, dark matches, and special events.</p>
+        <hr>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-dark text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="productionThemeCount">-</h3>
+                <small>Show Themes</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="productionSegmentCount">-</h3>
+                <small>Segment Types</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="productionPPVCount">-</h3>
+                <small>Upcoming PPVs</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="productionSupercardCount">-</h3>
+                <small>Supercard Templates</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-tv"></i> Weekly TV Footprint</h5>
+            </div>
+            <div class="card-body" id="weeklyFootprintBoard">
+                <p class="text-muted mb-0">Loading weekly schedule...</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-stars"></i> Upcoming PPVs</h5>
+            </div>
+            <div class="card-body" id="upcomingPpvBoard">
+                <p class="text-muted mb-0">Loading PPVs...</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-trophy"></i> Supercard Requirements</h5>
+            </div>
+            <div class="card-body" id="supercardBoard">
+                <p class="text-muted mb-0">Loading supercard rules...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Current Show Production Plan -->
+<div class="row mb-4" id="productionPlanSection">
+    <div class="col-md-12">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-clipboard2-pulse"></i> Production Plan — Next Show</h5>
+                <button class="btn btn-sm btn-light" onclick="loadProductionPlan()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+            </div>
+            <div class="card-body" id="productionPlanBody">
+                <p class="text-muted">Loading production plan...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs for each production feature -->
+<ul class="nav nav-tabs mb-3" id="productionTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-theme" data-bs-toggle="tab" data-bs-target="#pane-theme" type="button">
+            <i class="bi bi-palette"></i> Theme
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-pacing" data-bs-toggle="tab" data-bs-target="#pane-pacing" type="button">
+            <i class="bi bi-graph-up"></i> Pacing
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-dark" data-bs-toggle="tab" data-bs-target="#pane-dark" type="button">
+            <i class="bi bi-moon-stars"></i> Dark Matches
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-runing" data-bs-toggle="tab" data-bs-target="#pane-runing" type="button">
+            <i class="bi bi-lightning-charge"></i> Run-Ins
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-debut" data-bs-toggle="tab" data-bs-target="#pane-debut" type="button">
+            <i class="bi bi-person-plus"></i> Debuts
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-return" data-bs-toggle="tab" data-bs-target="#pane-return" type="button">
+            <i class="bi bi-person-check"></i> Returns
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-house" data-bs-toggle="tab" data-bs-target="#pane-house" type="button">
+            <i class="bi bi-house"></i> House Shows
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-segments" data-bs-toggle="tab" data-bs-target="#pane-segments" type="button">
+            <i class="bi bi-collection-play"></i> Segment Types
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="productionTabContent">
+
+    <!-- ================================================================ -->
+    <!-- THEME TAB (Step 72) -->
+    <!-- ================================================================ -->
+    <div class="tab-pane fade show active" id="pane-theme" role="tabpanel">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h6 class="mb-0"><i class="bi bi-palette"></i> Choose Show Theme</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">Themes shape attendance, revenue, and segment requirements.</p>
+                        <div class="mb-3">
+                            <label class="form-label">Select Theme</label>
+                            <select class="form-select" id="themeSelect" onchange="previewTheme()">
+                                <option value="standard">Standard Show</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary w-100" onclick="applyTheme()">
+                            <i class="bi bi-check-circle"></i> Apply Theme
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div id="themePreviewCard" class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h6 class="mb-0" id="themePreviewTitle">Theme Preview</h6>
+                    </div>
+                    <div class="card-body" id="themePreviewBody">
+                        <p class="text-muted">Select a theme to preview its effects.</p>
+                    </div>
+                </div>
+                <div class="row mt-3" id="allThemesGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- PACING TAB (Steps 63/64) -->
+    <!-- ================================================================ -->
+    <div class="tab-pane fade" id="pane-pacing" role="tabpanel">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="bi bi-graph-up"></i> Show Pacing Analyzer (Step 63)</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">
+                            Pacing manages the crowd energy flow. Good pacing builds to the main event.
+                            Poor pacing leaves crowds bored mid-show or exhausted before the main event.
+                        </p>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Show Type</label>
+                                <select class="form-select" id="pacingShowType">
+                                    <option value="weekly_tv">Weekly TV</option>
+                                    <option value="minor_ppv">Minor PPV</option>
+                                    <option value="major_ppv">Major PPV</option>
+                                    <option value="supercard">Supercard</option>
+                                    <option value="house_show">House Show</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Brand</label>
+                                <select class="form-select" id="pacingBrand">
+                                    <option value="ROC Alpha">ROC Alpha (Mon, 8PM, 120 min)</option>
+                                    <option value="ROC Velocity">ROC Velocity (Fri, 9PM, 120 min)</option>
+                                    <option value="ROC Vanguard">ROC Vanguard (Sat, 7PM, 90 min)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button class="btn btn-info w-100" onclick="analyzePacingDemo()">
+                                    <i class="bi bi-play-fill"></i> Analyze Sample Card
+                                </button>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row g-2">
+                            <div class="col-md-2"><button class="btn btn-outline-primary w-100" onclick="createPacingSession()">Start Session</button></div>
+                            <div class="col-md-3"><input id="paceItemName" class="form-control" placeholder="Segment name"></div>
+                            <div class="col-md-2"><input id="paceItemType" class="form-control" placeholder="match/segment/tag/brawl/debut"></div>
+                            <div class="col-md-2"><input id="paceItemDuration" class="form-control" type="number" value="8"></div>
+                            <div class="col-md-1"><input id="paceItemRating" class="form-control" type="number" step="0.1" value="3.0"></div>
+                            <div class="col-md-2"><button class="btn btn-outline-success w-100" onclick="addPacingItem()">Add To Session</button></div>
+                        </div>
+                        <small class="text-muted d-block mt-2">Active pacing session: <span id="activePacingSession">none</span></small>
+                    </div>
+                </div>
+                <div id="pacingResultSection" style="display:none;">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <div class="card text-center border-success">
+                                <div class="card-body">
+                                    <h3 id="pacingGrade" class="text-success">—</h3>
+                                    <small class="text-muted">Pacing Grade</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h3 id="pacingFinalEnergy">—</h3>
+                                    <small class="text-muted">Final Crowd Energy</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h3 id="pacingRuntime">—</h3>
+                                    <small class="text-muted">Elapsed / Available</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h3 id="pacingBreaks">—</h3>
+                                    <small class="text-muted">Commercial Breaks</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Energy chart -->
+                    <div class="card">
+                        <div class="card-header"><h6 class="mb-0">Crowd Energy Flow</h6></div>
+                        <div class="card-body">
+                            <div id="pacingChartContainer" style="height:200px; position:relative;">
+                                <canvas id="pacingChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-header"><h6 class="mb-0">Slot-by-Slot Breakdown</h6></div>
+                        <div class="card-body p-0">
+                            <table class="table table-sm mb-0" id="pacingTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Item</th>
+                                        <th>Type</th>
+                                        <th>Duration</th>
+                                        <th>Energy Before</th>
+                                        <th>Energy After</th>
+                                        <th>Rating</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pacingTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- DARK MATCHES TAB (Step 71) -->
+    <!-- ================================================================ -->
+    <div class="tab-pane fade" id="pane-dark" role="tabpanel">
+        <div class="row">
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h6 class="mb-0"><i class="bi bi-moon-stars"></i> Book Dark Matches (Step 71)</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">
+                            Dark matches are untelevised pre/post-show bouts for live crowd satisfaction and talent development.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label">Brand</label>
+                            <select class="form-select" id="darkMatchBrand" onchange="onDarkMatchBrandChange()">
+                                <option value="ROC Alpha">ROC Alpha</option>
+                                <option value="ROC Velocity">ROC Velocity</option>
+                                <option value="ROC Vanguard">ROC Vanguard</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Number of Dark Matches</label>
+                            <select class="form-select" id="darkMatchCount">
+                                <option value="1">1 (Pre-show only)</option>
+                                <option value="2">2 (Pre + Post-show)</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-dark w-100" onclick="generateDarkMatches()">
+                            <i class="bi bi-moon-stars-fill"></i> Generate Dark Matches
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <!-- Tabs: Generated (new) | Pre-Show (saved) | Post-Show (saved) -->
+                <ul class="nav nav-tabs nav-sm mb-2" id="dmTabs">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#dm-new">
+                            ➕ Generated
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#dm-pre"
+                                onclick="loadSavedDarkMatches()">
+                            🌙 Pre-Show
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#dm-post"
+                                onclick="loadSavedDarkMatches()">
+                            🌑 Post-Show
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="dm-new">
+                        <div id="darkMatchResults">
+                            <div class="alert alert-secondary mb-0">Generate dark matches to see booked wrestlers.</div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="dm-pre">
+                        <div id="dmPreShowList">
+                            <p class="text-muted small">Click the Pre-Show tab to load saved matches.</p>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="dm-post">
+                        <div id="dmPostShowList">
+                            <p class="text-muted small">Click the Post-Show tab to load saved matches.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- RUN-INS TAB (Step 65) -->
+    <!-- ================================================================ -->
+    <div class="tab-pane fade" id="pane-runing" role="tabpanel">
+        <div class="row">
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h6 class="mb-0"><i class="bi bi-lightning-charge"></i> Plan Run-In (Step 65)</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">
+                            Run-ins add drama but lose impact with overuse. Max allowed per show type is enforced.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label">Brand</label>
+                            <select class="form-select" id="runInBrand">
+                                <option value="ROC Alpha">ROC Alpha</option>
+                                <option value="ROC Velocity">ROC Velocity</option>
+                                <option value="ROC Vanguard">ROC Vanguard</option>
+                                <option value="Cross-Brand">Cross-Brand (PPV)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Target Match ID</label>
+                            <input type="text" class="form-control" id="runInMatchId" value="main_event" placeholder="match_1">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Show Type</label>
+                            <select class="form-select" id="runInShowType">
+                                <option value="weekly_tv">Weekly TV</option>
+                                <option value="minor_ppv">Minor PPV</option>
+                                <option value="major_ppv">Major PPV</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-danger w-100" onclick="generateRunIn()">
+                            <i class="bi bi-lightning-fill"></i> Generate Run-In Angle
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div id="runInResults">
+                    <div class="alert alert-secondary">Generate a run-in to see the planned angle.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- DEBUTS TAB (Step 66) -->
+    <!-- ================================================================ -->
+    <div class="tab-pane fade" id="pane-debut" role="tabpanel">
+        <div class="row">
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="bi bi-person-plus"></i> Plan Surprise Debut (Step 66)</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">
+                            Debut free agents with maximum impact. Timing and context determine crowd reaction.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label">Debut Candidate</label>
+                            <select class="form-select" id="debutWrestlerSelect">
+                                <option value="">Loading candidates...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Show Type</label>
+                            <select class="form-select" id="debutShowType">
+                                <option value="weekly_tv">Weekly TV</option>
+                                <option value="minor_ppv">Minor PPV</option>
+                                <option value="major_ppv">Major PPV</option>
+                                <option value="supercard">Supercard</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-success w-100" onclick="planDebut()">
+                            <i class="bi bi-stars"></i> Plan Debut Angle
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div id="debutResults">
+                    <div class="alert alert-secondary">Plan a debut to see the suggested angle.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- RETURNS TAB (Step 67) -->
+    <!-- ================================================================ -->
+    <div class="tab-pane fade" id="pane-return" role="tabpanel">
+        <div class="row">
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0"><i class="bi bi-person-check"></i> Plan Return (Step 67)</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">
+                            Cold returns surprise the crowd. Announced comebacks let the crowd prepare. Both have value.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label">Returning Wrestler</label>
+                            <select class="form-select" id="returnWrestlerSelect">
+                                <option value="">Loading candidates...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Weeks of Absence</label>
+                            <input type="number" class="form-control" id="returnAbsenceWeeks" value="8" min="1" max="52">
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="returnIsSurprise" checked>
+                            <label class="form-check-label" for="returnIsSurprise">Surprise Return (unannounced)</label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Show Type</label>
+                            <select class="form-select" id="returnShowType">
+                                <option value="weekly_tv">Weekly TV</option>
+                                <option value="minor_ppv">Minor PPV</option>
+                                <option value="major_ppv">Major PPV</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-warning w-100" onclick="planReturn()">
+                            <i class="bi bi-arrow-return-left"></i> Plan Return Angle
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div id="returnResults">
+                    <div class="alert alert-secondary">Plan a return to see the suggested angle.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- HOUSE SHOWS TAB (Step 60) -->
+    <!-- ================================================================ -->
+    <div class="tab-pane fade" id="pane-house" role="tabpanel">
+        <div class="row">
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h6 class="mb-0"><i class="bi bi-house"></i> Plan House Show Tour (Step 60)</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">
+                            Non-televised tours generate additional revenue with lower production costs.
+                            No title changes, no major angles.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label">Brand</label>
+                            <select class="form-select" id="houseShowBrand" onchange="loadHouseShowCities()">
+                                <option value="ROC Alpha">ROC Alpha</option>
+                                <option value="ROC Velocity">ROC Velocity</option>
+                                <option value="ROC Vanguard">ROC Vanguard</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tour Duration (weeks)</label>
+                            <select class="form-select" id="houseShowDuration">
+                                <option value="2">2 weeks</option>
+                                <option value="4" selected>4 weeks (standard)</option>
+                                <option value="6">6 weeks</option>
+                                <option value="8">8 weeks</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Cities (hold Ctrl/Cmd to multi-select)</label>
+                            <select class="form-select" id="houseShowCities" multiple size="5" style="font-size:0.85rem;">
+                                <option value="">Loading cities...</option>
+                            </select>
+                            <small class="text-muted">Leave all unselected to use brand defaults.</small>
+                        </div>
+                        <button class="btn btn-secondary w-100" onclick="planHouseShowTour()">
+                            <i class="bi bi-map"></i> Plan Tour
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div id="houseShowResults">
+                    <div class="alert alert-secondary">Plan a house show tour to see projected revenue and venues.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- SEGMENT TYPES TAB (Step 62) -->
+    <!-- ================================================================ -->
+    <div class="tab-pane fade" id="pane-segments" role="tabpanel">
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="bi bi-collection-play"></i> Segment Type Catalogue (Step 62)</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="segmentTypeFilter" onchange="filterSegmentTypes()">
+                                    <option value="all">All Segment Types</option>
+                                    <option value="opening">Opening Segments Only</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row" id="segmentTypesGrid">
+                            <p class="text-muted">Loading segment types...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- JavaScript -->
+<!-- ============================================================ -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card border-secondary">
+            <div class="card-header bg-secondary text-white"><h6 class="mb-0">Advanced Creative Systems (Persistent)</h6></div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <input id="customPpvName" class="form-control mb-2" placeholder="PPV Name">
+                        <input id="customPpvLocation" class="form-control mb-2" placeholder="Location">
+                        <input id="customPpvYear" type="number" class="form-control mb-2" placeholder="Year">
+                        <input id="customPpvWeek" type="number" class="form-control mb-2" placeholder="Week 1-52">
+                        <input id="customPpvDate" type="date" class="form-control mb-2">
+                        <select id="customPpvTier" class="form-select mb-2"><option value="minor">Minor PPV</option><option value="major">Major PPV</option></select>
+                        <button class="btn btn-secondary w-100" onclick="createCustomPPV()">Create Custom PPV</button>
+                    </div>
+                    <div class="col-md-4">
+                        <input id="cinematicTitle" class="form-control mb-2" placeholder="Cinematic Match Title">
+                        <input id="cinematicLocation" class="form-control mb-2" placeholder="Filming Location">
+                        <input id="cinematicScores" class="form-control mb-2" placeholder="Script,Production,Acting,Originality">
+                        <button class="btn btn-dark w-100" onclick="bookAdvancedFeature('cinematic_match')">Save Cinematic Match</button>
+                    </div>
+                    <div class="col-md-4">
+                        <input id="swerveTitle" class="form-control mb-2" placeholder="Swerve Title">
+                        <input id="swerveScores" class="form-control mb-2" placeholder="Surprise,Logic,Follow-through">
+                        <button class="btn btn-danger w-100 mb-2" onclick="bookAdvancedFeature('twist_swerve')">Save Swerve</button>
+                        <input id="arcName" class="form-control mb-2" placeholder="Long-Term Arc Name">
+                        <input id="arcEnd" class="form-control mb-2" placeholder="EndYear,EndWeek">
+                        <button class="btn btn-primary w-100" onclick="bookAdvancedFeature('long_term_arc')">Save Long-Term Arc</button>
+                        <input id="mainEventTitle" class="form-control mt-2 mb-2" placeholder="Main Event Match Title">
+                        <input id="mainEventScores" class="form-control mb-2" placeholder="Quality,Draw,Placement">
+                        <button class="btn btn-success w-100 mb-2" onclick="bookAdvancedFeature('main_event_selection')">Save Main Event Grade</button>
+                        <input id="debutSecrecyWrestlerId" class="form-control mb-2" placeholder="Debut Wrestler ID">
+                        <input id="debutSecrecyMeta" class="form-control mb-2" placeholder="SigningYear,SigningWeek,Leaked(0/1)">
+                        <button class="btn btn-warning w-100" onclick="bookAdvancedFeature('surprise_debut')">Save Surprise Debut Secrecy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── Helpers ──────────────────────────────────────────────────────────
+function badge(text, color='secondary') {
+    return `<span class="badge bg-${color} me-1">${text}</span>`;
+}
+function asArray(val) {
+    return Array.isArray(val) ? val : [];
+}
+function safeReplace(val) {
+    return val ? String(val).replace(/_/g,' ') : '—';
+}
+
+// ── Production Plan ───────────────────────────────────────────────────
+async function loadProductionPlan() {
+    const body = document.getElementById('productionPlanBody');
+    body.innerHTML = '<p class="text-muted">Loading...</p>';
+    try {
+        const r = await fetch('/api/show-production/plan');
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error);
+        const p = d.production_plan;
+
+        const themeColor = p.theme === 'standard' ? 'secondary' : 'primary';
+        const overrun = p.total_runtime_minutes < 200 ? '' :
+            `<span class="badge bg-warning ms-2">SUPERCARD ${p.total_runtime_minutes} min</span>`;
+
+        const darkNote = p.dark_matches && p.dark_matches.length
+            ? `<div class="alert alert-dark mt-2 mb-0">
+                <strong>🌙 Dark Matches:</strong>
+                ${p.dark_matches.map(d => (d.side_a[0]||'?') + ' vs ' + (d.side_b[0]||'?')).join(', ')}
+               </div>` : '';
+
+        const runInNote = p.run_in_planned
+            ? `<div class="alert alert-warning mt-3 mb-0">
+                <strong>⚡ Run-In Planned:</strong> ${p.run_in_planned.interferer_name}
+                will interfere in ${p.run_in_planned.target_match_id}
+                (${safeReplace(p.run_in_planned.effect)})
+               </div>` : '';
+
+        body.innerHTML = `
+        <div class="row">
+            <div class="col-md-2 text-center">
+                <h4>${p.show_name}</h4>
+                <span class="badge bg-${p.is_ppv ? 'danger' : 'primary'}">${safeReplace(p.show_type).toUpperCase()}</span>
+                ${overrun}
+            </div>
+            <div class="col-md-2">
+                <small class="text-muted d-block">Brand</small><strong>${p.brand}</strong><br>
+                <small class="text-muted d-block mt-1">Week / Year</small><strong>Week ${p.week}, Year ${p.year}</strong>
+            </div>
+            <div class="col-md-2">
+                <small class="text-muted d-block">Runtime</small><strong>${p.total_runtime_minutes} min</strong><br>
+                <small class="text-muted d-block mt-1">Target Matches</small>
+                <strong>${p.min_matches}–${p.max_matches} (ideal: ${p.target_matches})</strong>
+            </div>
+            <div class="col-md-3">
+                <small class="text-muted d-block">Theme</small>
+                <span class="badge bg-${themeColor}">${p.theme_display_name}</span>
+                <p class="small mt-1 mb-0">${p.theme_description}</p>
+                ${p.theme_bonus_attendance_pct > 0 ? `<small class="text-success">+${(p.theme_bonus_attendance_pct*100).toFixed(0)}% attendance</small>` : ''}
+                ${p.theme_bonus_match_quality  > 0 ? `<small class="text-success d-block">+${p.theme_bonus_match_quality.toFixed(1)}⭐ match quality</small>` : ''}
+            </div>
+            <div class="col-md-3">
+                <small class="text-muted d-block">Opening Segment</small>
+                <strong>${safeReplace(p.opening_segment_type)}</strong>
+                <p class="small mb-0 text-muted">${p.opening_segment_reason || ''}</p>
+                <small class="text-muted d-block mt-1">Commercial Breaks</small>
+                <strong>${p.commercial_breaks_count} breaks (${safeReplace(p.commercial_break_strategy)})</strong>
+            </div>
+        </div>
+        ${runInNote}
+        ${darkNote}
+        ${p.ppv_buildup_score > 0 ? `
+        <div class="mt-2">
+            <small class="text-muted">PPV Buildup Score: </small>
+            <div class="progress" style="height:8px;">
+                <div class="progress-bar bg-${p.ppv_buildup_score >= 70 ? 'success' : p.ppv_buildup_score >= 40 ? 'warning' : 'danger'}"
+                     style="width:${p.ppv_buildup_score}%"></div>
+            </div>
+            <small class="text-muted">${p.ppv_buildup_score}/100</small>
+        </div>` : ''}`;
+
+        if (p.theme) {
+            const sel = document.getElementById('themeSelect');
+            if (sel) {
+                const opt = Array.from(sel.options).find(o => o.value === p.theme);
+                if (opt) opt.selected = true;
+                previewThemeValue(p.theme);
+            }
+        }
+    } catch(e) {
+        body.innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
+    }
+}
+
+// ── Themes ─────────────────────────────────────────────────────────────
+async function loadThemes() {
+    try {
+        const r = await fetch('/api/show-production/themes');
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error || 'Failed to load themes');
+
+        const sel  = document.getElementById('themeSelect');
+        const grid = document.getElementById('allThemesGrid');
+        sel.innerHTML = '';
+        grid.innerHTML = '';
+
+        d.themes.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.value; opt.textContent = t.display_name;
+            sel.appendChild(opt);
+
+            const col = document.createElement('div');
+            col.className = 'col-md-6 mb-2';
+            col.innerHTML = `
+            <div class="card card-body p-2 h-100" style="cursor:pointer;" onclick="previewThemeValue('${t.value}')">
+                <strong class="small">${t.display_name}</strong>
+                <p class="mb-1 small text-muted">${t.description}</p>
+                ${t.bonus_attendance_pct > 0 ? badge(`+${(t.bonus_attendance_pct*100).toFixed(0)}% attendance`,'success') : ''}
+                ${t.bonus_match_quality  > 0 ? badge(`+${t.bonus_match_quality.toFixed(1)}⭐`,'warning') : ''}
+                ${t.required_segments && t.required_segments.length > 0 ? badge('Requires: '+t.required_segments.join(', '),'info') : ''}
+            </div>`;
+            grid.appendChild(col);
+        });
+        if (sel.options.length) previewThemeValue(sel.value);
+    } catch(e) {
+        console.warn('Could not load themes', e);
+        document.getElementById('allThemesGrid').innerHTML =
+            `<div class="col-12"><div class="alert alert-danger mb-0">${e.message}</div></div>`;
+    }
+}
+
+function previewTheme() {
+    previewThemeValue(document.getElementById('themeSelect').value);
+}
+
+async function previewThemeValue(themeValue) {
+    try {
+        const r = await fetch('/api/show-production/themes');
+        const d = await r.json();
+        const theme = d.themes.find(t => t.value === themeValue);
+        if (!theme) return;
+        document.getElementById('themePreviewTitle').textContent = `Preview: ${theme.display_name}`;
+        document.getElementById('themePreviewBody').innerHTML = `
+        <p>${theme.description}</p>
+        <div class="row text-center">
+            <div class="col">
+                <h5 class="text-success">${theme.bonus_attendance_pct > 0 ? '+' + (theme.bonus_attendance_pct*100).toFixed(0) + '%' : '—'}</h5>
+                <small class="text-muted">Attendance</small>
+            </div>
+            <div class="col">
+                <h5 class="text-warning">${theme.bonus_match_quality > 0 ? '+' + theme.bonus_match_quality.toFixed(1) + '⭐' : '—'}</h5>
+                <small class="text-muted">Match Quality</small>
+            </div>
+            <div class="col">
+                <h5 class="text-info">${theme.bonus_revenue_pct > 0 ? '+' + (theme.bonus_revenue_pct*100).toFixed(0) + '%' : '—'}</h5>
+                <small class="text-muted">Revenue</small>
+            </div>
+        </div>
+        ${theme.required_segments && theme.required_segments.length > 0 ? `<div class="mt-2"><strong>Required Segments:</strong> ${theme.required_segments.join(', ')}</div>` : ''}
+        ${theme.preferred_stipulations && theme.preferred_stipulations.length > 0 ? `<div class="mt-1"><strong>Preferred Stipulations:</strong> ${theme.preferred_stipulations.join(', ')}</div>` : ''}`;
+    } catch(e) {}
+}
+
+async function applyTheme() {
+    const theme = document.getElementById('themeSelect').value;
+    try {
+        const r = await fetch('/api/show-production/themes/apply', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({theme})
+        });
+        const d = await r.json();
+        if (d.success) { showToast(`Theme "${theme}" applied!`, 'success'); loadProductionPlan(); }
+        else           { showToast(`Error: ${d.error}`, 'danger'); }
+    } catch(e) { showToast(e.message, 'danger'); }
+}
+
+// ── Pacing ─────────────────────────────────────────────────────────────
+async function analyzePacingDemo() {
+    const showType = document.getElementById('pacingShowType').value;
+    const brand    = document.getElementById('pacingBrand').value;
+    const sampleItems = {
+        weekly_tv: [
+            {type:'segment', name:'Opening Promo',        duration:5,  segment_type:'promo'},
+            {type:'match',   name:'Opener',               duration:8,  star_rating:2.5},
+            {type:'segment', name:'Backstage Interview',  duration:2,  segment_type:'backstage_interview'},
+            {type:'match',   name:'Mid-show Match',       duration:12, star_rating:3.0},
+            {type:'segment', name:'Contract Signing',     duration:7,  segment_type:'contract_signing'},
+            {type:'match',   name:'Main Event',           duration:20, star_rating:3.8},
+        ],
+        minor_ppv: [
+            {type:'segment', name:'Video Package',        duration:3,  segment_type:'vignette'},
+            {type:'match',   name:'Opener',               duration:10, star_rating:3.0},
+            {type:'match',   name:'Match 2',              duration:12, star_rating:2.5},
+            {type:'segment', name:'Run-In Angle',         duration:4,  segment_type:'run_in'},
+            {type:'match',   name:'Title Match',          duration:18, star_rating:3.5},
+            {type:'match',   name:'Main Event',           duration:25, star_rating:4.0},
+        ],
+        major_ppv: [
+            {type:'segment', name:'Cold Open',            duration:3,  segment_type:'vignette'},
+            {type:'match',   name:'Opener',               duration:12, star_rating:3.5},
+            {type:'match',   name:'Match 2',              duration:15, star_rating:2.8},
+            {type:'match',   name:'Match 3',              duration:18, star_rating:3.2},
+            {type:'segment', name:'Championship Ceremony',duration:6,  segment_type:'title_presentation'},
+            {type:'match',   name:'Tag Title',            duration:20, star_rating:3.8},
+            {type:'match',   name:'Semi-Main',            duration:22, star_rating:4.0},
+            {type:'match',   name:'Main Event',           duration:30, star_rating:4.5},
+        ],
+    };
+    try {
+        const r = await fetch('/api/show-production/pacing/analyze', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({show_type: showType, brand, items: sampleItems[showType] || sampleItems.weekly_tv})
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error);
+        renderPacingReport(d.pacing_report);
+    } catch(e) { showToast(e.message, 'danger'); }
+}
+
+let activePacingSessionId = null;
+async function createPacingSession() {
+    const show_type = document.getElementById('pacingShowType').value;
+    const brand = document.getElementById('pacingBrand').value;
+    const r = await fetch('/api/show-production/pacing/session/create', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ show_type, brand, target_peaks: 3 })
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error || 'Failed to create session');
+    activePacingSessionId = d.session_id;
+    document.getElementById('activePacingSession').textContent = activePacingSessionId;
+    showToast('Pacing session created.', 'success');
+}
+
+async function addPacingItem() {
+    if (!activePacingSessionId) { showToast('Start a pacing session first.', 'warning'); return; }
+    const payload = {
+        item_name: document.getElementById('paceItemName').value || 'Unnamed Segment',
+        item_type: document.getElementById('paceItemType').value || 'segment',
+        duration_minutes: parseInt(document.getElementById('paceItemDuration').value || '8'),
+        star_rating: parseFloat(document.getElementById('paceItemRating').value || '3')
+    };
+    const r = await fetch(`/api/show-production/pacing/session/${activePacingSessionId}/add-item`, {
+        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error || 'Failed to add item');
+    renderPacingReport(d.pacing_report);
+    showToast(`Added. Energy ${d.energy_before} → ${d.energy_after}`, d.momentum_delta >= 0 ? 'success' : 'warning');
+}
+
+function renderPacingReport(report) {
+    const gradeColors = {
+        Excellent:'success',
+        Great:'primary',
+        Good:'info',
+        Average:'warning',
+        Poor:'danger',
+        Terrible:'dark',
+        Disastrous:'dark'
+    };
+    const breakPositions = asArray(report.commercial_break_positions);
+    const snapshots = asArray(report.snapshots);
+    const color = gradeColors[report.pacing_grade] || 'secondary';
+    document.getElementById('pacingGrade').textContent   = report.pacing_grade;
+    document.getElementById('pacingGrade').className     = `text-${color}`;
+    document.getElementById('pacingFinalEnergy').textContent = `${report.final_crowd_energy}/100`;
+    document.getElementById('pacingRuntime').textContent = `${report.elapsed_minutes}/${report.total_available_minutes} min`;
+    document.getElementById('pacingBreaks').textContent  = `${breakPositions.length} (${safeReplace(report.commercial_break_strategy)})`;
+
+    const tbody = document.getElementById('pacingTableBody');
+    tbody.innerHTML = snapshots.length ? snapshots.map(s => `
+        <tr>
+            <td>${s.position}</td>
+            <td>${s.item_name}</td>
+            <td><span class="badge bg-${s.item_type === 'match' ? 'primary' : 'info'}">${s.item_type}</span></td>
+            <td>${s.duration_minutes} min</td>
+            <td><div class="progress" style="height:6px;min-width:60px;">
+                    <div class="progress-bar bg-secondary" style="width:${s.crowd_energy_before}%"></div></div>
+                <small>${s.crowd_energy_before}</small></td>
+            <td><div class="progress" style="height:6px;min-width:60px;">
+                    <div class="progress-bar bg-${s.crowd_energy_after >= 60 ? 'success' : s.crowd_energy_after >= 40 ? 'warning' : 'danger'}"
+                         style="width:${s.crowd_energy_after}%"></div></div>
+                <small>${s.crowd_energy_after}</small></td>
+            <td>${s.star_rating > 0 ? '⭐'.repeat(Math.floor(s.star_rating)) + ' ' + s.star_rating.toFixed(1) : '—'}</td>
+        </tr>`).join('') : '<tr><td colspan="7" class="text-center text-muted">No pacing snapshots returned.</td></tr>';
+    document.getElementById('pacingResultSection').style.display = 'block';
+}
+
+// ── Dark Matches ─────────────────────────────────────────────────────────
+async function generateDarkMatches() {
+    const brand = document.getElementById('darkMatchBrand').value;
+    const count = parseInt(document.getElementById('darkMatchCount').value);
+    const res   = document.getElementById('darkMatchResults');
+    res.innerHTML = '<p class="text-muted">Generating...</p>';
+
+    try {
+        const r = await fetch('/api/show-production/dark-matches/generate', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({brand, count, save: true})
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error);
+
+        if (!d.dark_matches.length) {
+            res.innerHTML = '<div class="alert alert-warning">No eligible wrestlers for dark matches.</div>';
+            return;
+        }
+        res.innerHTML = d.dark_matches.map(dm => renderDarkMatchCard(dm)).join('');
+        // Automatically refresh the saved tabs
+        loadSavedDarkMatches();
+    } catch(e) {
+        res.innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
+    }
+}
+
+function renderDarkMatchCard(dm) {
+    const sideA = Array.isArray(dm.side_a) ? dm.side_a : [];
+    const sideB = Array.isArray(dm.side_b) ? dm.side_b : [];
+    const label = dm.match_type === 'pre_show' ? 'Pre-Show' : 'Post-Show';
+    return `
+    <div class="card mb-2">
+        <div class="card-header bg-dark text-white d-flex justify-content-between">
+            <strong>🌙 ${label} Dark Match</strong>
+            <span class="badge bg-secondary">${dm.duration_minutes} min | ${safeReplace(dm.purpose)}</span>
+        </div>
+        <div class="card-body py-2">
+            <strong>${sideA.join(' & ') || '?'}</strong>
+            <span class="text-muted mx-2">vs</span>
+            <strong>${sideB.join(' & ') || '?'}</strong>
+            <span class="badge bg-dark ms-2">NOT TELEVISED</span>
+        </div>
+    </div>`;
+}
+
+async function loadSavedDarkMatches() {
+    const brand = document.getElementById('darkMatchBrand').value;
+    const preEl  = document.getElementById('dmPreShowList');
+    const postEl = document.getElementById('dmPostShowList');
+    preEl.innerHTML  = '<p class="text-muted small">Loading...</p>';
+    postEl.innerHTML = '<p class="text-muted small">Loading...</p>';
+
+    try {
+        // Fetch by brand's current show
+        const r = await fetch(`/api/show-production/dark-matches/list?brand=${encodeURIComponent(brand)}`);
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error);
+
+        const pre  = (d.pre_show_matches  || []).filter(m => !m.brand || m.brand === brand);
+        const post = (d.post_show_matches || []).filter(m => !m.brand || m.brand === brand);
+
+        preEl.innerHTML  = pre.length  ? pre.map(renderDarkMatchCard).join('')
+            : '<div class="alert alert-secondary mb-0">No pre-show dark matches saved for this brand.</div>';
+        postEl.innerHTML = post.length ? post.map(renderDarkMatchCard).join('')
+            : '<div class="alert alert-secondary mb-0">No post-show dark matches saved for this brand.</div>';
+    } catch(e) {
+        preEl.innerHTML  = `<div class="alert alert-danger">${e.message}</div>`;
+        postEl.innerHTML = '';
+    }
+}
+
+// Reload saved matches when brand dropdown changes
+function onDarkMatchBrandChange() {
+    // Only reload if the saved tabs are visible (have been clicked at least once)
+    const prePane = document.getElementById('dm-pre');
+    if (prePane && prePane.classList.contains('active')) {
+        loadSavedDarkMatches();
+    }
+}
+
+// ── Run-Ins ──────────────────────────────────────────────────────────
+async function generateRunIn() {
+    const brand     = document.getElementById('runInBrand').value;
+    const match_id  = document.getElementById('runInMatchId').value;
+    const show_type = document.getElementById('runInShowType').value;
+    const res       = document.getElementById('runInResults');
+    res.innerHTML = '<p class="text-muted">Generating...</p>';
+
+    try {
+        const r = await fetch('/api/show-production/run-in/generate', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({brand, match_id, show_type})
+        });
+        const d = await r.json();
+        if (!d.success) {
+            res.innerHTML = `<div class="alert alert-warning">${d.message || d.error}</div>`;
+            return;
+        }
+        const ri = d.run_in;
+        res.innerHTML = `
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white"><strong>⚡ Run-In Planned</strong></div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Interferer:</strong> ${ri.interferer_name}<br>
+                        <strong>Target Match:</strong> ${ri.target_match_id}<br>
+                        <strong>Victim:</strong> ${ri.target_wrestler_name}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Reason:</strong> ${safeReplace(ri.reason)}<br>
+                        <strong>Effect:</strong> ${safeReplace(ri.effect)}<br>
+                        <strong>Feud Intensity Boost:</strong> +${ri.feud_intensity_boost}
+                    </div>
+                </div>
+                ${ri.creates_new_feud ? '<div class="alert alert-warning mt-2 mb-0">🔥 Creates a NEW FEUD!</div>' : ''}
+            </div>
+        </div>`;
+    } catch(e) {
+        res.innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
+    }
+}
+
+// ── Debuts ──────────────────────────────────────────────────────────
+async function loadDebutCandidates() {
+    try {
+        const r = await fetch('/api/show-production/debut/candidates');
+        const d = await r.json();
+        const sel = document.getElementById('debutWrestlerSelect');
+        if (!d.success || !d.debut_candidates.length) {
+            sel.innerHTML = '<option value="">No debut candidates available</option>';
+            return;
+        }
+        sel.innerHTML = d.debut_candidates.map(c =>
+            `<option value="${c.id}">${c.name} (${c.role})</option>`
+        ).join('');
+    } catch(e) {}
+}
+
+async function planDebut() {
+    const wrestler_id = document.getElementById('debutWrestlerSelect').value;
+    const show_type   = document.getElementById('debutShowType').value;
+    if (!wrestler_id) return;
+    const res = document.getElementById('debutResults');
+    res.innerHTML = '<p class="text-muted">Planning...</p>';
+
+    try {
+        const r = await fetch('/api/show-production/debut/plan', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({wrestler_id, show_type})
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error);
+        const angle = d.debut_angle;
+        const reactionBadge = {massive_pop:'success', heat:'danger', mixed:'warning'}[angle.crowd_reaction] || 'secondary';
+        res.innerHTML = `
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <strong>⭐ Debut Angle: ${angle.wrestler_name}</strong>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Debut Type:</strong> ${safeReplace(angle.debut_type)}<br>
+                        <strong>Crowd Reaction:</strong> <span class="badge bg-${reactionBadge}">${safeReplace(angle.crowd_reaction)}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Momentum Boost:</strong> +${angle.momentum_boost}<br>
+                        <strong>Popularity Boost:</strong> +${angle.popularity_boost}
+                    </div>
+                </div>
+                ${angle.target_name ? `<div class="mt-2"><strong>Target:</strong> ${angle.target_name}</div>` : ''}
+                ${angle.creates_feud ? '<div class="alert alert-warning mt-2 mb-0">🔥 Creates a feud on debut!</div>' : ''}
+                ${d.message ? `<div class="alert alert-info mt-2 mb-0 small">${d.message}</div>` : ''}
+            </div>
+        </div>`;
+    } catch(e) {
+        res.innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
+    }
+}
+
+// ── Returns ──────────────────────────────────────────────────────────
+async function loadReturnCandidates() {
+    const sel = document.getElementById('returnWrestlerSelect');
+    try {
+        const r = await fetch('/api/show-production/return/candidates');
+        const d = await r.json();
+        const candidates = asArray(d.return_candidates);
+        if (!d.success || !candidates.length) {
+            sel.innerHTML = '<option value="">No return candidates found</option>';
+            return;
+        }
+        sel.innerHTML = candidates.map(c =>
+            `<option value="${c.id}">${c.name} (${c.is_retired ? 'Retired' : c.is_injured ? 'Injured' : 'Absent'})</option>`
+        ).join('');
+    } catch(e) {
+        sel.innerHTML = '<option value="">Could not load return candidates</option>';
+        showToast(e.message, 'danger');
+    }
+}
+
+async function planReturn() {
+    const wrestler_id   = document.getElementById('returnWrestlerSelect').value;
+    const absence_weeks = parseInt(document.getElementById('returnAbsenceWeeks').value);
+    const is_surprise   = document.getElementById('returnIsSurprise').checked;
+    const show_type     = document.getElementById('returnShowType').value;
+    if (!wrestler_id) return;
+    const res = document.getElementById('returnResults');
+    res.innerHTML = '<p class="text-muted">Planning...</p>';
+
+    try {
+        const r = await fetch('/api/show-production/return/plan', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({wrestler_id, absence_weeks, is_surprise, show_type})
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error);
+        const angle = d.return_angle;
+        const reactionBadge = {massive_pop:'success', massive_heat:'danger', heat:'warning', pop:'info'}[angle.crowd_reaction] || 'secondary';
+        res.innerHTML = `
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <strong>${angle.is_surprise ? '🎉 SURPRISE ' : ''}Return Angle: ${angle.wrestler_name}</strong>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Return Type:</strong> ${safeReplace(angle.return_type)}<br>
+                        <strong>Crowd Reaction:</strong> <span class="badge bg-${reactionBadge}">${safeReplace(angle.crowd_reaction)}</span><br>
+                        <strong>Absent For:</strong> ${angle.absence_weeks} weeks
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Momentum Boost:</strong> +${angle.momentum_boost}<br>
+                        <strong>Popularity Boost:</strong> +${angle.popularity_boost}
+                    </div>
+                </div>
+                ${angle.target_name ? `<div class="mt-2"><strong>Target:</strong> ${angle.target_name}</div>` : ''}
+            </div>
+        </div>`;
+    } catch(e) {
+        res.innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
+    }
+}
+
+// ── House Shows ──────────────────────────────────────────────────────
+async function loadHouseShowCities() {
+    const brand = document.getElementById('houseShowBrand').value;
+    const sel   = document.getElementById('houseShowCities');
+    sel.innerHTML = '<option value="">Loading...</option>';
+    try {
+        const r = await fetch(`/api/show-production/house-show/cities?brand=${encodeURIComponent(brand)}`);
+        const d = await r.json();
+        if (!d.success || !d.cities.length) {
+            sel.innerHTML = '<option value="">No cities available</option>';
+            try { await loadPlannedHouseShows(); } catch(e) {}
+            return;
+        }
+        sel.innerHTML = d.cities.map(c => `<option value="${c}">${c}</option>`).join('');
+        try { await loadPlannedHouseShows(); } catch(e) {}
+    } catch(e) {
+        sel.innerHTML = '<option value="">Error loading cities</option>';
+        try { await loadPlannedHouseShows(); } catch(e2) {}
+    }
+}
+
+async function createCustomPPV() {
+    const payload = {
+        name: document.getElementById('customPpvName').value,
+        location: document.getElementById('customPpvLocation').value,
+        year: parseInt(document.getElementById('customPpvYear').value || '1'),
+        week: parseInt(document.getElementById('customPpvWeek').value || '1'),
+        date: document.getElementById('customPpvDate').value || null,
+        tier: document.getElementById('customPpvTier').value
+    };
+    const r = await fetch('/api/show-production/custom-ppv/create', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error || 'Failed to create custom PPV');
+    showToast('Custom PPV created and added to calendar.', 'success');
+}
+
+async function bookAdvancedFeature(feature_type) {
+    let payload = { feature_type };
+    if (feature_type === 'cinematic_match') {
+        const s = (document.getElementById('cinematicScores').value || '50,50,50,50').split(',').map(v => parseInt(v.trim() || '50'));
+        payload = { ...payload, title: document.getElementById('cinematicTitle').value, location: document.getElementById('cinematicLocation').value, script_quality: s[0], production_value: s[1], acting_quality: s[2], originality: s[3] };
+    } else if (feature_type === 'twist_swerve') {
+        const s = (document.getElementById('swerveScores').value || '50,50,50').split(',').map(v => parseInt(v.trim() || '50'));
+        payload = { ...payload, title: document.getElementById('swerveTitle').value, surprise_rating: s[0], logic_rating: s[1], follow_through: s[2] };
+    } else if (feature_type === 'long_term_arc') {
+        const [endYear, endWeek] = (document.getElementById('arcEnd').value || '1,12').split(',').map(v => parseInt(v.trim() || '1'));
+        payload = { ...payload, name: document.getElementById('arcName').value, planned_end_year: endYear, planned_end_week: endWeek, beats: ['setup', 'first escalation', 'complication', 'second escalation', 'near-miss', 'resolution'] };
+    } else if (feature_type === 'main_event_selection') {
+        const [q, d, p] = (document.getElementById('mainEventScores').value || '70,70,70').split(',').map(v => parseFloat(v.trim() || '70'));
+        payload = { ...payload, match_title: document.getElementById('mainEventTitle').value || 'Main Event', quality_score: q, draw_score: d, placement_correctness: p };
+    } else if (feature_type === 'surprise_debut') {
+        const [sy, sw, lk] = (document.getElementById('debutSecrecyMeta').value || '1,1,0').split(',').map(v => v.trim());
+        payload = { ...payload, wrestler_id: document.getElementById('debutSecrecyWrestlerId').value, signing_year: parseInt(sy || '1'), signing_week: parseInt(sw || '1'), leaked: lk === '1' };
+    }
+    const r = await fetch('/api/show-production/advanced/book', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error || 'Failed to save advanced feature');
+    showToast(`${feature_type} saved.`, 'success');
+}
+
+async function planHouseShowTour() {
+    const brand          = document.getElementById('houseShowBrand').value;
+    const duration_weeks = parseInt(document.getElementById('houseShowDuration').value);
+    const citySelect     = document.getElementById('houseShowCities');
+    const selectedCities = Array.from(citySelect.selectedOptions).map(o => o.value).filter(Boolean);
+    const res            = document.getElementById('houseShowResults');
+    res.innerHTML = '<p class="text-muted">Planning tour...</p>';
+
+    try {
+        const r = await fetch('/api/show-production/house-show/plan', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({brand, duration_weeks, cities: selectedCities})
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error);
+        const tour = d.tour;
+        const rev  = d.projected_revenue;
+        res.innerHTML = `
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <strong>🗺️ ${tour.tour_name}</strong>
+                <span class="badge bg-light text-dark ms-2">${tour.event_count} events</span>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col">
+                        <h5 class="text-success">$${(rev.gross_revenue||0).toLocaleString()}</h5>
+                        <small class="text-muted">Gross Revenue</small>
+                    </div>
+                    <div class="col">
+                        <h5 class="text-danger">$${(rev.production_cost||0).toLocaleString()}</h5>
+                        <small class="text-muted">Production Cost</small>
+                    </div>
+                    <div class="col">
+                        <h5 class="${(rev.net_profit||0) >= 0 ? 'text-success' : 'text-danger'}">
+                            $${(rev.net_profit||0).toLocaleString()}</h5>
+                        <small class="text-muted">Net Profit</small>
+                    </div>
+                    <div class="col">
+                        <h5>${(rev.total_attendance||0).toLocaleString()}</h5>
+                        <small class="text-muted">Total Attendance</small>
+                    </div>
+                </div>
+                <table class="table table-sm mb-0">
+                    <thead class="table-dark">
+                        <tr><th>Week</th><th>City</th><th>Venue</th><th>Attendance</th><th>Revenue</th></tr>
+                    </thead>
+                    <tbody>
+                        ${tour.scheduled_events.map(e => `
+                        <tr>
+                            <td>Week ${e.week}</td>
+                            <td>${e.city || '—'}</td>
+                            <td>${e.venue}</td>
+                            <td>${(e.expected_attendance||0).toLocaleString()}</td>
+                            <td>$${((e.expected_attendance||0) * (e.ticket_price||45)).toLocaleString()}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+                <div class="alert alert-success mt-3 mb-0 small">
+                    ✅ ${d.message}
+                </div>
+            </div>
+        </div>`;
+    } catch(e) {
+        res.innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
+    }
+}
+
+// ── Segment Types ─────────────────────────────────────────────────────
+async function loadSegmentTypes(openingOnly = false) {
+    const grid = document.getElementById('segmentTypesGrid');
+    try {
+        const url = openingOnly
+            ? '/api/show-production/segment-types?opening_only=true'
+            : '/api/show-production/segment-types';
+        const r = await fetch(url);
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error || 'Failed to load segment types');
+        const segmentTypes = asArray(d.segment_types);
+        if (!segmentTypes.length) {
+            grid.innerHTML = '<div class="col-12"><div class="alert alert-secondary mb-0">No segment types available.</div></div>';
+            return;
+        }
+        grid.innerHTML = segmentTypes.map(st => `
+        <div class="col-md-4 mb-2">
+            <div class="card card-body p-2 h-100">
+                <strong class="small">${st.display_name}</strong>
+                <p class="mb-1 small text-muted">${st.description}</p>
+                <div>
+                    ${st.can_end_in_brawl ? badge('Can Brawl','warning') : ''}
+                    ${st.advances_feud    ? badge('Feud+','danger') : ''}
+                    ${st.creates_heat     ? badge('Heat','dark') : ''}
+                    ${st.creates_pop      ? badge('Pop','success') : ''}
+                    ${st.suitable_for_opening ? badge('Opening OK','primary') : ''}
+                </div>
+                <small class="text-muted mt-1">${st.typical_duration} min | Energy: ${st.crowd_energy_impact >= 0 ? '+' : ''}${st.crowd_energy_impact}</small>
+            </div>
+        </div>`).join('');
+    } catch(e) {
+        grid.innerHTML = `<div class="col-12"><div class="alert alert-danger mb-0">${e.message}</div></div>`;
+    }
+}
+
+async function loadPlannedHouseShows() {
+    const brand = document.getElementById('houseShowBrand').value;
+    const res   = document.getElementById('houseShowResults');
+    res.innerHTML = '<p class="text-muted">Loading planned house shows...</p>';
+    try {
+        const r = await fetch(`/api/show-production/house-show/list?brand=${encodeURIComponent(brand)}`);
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error || 'Failed to load house shows');
+        const shows = (d.house_shows || []).filter(s => (s.status || 'planned') === 'planned');
+        if (!shows.length) {
+            res.innerHTML = '<div class="alert alert-secondary">No planned house shows found for this brand yet.</div>';
+            return;
+        }
+        res.innerHTML = `
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <strong>🗓️ ${brand} House Show Tour (Saved)</strong>
+                <span class="badge bg-light text-dark ms-2">${shows.length} events</span>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <thead class="table-dark">
+                        <tr><th>Year</th><th>Week</th><th>City</th><th>Venue</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        ${shows.map(s => `
+                        <tr>
+                            <td>${s.year}</td>
+                            <td>${s.week}</td>
+                            <td>${s.city || '—'}</td>
+                            <td>${s.venue || '—'}</td>
+                            <td><span class="badge bg-secondary">${(s.status || 'planned')}</span></td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+                <div class="alert alert-info mt-3 mb-0 small">
+                    Tip: Use the new <strong>Calendar</strong> page to edit cities/venues for any show.
+                </div>
+            </div>
+        </div>`;
+    } catch (e) {
+        res.innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
+    }
+}
+
+function filterSegmentTypes() {
+    loadSegmentTypes(document.getElementById('segmentTypeFilter').value === 'opening');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────
+function showToast(msg, type='info') {
+    const existing = document.getElementById('prodToast');
+    if (existing) existing.remove();
+    const div = document.createElement('div');
+    div.id = 'prodToast';
+    div.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3`;
+    div.style.zIndex = 9999;
+    div.textContent = msg;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 4000);
+}
+
+// ── Init ─────────────────────────────────────────────────────────────
+function renderSimpleBoard(containerId, items, formatter, emptyMessage) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    if (!items || !items.length) {
+        container.innerHTML = `<p class="text-muted mb-0">${emptyMessage}</p>`;
+        return;
+    }
+    container.innerHTML = items.map(formatter).join('');
+}
+
+async function loadProductionDashboard() {
+    try {
+        const r = await fetch('/api/show-production/dashboard');
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error);
+
+        const overview = d.overview || {};
+        const weeklySchedule = overview.weekly_schedule || [];
+        const upcomingPPVs = overview.upcoming_ppvs || [];
+        const supercards = Object.entries(overview.supercards || {});
+
+        document.getElementById('productionThemeCount').textContent = overview.theme_count || 0;
+        document.getElementById('productionSegmentCount').textContent = overview.segment_type_count || 0;
+        document.getElementById('productionPPVCount').textContent = upcomingPPVs.length;
+        document.getElementById('productionSupercardCount').textContent = supercards.length;
+
+        renderSimpleBoard(
+            'weeklyFootprintBoard',
+            weeklySchedule,
+            item => `
+                <div class="border rounded p-2 mb-2">
+                    <strong>${item.brand}</strong>
+                    <div class="small text-muted">${item.day || 'TBD'} • ${item.start_time || 'TBD'} • ${item.duration_minutes || '?'} min</div>
+                </div>
+            `,
+            'No weekly schedule data available.'
+        );
+
+        renderSimpleBoard(
+            'upcomingPpvBoard',
+            upcomingPPVs,
+            item => `
+                <div class="border rounded p-2 mb-2">
+                    <strong>${item.name}</strong>
+                    <div class="small text-muted">${item.brand} • Week ${item.week}</div>
+                </div>
+            `,
+            'No PPVs on the calendar.'
+        );
+
+        renderSimpleBoard(
+            'supercardBoard',
+            supercards,
+            ([name, config]) => `
+                <div class="border rounded p-2 mb-2">
+                    <strong>${name}</strong>
+                    <div class="small text-muted">Min matches: ${config.min_matches} • Title matches: ${config.must_have_title_matches}</div>
+                </div>
+            `,
+            'No supercard templates available.'
+        );
+    } catch (e) {
+        renderSimpleBoard('weeklyFootprintBoard', [], () => '', `Failed to load weekly footprint: ${e.message}`);
+        renderSimpleBoard('upcomingPpvBoard', [], () => '', `Failed to load PPVs: ${e.message}`);
+        renderSimpleBoard('supercardBoard', [], () => '', `Failed to load supercards: ${e.message}`);
+    }
+}
+
+window.loadProductionPlan  = loadProductionPlan;
+window.applyTheme          = applyTheme;
+window.previewTheme        = previewTheme;
+window.analyzePacingDemo   = analyzePacingDemo;
+window.generateDarkMatches = generateDarkMatches;
+window.loadSavedDarkMatches= loadSavedDarkMatches;
+window.onDarkMatchBrandChange = onDarkMatchBrandChange;
+window.generateRunIn       = generateRunIn;
+window.planDebut           = planDebut;
+window.planReturn          = planReturn;
+window.planHouseShowTour   = planHouseShowTour;
+window.loadHouseShowCities = loadHouseShowCities;
+window.filterSegmentTypes  = filterSegmentTypes;
+window.createCustomPPV     = createCustomPPV;
+window.bookAdvancedFeature = bookAdvancedFeature;
+window.createPacingSession = createPacingSession;
+window.addPacingItem       = addPacingItem;
+
+// Run on load
+loadProductionDashboard();
+loadProductionPlan();
+loadThemes();
+loadDebutCandidates();
+loadReturnCandidates();
+loadSegmentTypes();
+loadHouseShowCities();
+</script>

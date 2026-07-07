@@ -1,0 +1,903 @@
+<!-- Brand Draft View -->
+<div class="container-fluid mt-4">
+    <!-- Draft Header -->
+    <div class="draft-header mb-4">
+        <div class="draft-header-content">
+            <h2>
+                <i class="bi bi-arrow-left-right"></i> Brand Draft
+            </h2>
+            <p class="lead">Annual roster shakeup - GMs select wrestlers for their brands</p>
+        </div>
+    </div>
+
+    <!-- Draft Status Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card draft-status-card" id="draftStatusCard" style="display: none;">
+                <div class="card-header draft-status-header">
+                    <h5>
+                        <i class="bi bi-broadcast"></i>
+                        Draft in Progress
+                    </h5>
+                    <span class="badge bg-warning text-dark" id="draftFormat">SNAKE DRAFT</span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="draft-stat-box">
+                                <div class="stat-label">Current Round</div>
+                                <div class="stat-value" id="currentRound">1</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="draft-stat-box">
+                                <div class="stat-label">Overall Pick</div>
+                                <div class="stat-value" id="overallPick">1</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="draft-stat-box">
+                                <div class="stat-label">Wrestlers Remaining</div>
+                                <div class="stat-value" id="remainingCount">0</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="draft-stat-box currently-picking">
+                                <div class="stat-label">Currently Picking</div>
+                                <div class="stat-value" id="currentlyPicking">-</div>
+                            </div>
+                        </div>
+                                            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Draft Setup (shown when no draft active) -->
+    <div class="row mb-4" id="draftSetup">
+        <div class="col-lg-8 mx-auto">
+            <div class="card draft-setup-card">
+                <div class="card-header">
+                    <h5>
+                        <i class="bi bi-gear"></i>
+                        Draft Setup
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        The Brand Draft allows General Managers to select wrestlers for their rosters. Champions and recently debuted wrestlers are exempt.
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="bi bi-diagram-3 me-2"></i>Draft Format
+                            </label>
+                            <select class="form-select" id="draftFormatSelect">
+                                <option value="snake">Snake Draft (A-B-C-C-B-A)</option>
+                                <option value="rotating">Rotating Draft (A-B-C-A-B-C)</option>
+                                <option value="lottery">Lottery Draft (Random each round)</option>
+                            </select>
+                            <small class="text-muted">Snake draft reverses order each round for fairness</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="bi bi-shuffle me-2"></i>Draft Order
+                            </label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="randomizeOrder">
+                                <label class="form-check-label" for="randomizeOrder">
+                                    Randomize draft order
+                                </label>
+                            </div>
+                            <small class="text-muted">Otherwise: Alpha → Velocity → Vanguard</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary btn-lg" onclick="initiateDraft()">
+                            <i class="bi bi-play-fill me-2"></i>
+                            Start Draft
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GM Information -->
+    <div class="row mb-4" id="gmInfoSection" style="display: none;">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>
+                        <i class="bi bi-person-badge"></i>
+                        General Managers
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="gmCards">
+                        <!-- GM cards will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Draft Board -->
+    <div class="row" id="draftBoard" style="display: none;">
+        <!-- Exemptions Panel -->
+        <div class="col-lg-3">
+            <div class="card exemptions-card mb-4">
+                <div class="card-header">
+                    <h6>
+                        <i class="bi bi-shield-check"></i>
+                        Draft Exemptions
+                    </h6>
+                    <span class="badge bg-secondary" id="exemptionCount">0</span>
+                </div>
+                <div class="card-body">
+                    <div class="exemptions-list" id="exemptionsList">
+                        <!-- Exemptions will be listed here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Picks -->
+            <div class="card recent-picks-card">
+                <div class="card-header">
+                    <h6>
+                        <i class="bi bi-clock-history"></i>
+                        Recent Picks
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="recent-picks-list" id="recentPicksList">
+                        <p class="text-muted text-center">No picks yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Draft Area -->
+        <div class="col-lg-6">
+            <!-- Available Wrestlers -->
+            <div class="card available-wrestlers-card mb-4">
+                <div class="card-header">
+                    <h5>
+                        <i class="bi bi-people"></i>
+                        Available Wrestlers
+                    </h5>
+                    <input type="text" class="form-control form-control-sm" id="wrestlerSearch" placeholder="Search wrestlers...">
+                </div>
+                <div class="card-body">
+                    <div class="available-wrestlers-grid" id="availableWrestlers">
+                        <!-- Wrestler cards will be inserted here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Simulation Controls -->
+            <div class="text-center mb-4">
+                <button class="btn btn-success btn-lg" onclick="simulateDraft()">
+                    <i class="bi bi-robot me-2"></i>
+                    Simulate Full Draft
+                </button>
+                <button class="btn btn-outline-secondary ms-2" onclick="cancelDraft()">
+                    <i class="bi bi-x-circle me-2"></i>
+                    Cancel Draft
+                </button>
+            </div>
+        </div>
+
+        <!-- Brand Rosters -->
+        <div class="col-lg-3">
+            <div class="brand-rosters">
+                <!-- Alpha Roster -->
+                <div class="card brand-roster-card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">ROC Alpha</h6>
+                        <span class="badge bg-light text-dark" id="alphaCount">0</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="roster-list" id="alphaRoster">
+                            <p class="text-muted small">No picks yet</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Velocity Roster -->
+                <div class="card brand-roster-card mb-3">
+                    <div class="card-header bg-danger text-white">
+                        <h6 class="mb-0">ROC Velocity</h6>
+                        <span class="badge bg-light text-dark" id="velocityCount">0</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="roster-list" id="velocityRoster">
+                            <p class="text-muted small">No picks yet</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Vanguard Roster -->
+                <div class="card brand-roster-card">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0">ROC Vanguard</h6>
+                        <span class="badge bg-light text-dark" id="vanguardCount">0</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="roster-list" id="vanguardRoster">
+                            <p class="text-muted small">No picks yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Draft Results (shown after completion) -->
+    <div class="row" id="draftResults" style="display: none;">
+        <div class="col-12">
+            <div class="card draft-results-card">
+                <div class="card-header">
+                    <h5>
+                        <i class="bi bi-trophy"></i>
+                        Draft Results
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="draftSummary">
+                        <!-- Summary will be inserted here -->
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary" onclick="loadView('roster')">
+                            <i class="bi bi-people me-2"></i>
+                            View Updated Rosters
+                        </button>
+                        <button class="btn btn-outline-secondary ms-2" onclick="loadView('office')">
+                            <i class="bi bi-building me-2"></i>
+                            Return to Office
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Draft-specific styles */
+.draft-header {
+    background: linear-gradient(135deg, #6f42c1 0%, #20c997 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(111, 66, 193, 0.3);
+}
+
+.draft-status-card {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.draft-status-header {
+    background: linear-gradient(135deg, #ffc107 0%, #ff6b35 100%);
+    color: white;
+}
+
+.draft-stat-box {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.draft-stat-box.currently-picking {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.draft-stat-box .stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.draft-stat-box .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.gm-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+.gm-card h6 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.gm-personality {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.personality-balanced { background: #e3f2fd; color: #1976d2; }
+.personality-aggressive { background: #ffebee; color: #c62828; }
+.personality-builder { background: #e8f5e9; color: #2e7d32; }
+.personality-entertainment { background: #fff3e0; color: #e65100; }
+
+.exemptions-card {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.exemption-item {
+    background: #fff5f5;
+    border-left: 3px solid #dc3545;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0 8px 8px 0;
+}
+
+.exemption-item .wrestler-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.exemption-item .reason {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.available-wrestlers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.wrestler-draft-card {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.wrestler-draft-card:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.wrestler-draft-card.selected {
+    background: #e3f2fd;
+    border-color: #2196f3;
+}
+
+.wrestler-draft-card .name {
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.wrestler-draft-card .info {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.wrestler-draft-card .overall {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #667eea;
+    float: right;
+}
+
+.recent-pick-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.recent-pick-item .pick-number {
+    font-weight: 700;
+    color: #667eea;
+}
+
+.brand-roster-card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.roster-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.roster-item {
+    padding: 0.25rem 0;
+    font-size: 0.85rem;
+    border-bottom: 1px dashed #eee;
+}
+
+.draft-results-card {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.draft-summary-section {
+    margin-bottom: 2rem;
+}
+
+.draft-summary-section h6 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #1a1a2e;
+}
+
+.steal-item, .reach-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.steal-item {
+    border-left: 3px solid #28a745;
+}
+
+.reach-item {
+    border-left: 3px solid #ffc107;
+}
+</style>
+
+<script>
+// Global variables
+window.currentDraft = null;
+window.availableWrestlers = [];
+window.draftInProgress = false;
+
+// Initialize draft - GLOBAL FUNCTION
+window.initiateDraft = async function() {
+    const format = document.getElementById('draftFormatSelect').value;
+    const randomizeOrder = document.getElementById('randomizeOrder').checked;
+    
+    try {
+        const response = await fetch('/api/draft/initiate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                format: format,
+                randomize_order: randomizeOrder
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            // Success - hide setup, show draft board
+            document.getElementById('draftSetup').style.display = 'none';
+            document.getElementById('draftStatusCard').style.display = 'block';
+            document.getElementById('gmInfoSection').style.display = 'block';
+            document.getElementById('draftBoard').style.display = 'flex';
+            
+            // Update status
+            document.getElementById('draftFormat').textContent = format.toUpperCase() + ' DRAFT';
+            document.getElementById('remainingCount').textContent = data.draft.total_eligible;
+            document.getElementById('currentlyPicking').textContent = 'Ready to simulate';
+            
+            // Load GMs
+            await loadGMs();
+            
+            // Load exemptions
+            await loadExemptions();
+            
+            // Load available wrestlers
+            await loadAvailableWrestlers();
+            
+            window.currentDraft = data.draft;
+            
+            // Auto-simulate after short delay
+            setTimeout(() => {
+                simulateDraft();
+            }, 1000);
+            
+        } else {
+            // Handle errors including cooldown
+            if (data.weeks_until_eligible) {
+                alert(`⏳ Draft Cooldown Active!\n\n${data.error}\n\nPlease wait ${data.weeks_until_eligible} more weeks before initiating another draft.`);
+            } else {
+                alert('Failed to initiate draft: ' + (data.error || 'Unknown error'));
+            }
+        }
+    } catch (error) {
+        console.error('Error initiating draft:', error);
+        alert('Error initiating draft: ' + error.message);
+    }
+}
+
+// Check if draft allowed
+window.checkDraftEligibility = async function() {
+    try {
+        const response = await fetchAPI('/api/draft/check-eligibility');
+        
+        if (!response.eligible) {
+            const setupDiv = document.getElementById('draftSetup');
+            const cardBody = setupDiv.querySelector('.card-body');
+            
+            // Remove any existing alerts
+            const existingAlert = cardBody.querySelector('.alert-warning');
+            if (existingAlert) existingAlert.remove();
+            
+            const alertHtml = `
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <h5 class="alert-heading">
+                        <i class="bi bi-clock-history me-2"></i>
+                        Draft Cooldown Active
+                    </h5>
+                    <p>${response.message}</p>
+                    <hr>
+                    <p class="mb-0">
+                        <strong>Next draft available in ${response.weeks_until_eligible} weeks.</strong>
+                    </p>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            cardBody.insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // Update start button
+            const startBtn = setupDiv.querySelector('.btn-primary');
+            if (startBtn) {
+                startBtn.disabled = true;
+                startBtn.innerHTML = `<i class="bi bi-lock me-2"></i>Draft Locked (${response.weeks_until_eligible} weeks)`;
+            }
+        }
+    } catch (error) {
+        console.error('Error checking draft eligibility:', error);
+    }
+}
+
+// Simulate full draft with animation - IMPROVED VERSION
+window.simulateDraft = async function() {
+    if (window.draftInProgress) return;
+    
+    window.draftInProgress = true;
+    
+    // Update UI to show simulation starting
+    document.getElementById('currentRound').textContent = '1';
+    document.getElementById('overallPick').textContent = '0';
+    document.getElementById('currentlyPicking').textContent = 'Simulating...';
+    
+    // Hide manual controls
+    const btn = document.querySelector('.btn-success');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Simulating Draft...';
+    }
+    
+    // Clear wrestler search
+    const searchInput = document.getElementById('wrestlerSearch');
+    if (searchInput) searchInput.style.display = 'none';
+    
+    // Show progress message
+    const availableDiv = document.getElementById('availableWrestlers');
+    availableDiv.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+            <h5>Draft Simulation in Progress</h5>
+            <p class="text-muted">AI GMs are making their selections...</p>
+            <div class="progress mt-3" style="height: 25px;">
+                <div id="draftProgress" class="progress-bar progress-bar-striped progress-bar-animated" 
+                     role="progressbar" style="width: 0%">0%</div>
+            </div>
+        </div>
+    `;
+    
+    // Simulate with progress updates
+    try {
+        // Start simulation
+        const response = await fetchAPI('/api/draft/simulate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                animated: true
+            })
+        });
+        
+        if (response.success) {
+            // Update progress to 100%
+            const progressBar = document.getElementById('draftProgress');
+            if (progressBar) {
+                progressBar.style.width = '100%';
+                progressBar.textContent = '100%';
+            }
+            
+            // Short delay before showing results
+            setTimeout(() => {
+                showDraftResults(response.summary, response.report);
+            }, 500);
+        } else {
+            alert('Simulation failed: ' + response.error);
+            resetDraftUI();
+        }
+    } catch (error) {
+        console.error('Error simulating draft:', error);
+        alert('Error during simulation: ' + error.message);
+        resetDraftUI();
+    }
+    
+    window.draftInProgress = false;
+}
+
+// Reset draft UI
+window.resetDraftUI = function() {
+    const btn = document.querySelector('.btn-success');
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-robot me-2"></i>Simulate Full Draft';
+    }
+    
+    window.draftInProgress = false;
+}
+
+// Load GM information
+window.loadGMs = async function() {
+    try {
+        const response = await fetchAPI('/api/draft/gms');
+        
+        if (response.success) {
+            let html = '';
+            
+            response.gms.forEach(gm => {
+                const personalityClass = `personality-${gm.personality_type}`;
+                html += `
+                    <div class="col-md-4">
+                        <div class="gm-card">
+                            <h6>${gm.name}</h6>
+                            <div class="text-muted small">"${gm.nickname}"</div>
+                            <div class="mt-2">
+                                <strong>${gm.brand}</strong>
+                            </div>
+                            <div class="mt-2">
+                                <span class="gm-personality ${personalityClass}">
+                                    ${gm.personality_type.toUpperCase()}
+                                </span>
+                            </div>
+                            <div class="mt-2 small text-muted">
+                                <em>"${gm.catchphrase}"</em>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('gmCards').innerHTML = html;
+        }
+    } catch (error) {
+        console.error('Error loading GMs:', error);
+    }
+}
+
+// Load exemptions
+window.loadExemptions = async function() {
+    try {
+        const response = await fetchAPI('/api/draft/exemptions');
+        
+        if (response.success) {
+            document.getElementById('exemptionCount').textContent = response.total;
+            
+            let html = '';
+            // Show only first 10 exemptions to save space
+            const displayExemptions = response.exemptions.slice(0, 10);
+            
+            displayExemptions.forEach(exemption => {
+                html += `
+                    <div class="exemption-item">
+                        <div class="wrestler-name">${exemption.wrestler_name}</div>
+                        <div class="reason small">${exemption.description}</div>
+                    </div>
+                `;
+            });
+            
+            if (response.exemptions.length > 10) {
+                html += `<div class="text-center text-muted small mt-2">
+                    ... and ${response.exemptions.length - 10} more
+                </div>`;
+            }
+            
+            if (response.exemptions.length === 0) {
+                html = '<p class="text-muted text-center small">No exemptions</p>';
+            }
+            
+            document.getElementById('exemptionsList').innerHTML = html;
+        }
+    } catch (error) {
+        console.error('Error loading exemptions:', error);
+    }
+}
+
+// Load available wrestlers
+window.loadAvailableWrestlers = async function() {
+    try {
+        const response = await fetchAPI('/api/draft/eligible');
+        
+        if (response.success) {
+            window.availableWrestlers = response.wrestlers;
+            displayAvailableWrestlers(window.availableWrestlers);
+            
+            // Update remaining count
+            document.getElementById('remainingCount').textContent = response.wrestlers.length;
+        }
+    } catch (error) {
+        console.error('Error loading available wrestlers:', error);
+    }
+}
+
+// Display available wrestlers
+window.displayAvailableWrestlers = function(wrestlers) {
+    let html = '';
+    
+    if (wrestlers.length === 0) {
+        html = `<div class="text-center text-muted py-5">
+            <i class="bi bi-person-x" style="font-size: 3rem;"></i>
+            <p>No wrestlers available for draft</p>
+        </div>`;
+    } else {
+        wrestlers.forEach(wrestler => {
+            html += `
+                <div class="wrestler-draft-card">
+                    <div class="overall">${wrestler.overall}</div>
+                    <div class="name">${wrestler.name}</div>
+                    <div class="info">
+                        ${wrestler.role}<br>
+                        Age ${wrestler.age} • ${wrestler.primary_brand}
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    document.getElementById('availableWrestlers').innerHTML = html;
+}
+
+// Show draft results - ENHANCED VERSION
+window.showDraftResults = function(summary, report) {
+    // Hide draft board, show results
+    document.getElementById('draftBoard').style.display = 'none';
+    document.getElementById('draftStatusCard').style.display = 'none';
+    document.getElementById('gmInfoSection').style.display = 'none';
+    document.getElementById('draftResults').style.display = 'block';
+    
+    let html = '<div class="row">';
+    
+    // Draft complete message
+    html += `
+        <div class="col-12 mb-4">
+            <div class="alert alert-success">
+                <h4 class="alert-heading">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    Draft Complete!
+                </h4>
+                <p>All ${summary.total_picks} eligible wrestlers have been drafted to their new brands.</p>
+                <hr>
+                <p class="mb-0">The next brand draft will be available after 15 weeks.</p>
+            </div>
+        </div>
+    `;
+    
+    // Overall summary
+    html += `
+        <div class="col-md-6">
+            <div class="draft-summary-section">
+                <h6><i class="bi bi-graph-up me-2"></i>Draft Overview</h6>
+                <ul class="list-unstyled">
+                    <li><strong>Format:</strong> ${summary.format.toUpperCase()}</li>
+                    <li><strong>Total Rounds:</strong> ${summary.total_rounds}</li>
+                    <li><strong>Total Picks:</strong> ${summary.total_picks}</li>
+                    <li><strong>Exemptions:</strong> ${summary.exemptions_count} wrestlers</li>
+                </ul>
+            </div>
+        </div>
+    `;
+    
+    // Top picks (only if we have picks)
+    if (summary.top_picks && summary.top_picks.length > 0) {
+        html += `
+            <div class="col-md-6">
+                <div class="draft-summary-section">
+                    <h6><i class="bi bi-star me-2"></i>Top Picks</h6>
+                    <ol>
+        `;
+        
+        summary.top_picks.slice(0, 5).forEach(pick => {
+            html += `<li><strong>${pick.wrestler}</strong> to ${pick.brand} (Overall: ${pick.overall})</li>`;
+        });
+        
+        html += `
+                    </ol>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Brand analysis
+    html += `
+        <div class="col-12">
+            <div class="draft-summary-section">
+                <h6><i class="bi bi-building me-2"></i>Brand Analysis</h6>
+                <div class="row">
+    `;
+    
+    for (const brand in report.brand_analysis) {
+        const analysis = report.brand_analysis[brand];
+        html += `
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title">${brand}</h6>
+                        <p class="mb-1"><strong>Picks:</strong> ${analysis.total_picks}</p>
+                        <p class="mb-1"><strong>Avg Overall:</strong> ${analysis.average_overall}</p>
+                        ${analysis.best_pick ? `
+                            <p class="mb-0"><strong>Best:</strong> ${analysis.best_pick.wrestler} (${analysis.best_pick.overall})</p>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    html += `
+                </div>
+            </div>
+        </div>
+    `;
+    
+    html += '</div>';
+    
+    document.getElementById('draftSummary').innerHTML = html;
+}
+
+// Cancel draft
+window.cancelDraft = function() {
+    if (window.draftInProgress) {
+        alert('Cannot cancel while draft is in progress');
+        return;
+    }
+    
+    if (!confirm('Cancel the current draft? All progress will be lost.')) {
+        return;
+    }
+    
+    // Reset UI
+    document.getElementById('draftSetup').style.display = 'block';
+    document.getElementById('draftStatusCard').style.display = 'none';
+    document.getElementById('gmInfoSection').style.display = 'none';
+    document.getElementById('draftBoard').style.display = 'none';
+    document.getElementById('draftResults').style.display = 'none';
+    
+    window.currentDraft = null;
+    
+    // Reload page to reset everything
+    location.reload();
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    checkDraftEligibility();
+});
+</script>

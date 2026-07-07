@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agents - AWUM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+    <style>
+        .agent-card {
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s;
+        }
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .agent-type-badge {
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .power-agent { border-left-color: #dc3545; }
+        .package-dealer { border-left-color: #ffc107; }
+        .standard-agent { border-left-color: #28a745; }
+        
+        .negotiation-simulator {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .leverage-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">AWUM</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="/office">Office</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/roster">Roster</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/free-agents">Free Agents</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/agents">Agents</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/championships">Championships</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h2><i class="bi bi-briefcase"></i> Agent Representation System</h2>
+                <p class="lead">Manage negotiations with wrestler representatives</p>
+            </div>
+        </div>
+
+        <!-- Statistics Dashboard -->
+        <div class="row mb-4" id="agentStats">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 id="totalAgents">0</h3>
+                        <p class="text-muted">Total Agents</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 id="representationRate">0%</h3>
+                        <p class="text-muted">Representation Rate</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 id="powerAgents">0</h3>
+                        <p class="text-muted">Power Agents</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 id="packageDealers">0</h3>
+                        <p class="text-muted">Package Dealers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agent List -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-people"></i> Active Agents</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="agentsList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Negotiation Simulator -->
+            <div class="col-md-4">
+                <div class="negotiation-simulator">
+                    <h5><i class="bi bi-calculator"></i> Negotiation Simulator</h5>
+                    <p class="small">Test different offers to find the optimal deal</p>
+                    <button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#simulatorModal">
+                        Launch Simulator
+                    </button>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6>Package Deals</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="packageDealsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Negotiation Simulator Modal -->
+    <div class="modal fade" id="simulatorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Negotiation Simulator</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Select Free Agent</label>
+                        <select id="simFreeAgent" class="form-select"></select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Max Salary</label>
+                            <input type="number" id="simMaxSalary" class="form-control" value="50000">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Max Signing Bonus</label>
+                            <input type="number" id="simMaxBonus" class="form-control" value="20000">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Max Creative Control (0-4)</label>
+                            <input type="number" id="simMaxCreative" class="form-control" value="2" min="0" max="4">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Max Negotiation Rounds</label>
+                            <input type="number" id="simMaxRounds" class="form-control" value="5" min="1" max="10">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary w-100" onclick="runSimulation()">
+                        <i class="bi bi-play-fill"></i> Run Simulation
+                    </button>
+
+                    <div id="simulationResults" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let agentData = null;
+        let statsData = null;
+
+        async function loadAgents() {
+            try {
+                const response = await fetch('/api/agents/statistics');
+                const data = await response.json();
+                
+                if (data.success) {
+                    statsData = data.statistics;
+                    updateStats();
+                    
+                    // Load full agent list
+                    const agentsResponse = await fetch('/api/agents');
+                    const agentsData = await agentsResponse.json();
+                    
+                    if (agentsData.success) {
+                        agentData = agentsData.agents;
+                        displayAgents();
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading agents:', error);
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('totalAgents').textContent = statsData.top_agents.length;
+            document.getElementById('representationRate').textContent = statsData.representation_rate + '%';
+            document.getElementById('powerAgents').textContent = statsData.by_type.power_agent || 0;
+            document.getElementById('packageDealers').textContent = statsData.by_type.package_dealer || 0;
+        }
+
+        function displayAgents() {
+            const container = document.getElementById('agentsList');
+            
+            if (!statsData.top_agents || statsData.top_agents.length === 0) {
+                container.innerHTML = '<p class="text-muted">No agents currently active</p>';
+                return;
+            }
+
+            let html = '';
+            
+            statsData.top_agents.forEach(agent => {
+                const typeClass = agent.type.replace('_', '-');
+                const typeLabel = agent.type.replace('_', ' ').toUpperCase();
+                
+                html += `
+                    <div class="card mb-3 agent-card ${typeClass}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">${agent.name}</h6>
+                                    <span class="badge agent-type-badge bg-secondary">${typeLabel}</span>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted">Commission</small>
+                                    <div class="fw-bold">${agent.commission_rate}%</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2">
+                                <small class="text-muted">Clients: ${agent.clients}</small><br>
+                                <small class="text-muted">Total Value: $${agent.total_value.toLocaleString()}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        async function loadPackageDeals() {
+            try {
+                const response = await fetch('/api/agents/package-dealers');
+                const data = await response.json();
+                
+                const container = document.getElementById('packageDealsList');
+                
+                if (!data.success || data.packages.length === 0) {
+                    container.innerHTML = '<p class="small text-muted">No package deals available</p>';
+                    return;
+                }
+
+                let html = '';
+                data.packages.forEach(pkg => {
+                    const discount = pkg.package_discount_eligible ? '10-15% off' : 'No discount';
+                    
+                    html += `
+                        <div class="card mb-2">
+                            <div class="card-body p-2">
+                                <h6 class="mb-1">${pkg.agent_name}</h6>
+                                <small>${pkg.client_count} clients</small><br>
+                                <small class="text-success">${discount}</small>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading package deals:', error);
+            }
+        }
+
+        async function loadFreeAgentsForSim() {
+            try {
+                const response = await fetch('/api/free-agents?discovered_only=true');
+                const data = await response.json();
+                
+                const select = document.getElementById('simFreeAgent');
+                select.innerHTML = '<option value="">-- Select Free Agent --</option>';
+                
+                if (data.success) {
+                    data.free_agents.forEach(fa => {
+                        const agentInfo = fa.agent.agent_name ? ` (Agent: ${fa.agent.agent_name})` : '';
+                        select.innerHTML += `<option value="${fa.id}">${fa.wrestler_name}${agentInfo}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading free agents:', error);
+            }
+        }
+
+        async function runSimulation() {
+            const faId = document.getElementById('simFreeAgent').value;
+            
+            if (!faId) {
+                alert('Please select a free agent');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('simulationResults');
+            resultsDiv.innerHTML = '<div class="text-center"><div class="spinner-border"></div><p>Simulating...</p></div>';
+
+            try {
+                const response = await fetch(`/api/negotiate/${faId}/simulate`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        max_salary: parseInt(document.getElementById('simMaxSalary').value),
+                        max_bonus: parseInt(document.getElementById('simMaxBonus').value),
+                        max_creative_control: parseInt(document.getElementById('simMaxCreative').value),
+                        max_rounds: parseInt(document.getElementById('simMaxRounds').value)
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const sim = data.simulation;
+                    
+                    let html = '<div class="alert alert-info">';
+                    html += `<h6>${data.free_agent}</h6>`;
+                    html += `<p class="mb-0">Agent: ${data.agent}</p>`;
+                    html += '</div>';
+
+                    if (sim.deal_reached) {
+                        html += '<div class="alert alert-success">';
+                        html += `<h6>✅ Deal Reached in ${sim.total_rounds} rounds!</h6>`;
+                        html += `<p class="mb-1">Optimal Offer:</p>`;
+                        html += `<ul class="mb-0">`;
+                        html += `<li>Salary: $${sim.optimal_offer.salary.toLocaleString()}</li>`;
+                        html += `<li>Bonus: $${sim.optimal_offer.bonus.toLocaleString()}</li>`;
+                        html += `<li>Length: ${sim.optimal_offer.length_weeks} weeks</li>`;
+                        html += `<li>Creative Control: Level ${sim.optimal_offer.creative_control}</li>`;
+                        html += `</ul>`;
+                        html += `<p class="mt-2 mb-0 fw-bold">Total Cost: $${sim.total_cost.toLocaleString()}</p>`;
+                        html += '</div>';
+                    } else {
+                        html += '<div class="alert alert-danger">';
+                        html += `<h6>❌ No Deal After ${sim.total_rounds} Rounds</h6>`;
+                        html += `<p class="mb-0">Agent demands exceed your maximum offer. Consider:</p>`;
+                        html += `<ul class="mb-0">`;
+                        html += `<li>Increasing budget constraints</li>`;
+                        html += `<li>Offering more creative control</li>`;
+                        html += `<li>Waiting for mood to improve</li>`;
+                        html += `</ul>`;
+                        html += '</div>';
+                    }
+
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="alert alert-danger">Simulation failed: ${error.message}</div>`;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAgents();
+            loadPackageDeals();
+            
+            // Load free agents when modal opens
+            document.getElementById('simulatorModal').addEventListener('show.bs.modal', loadFreeAgentsForSim);
+        });
+    </script>
+</body>
+</html>

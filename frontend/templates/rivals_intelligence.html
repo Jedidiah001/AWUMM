@@ -1,0 +1,132 @@
+<style>
+  .rival-intel-page,
+  .rival-intel-page h1,
+  .rival-intel-page h2,
+  .rival-intel-page h3,
+  .rival-intel-page h4,
+  .rival-intel-page h5,
+  .rival-intel-page h6,
+  .rival-intel-page label,
+  .rival-intel-page strong,
+  .rival-intel-page span,
+  .rival-intel-page div,
+  .rival-intel-page p {
+    color: #ffffff !important;
+  }
+  .rival-intel-page .text-muted { color: #d0d0d0 !important; }
+  .rival-intel-page .card { background: #111 !important; border-color: #343a40 !important; }
+  .rival-intel-page input.form-control { background: #1a1a1a; color: #fff; border-color: #555; }
+</style>
+
+<div class="container-fluid p-4 rival-intel-page">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-1">Rival Intelligence Center</h2>
+      <div class="text-muted">Track competing promotions, simulate weekly reactions, and monitor the persistent world feed.</div>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <span id="riTimestamp" class="small text-muted">Not synced</span>
+      <button class="btn btn-outline-light btn-sm" id="riRefresh">Refresh</button>
+    </div>
+  </div>
+
+  <div class="card bg-dark border-secondary p-3 mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-3">
+        <label class="form-label small text-muted">Year</label>
+        <input id="riYear" type="number" class="form-control form-control-sm" value="1" min="1"/>
+      </div>
+      <div class="col-3">
+        <label class="form-label small text-muted">Week</label>
+        <input id="riWeek" type="number" class="form-control form-control-sm" value="1" min="1" max="52"/>
+      </div>
+      <div class="col-6">
+        <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="riTournament"><label class="form-check-label" for="riTournament">Player ran major tournament</label></div>
+        <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="riTvDeal"><label class="form-check-label" for="riTvDeal">Player landed TV deal</label></div>
+      </div>
+      <div class="col-12"><button class="btn btn-warning btn-sm" id="riSimulate">Simulate Rival Week</button></div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <div class="card bg-dark border-secondary p-3">
+        <h5>Competitive Landscape</h5>
+        <div id="riLandscape" class="small"></div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card bg-dark border-secondary p-3">
+        <h5>Rival World Feed</h5>
+        <div id="riFeed" class="small" style="max-height:56vh; overflow:auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const esc = (v)=>String(v ?? '');
+  async function getJson(url, opts){
+    const r = await fetch(url, opts);
+    const j = await r.json();
+    if(!r.ok || j.success===false) throw new Error(j.error || `HTTP ${r.status}`);
+    return j;
+  }
+
+  function renderLandscape(rows){
+    const root = document.getElementById('riLandscape');
+    if(!rows.length){ root.innerHTML = '<div class="text-muted">No rival records found.</div>'; return; }
+    root.innerHTML = rows.map(r => `
+      <div class="border-bottom border-secondary py-2">
+        <div class="d-flex justify-content-between">
+          <strong>${esc(r.name)} (${esc(r.abbreviation)})</strong>
+          <span class="badge text-bg-secondary">${esc(r.tier)}</span>
+        </div>
+        <div class="text-muted">${esc(r.management_style)} · ${esc(r.booking_philosophy)}</div>
+        <div>Momentum: ${esc(r.momentum)} | Prestige: ${esc(r.prestige)} | Aggression: ${esc(r.aggression)}</div>
+        <div>Budget: $${Number(r.remaining_budget||0).toLocaleString()} | Reserves: $${Number(r.cash_reserves||0).toLocaleString()}</div>
+      </div>`).join('');
+  }
+
+  function renderFeed(events){
+    const root = document.getElementById('riFeed');
+    if(!events.length){ root.innerHTML = '<div class="text-muted">No rival events yet. Run a simulation week.</div>'; return; }
+    root.innerHTML = events.map(e => `
+      <div class="border-bottom border-secondary py-2">
+        <div><strong>${esc(e.headline)}</strong></div>
+        <div class="text-muted">Y${esc(e.year)} W${esc(e.week)} · ${esc(e.event_type)}</div>
+        <div>${esc(e.details || '')}</div>
+      </div>`).join('');
+  }
+
+  async function refresh(){
+    const [landscape, feed] = await Promise.all([
+      getJson('/api/rivals/landscape'),
+      getJson('/api/rivals/world-feed?limit=40')
+    ]);
+    renderLandscape(landscape.rivals || []);
+    renderFeed(feed.events || []);
+    document.getElementById('riTimestamp').textContent = `Synced ${new Date().toLocaleTimeString()}`;
+  }
+
+  async function simulateWeek(){
+    const payload = {
+      year: Number(document.getElementById('riYear').value || 1),
+      week: Number(document.getElementById('riWeek').value || 1),
+      player_context: {
+        player_major_tournament: document.getElementById('riTournament').checked,
+        player_new_tv_deal: document.getElementById('riTvDeal').checked
+      }
+    };
+    await getJson('/api/rivals/simulate-week', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+    });
+    await refresh();
+  }
+
+  document.getElementById('riRefresh').addEventListener('click', refresh);
+  document.getElementById('riSimulate').addEventListener('click', simulateWeek);
+  refresh().catch(err => alert(`Rival Intelligence failed: ${err.message}`));
+})();
+</script>

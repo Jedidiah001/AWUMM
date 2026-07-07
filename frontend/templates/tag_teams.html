@@ -1,0 +1,527 @@
+<!-- Tag Teams Management View -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="bi bi-people"></i> Tag Teams</h2>
+        <p class="lead">Form official teams and track chemistry, experience, presentation, and managers.</p>
+        <hr>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12 d-flex flex-wrap gap-2">
+        <button class="btn btn-success" data-action="show-create-modal">
+            <i class="bi bi-plus-circle"></i> Create New Tag Team
+        </button>
+        <button class="btn btn-info" data-action="show-suggestions-modal">
+            <i class="bi bi-lightbulb"></i> Get Team Suggestions
+        </button>
+        <button class="btn btn-outline-secondary" data-action="refresh-teams">
+            <i class="bi bi-arrow-repeat"></i> Refresh
+        </button>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-dark text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="teamCount">-</h3>
+                <small>Active Teams</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="avgChemistry">-</h3>
+                <small>Average Chemistry</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="avgExperience">-</h3>
+                <small>Average Experience (Weeks)</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-people-fill"></i> Active Tag Teams</h5>
+            </div>
+            <div class="card-body">
+                <div id="tagTeamsList">
+                    <p class="text-center text-muted">Loading tag teams...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="createTeamModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Tag Team</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Team Name</label>
+                        <input type="text" class="form-control" id="teamName" placeholder="The Destroyers">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Brand</label>
+                        <select class="form-select" id="teamBrand" data-action="load-wrestlers-for-brand">
+                            <option value="ROC Alpha">ROC Alpha</option>
+                            <option value="ROC Velocity">ROC Velocity</option>
+                            <option value="ROC Vanguard">ROC Vanguard</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Member 1</label>
+                        <select class="form-select" id="member1">
+                            <option value="">Select wrestler...</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Member 2</label>
+                        <select class="form-select" id="member2">
+                            <option value="">Select wrestler...</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Manager (Optional)</label>
+                        <select class="form-select" id="teamManager">
+                            <option value="">No manager</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Starting Chemistry</label>
+                        <input type="number" class="form-control" id="initialChemistry" min="0" max="100" value="50">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Entrance Style</label>
+                        <select class="form-select" id="entranceStyle">
+                            <option value="standard">Standard</option>
+                            <option value="flashy">Flashy</option>
+                            <option value="intimidating">Intimidating</option>
+                            <option value="sports-presentation">Sports Presentation</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Signature Double Team</label>
+                        <input type="text" class="form-control" id="signatureDoubleTeam" placeholder="Finisher or signature combo">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Team Identity</label>
+                        <textarea class="form-control" id="teamIdentity" rows="2" placeholder="Shared mission, vibe, or chemistry notes"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="createTeamBtn" data-action="create-team">
+                    <i class="bi bi-plus-circle"></i> Create Team
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="suggestionsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tag Team Suggestions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Select Brand</label>
+                    <select class="form-select" id="suggestionBrand" data-action="load-suggestions">
+                        <option value="ROC Alpha">ROC Alpha</option>
+                        <option value="ROC Velocity">ROC Velocity</option>
+                        <option value="ROC Vanguard">ROC Vanguard</option>
+                    </select>
+                </div>
+                <div id="suggestionsList">
+                    <p class="text-muted">Select a brand to see suggestions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editTeamModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Tag Team</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editTeamId">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Team Name</label>
+                        <input type="text" class="form-control" id="editTeamName">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Chemistry</label>
+                        <input type="number" class="form-control" id="editTeamChemistry" min="0" max="100">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Experience (Weeks)</label>
+                        <input type="number" class="form-control" id="editTeamExperience" min="0" max="520">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Entrance Style</label>
+                        <input type="text" class="form-control" id="editEntranceStyle">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Manager Name</label>
+                        <input type="text" class="form-control" id="editManagerName">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Signature Double Team</label>
+                        <input type="text" class="form-control" id="editSignatureDoubleTeam">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Team Identity</label>
+                        <textarea class="form-control" id="editTeamIdentity" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" data-action="save-team-updates">
+                    <i class="bi bi-save"></i> Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    document.addEventListener('click', function (e) {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+
+        const action = target.dataset.action;
+
+        if (action === 'show-create-modal') showCreateTeamModal();
+        if (action === 'show-suggestions-modal') showSuggestionsModal();
+        if (action === 'create-team') createTeam();
+        if (action === 'disband-team') disbandTeam(target.dataset.teamId, target.dataset.teamName);
+        if (action === 'edit-team') openEditTeamModal(target.dataset.teamId);
+        if (action === 'save-team-updates') saveTeamUpdates();
+        if (action === 'refresh-teams') loadTagTeams();
+    });
+
+    document.addEventListener('change', function (e) {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+
+        const action = target.dataset.action;
+
+        if (action === 'load-wrestlers-for-brand') loadWrestlersForBrand();
+        if (action === 'load-suggestions') loadSuggestions();
+    });
+
+    function getChemistryClass(chemistry) {
+        if (chemistry >= 80) return 'bg-success';
+        if (chemistry >= 60) return 'bg-primary';
+        if (chemistry >= 40) return 'bg-warning';
+        return 'bg-danger';
+    }
+
+    function buildWrestlerOptions(wrestlers, emptyLabel = 'Select wrestler...') {
+        let options = `<option value="">${emptyLabel}</option>`;
+        wrestlers.forEach(w => {
+            options += `<option value="${w.id}">${w.name} (${w.role})</option>`;
+        });
+        return options;
+    }
+
+    function setButtonLoading(btn, isLoading, originalHTML) {
+        btn.disabled = isLoading;
+        btn.innerHTML = isLoading
+            ? '<span class="spinner-border spinner-border-sm me-1"></span> Working...'
+            : originalHTML;
+    }
+
+    function updateSummary(teams) {
+        document.getElementById('teamCount').textContent = teams.length;
+        if (!teams.length) {
+            document.getElementById('avgChemistry').textContent = '0';
+            document.getElementById('avgExperience').textContent = '0';
+            return;
+        }
+
+        const avgChemistry = teams.reduce((sum, team) => sum + (team.chemistry || 0), 0) / teams.length;
+        const avgExperience = teams.reduce((sum, team) => sum + (team.experience_weeks || 0), 0) / teams.length;
+        document.getElementById('avgChemistry').textContent = avgChemistry.toFixed(1);
+        document.getElementById('avgExperience').textContent = avgExperience.toFixed(1);
+    }
+
+    async function loadTagTeams() {
+        const container = document.getElementById('tagTeamsList');
+        container.innerHTML = '<p class="text-center"><span class="spinner-border spinner-border-sm"></span> Loading...</p>';
+
+        try {
+            const response = await fetchAPI('/api/tag-teams');
+            const teams = response.teams || [];
+            updateSummary(teams);
+
+            if (!teams.length) {
+                container.innerHTML = '<p class="text-muted text-center">No active tag teams. Create your first team!</p>';
+                return;
+            }
+
+            let html = '<div class="row">';
+            teams.forEach(team => {
+                const record = team.team_record || { wins: 0, losses: 0, draws: 0, win_percentage: 0 };
+                const brandShort = (team.primary_brand || '').replace('ROC ', '');
+
+                html += `
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header bg-dark text-white">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-people-fill"></i> ${team.team_name}
+                                    <span class="badge bg-secondary float-end">${brandShort}</span>
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-2"><strong>Members:</strong> ${team.member_names.join(' &amp; ')}</p>
+                                <p class="mb-2"><strong>Record:</strong> ${record.wins}-${record.losses}-${record.draws} (${Number(record.win_percentage || 0).toFixed(1)}%)</p>
+                                <div class="mb-2">
+                                    <strong>Chemistry:</strong>
+                                    <div class="progress mt-1" style="height: 20px;">
+                                        <div class="progress-bar ${getChemistryClass(team.chemistry)}" role="progressbar" style="width: ${team.chemistry}%">
+                                            ${team.chemistry}/100
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="mb-2"><strong>Experience:</strong> ${team.experience_weeks} week(s)</p>
+                                <p class="mb-2"><strong>Coordination:</strong> x${Number(team.coordination_multiplier || 1).toFixed(3)}</p>
+                                <p class="mb-2"><strong>Entrance:</strong> ${team.entrance_style || 'standard'}</p>
+                                ${team.manager_name ? `<p class="mb-2"><strong>Manager:</strong> ${team.manager_name}</p>` : ''}
+                                ${team.team_identity ? `<p class="mb-2"><strong>Identity:</strong> ${team.team_identity}</p>` : ''}
+                                ${team.signature_double_team ? `<p class="mb-2"><strong>Signature Spot:</strong> ${team.signature_double_team}</p>` : ''}
+                                ${team.total_title_reigns > 0 ? `<p class="mb-2"><strong>Title Reigns:</strong> ${team.total_title_reigns} (${team.total_days_as_champions} days)</p>` : ''}
+                                <div class="mt-3">
+                                    <button class="btn btn-sm btn-outline-primary me-2" data-action="edit-team" data-team-id="${team.team_id}">
+                                        <i class="bi bi-sliders"></i> Update
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" data-action="disband-team" data-team-id="${team.team_id}" data-team-name="${team.team_name}">
+                                        <i class="bi bi-x-circle"></i> Disband
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        } catch (error) {
+            console.error('Failed to load tag teams:', error);
+            container.innerHTML = `<div class="alert alert-danger">Failed to load tag teams: ${error.message}</div>`;
+        }
+    }
+
+    function showCreateTeamModal() {
+        loadWrestlersForBrand();
+        new bootstrap.Modal(document.getElementById('createTeamModal')).show();
+    }
+
+    async function loadWrestlersForBrand() {
+        const brand = document.getElementById('teamBrand').value;
+        try {
+            const response = await fetchAPI(`/api/roster?brand=${encodeURIComponent(brand)}&active_only=true`);
+            const wrestlers = response.wrestlers || [];
+            document.getElementById('member1').innerHTML = buildWrestlerOptions(wrestlers);
+            document.getElementById('member2').innerHTML = buildWrestlerOptions(wrestlers);
+            document.getElementById('teamManager').innerHTML = buildWrestlerOptions(wrestlers, 'No manager');
+        } catch (error) {
+            console.error('Failed to load wrestlers:', error);
+        }
+    }
+
+    async function createTeam() {
+        const teamName = document.getElementById('teamName').value.trim();
+        const brand = document.getElementById('teamBrand').value;
+        const member1 = document.getElementById('member1').value;
+        const member2 = document.getElementById('member2').value;
+        const managerId = document.getElementById('teamManager').value;
+        const managerName = managerId
+            ? document.getElementById('teamManager').selectedOptions[0].textContent.split(' (')[0]
+            : null;
+        const teamIdentity = document.getElementById('teamIdentity').value.trim();
+        const entranceStyle = document.getElementById('entranceStyle').value;
+        const signatureDoubleTeam = document.getElementById('signatureDoubleTeam').value.trim();
+        const initialChemistry = parseInt(document.getElementById('initialChemistry').value || '50', 10);
+
+        if (!teamName || !member1 || !member2) {
+            alert('Please fill in team name and two members.');
+            return;
+        }
+        if (member1 === member2) {
+            alert('Please select two different wrestlers.');
+            return;
+        }
+
+        const btn = document.getElementById('createTeamBtn');
+        const originalHTML = btn.innerHTML;
+        setButtonLoading(btn, true, originalHTML);
+
+        try {
+            const response = await fetchAPI('/api/tag-teams/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    team_name: teamName,
+                    primary_brand: brand,
+                    member_ids: [member1, member2],
+                    manager_id: managerId || null,
+                    manager_name: managerName,
+                    team_identity: teamIdentity,
+                    entrance_style: entranceStyle,
+                    signature_double_team: signatureDoubleTeam || null,
+                    initial_chemistry: initialChemistry
+                })
+            });
+
+            if (!response.success) {
+                alert(`Failed to create team: ${response.error}`);
+                return;
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById('createTeamModal')).hide();
+            document.getElementById('teamName').value = '';
+            document.getElementById('member1').selectedIndex = 0;
+            document.getElementById('member2').selectedIndex = 0;
+            document.getElementById('teamManager').selectedIndex = 0;
+            document.getElementById('teamIdentity').value = '';
+            document.getElementById('entranceStyle').selectedIndex = 0;
+            document.getElementById('signatureDoubleTeam').value = '';
+            document.getElementById('initialChemistry').value = '50';
+            loadTagTeams();
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        } finally {
+            setButtonLoading(btn, false, originalHTML);
+        }
+    }
+
+    async function openEditTeamModal(teamId) {
+        try {
+            const response = await fetchAPI(`/api/tag-teams/${teamId}`);
+            const team = response.team;
+            document.getElementById('editTeamId').value = team.team_id;
+            document.getElementById('editTeamName').value = team.team_name || '';
+            document.getElementById('editTeamChemistry').value = team.chemistry || 0;
+            document.getElementById('editTeamExperience').value = team.experience_weeks || 0;
+            document.getElementById('editEntranceStyle').value = team.entrance_style || '';
+            document.getElementById('editManagerName').value = team.manager_name || '';
+            document.getElementById('editSignatureDoubleTeam').value = team.signature_double_team || '';
+            document.getElementById('editTeamIdentity').value = team.team_identity || '';
+            new bootstrap.Modal(document.getElementById('editTeamModal')).show();
+        } catch (error) {
+            alert(`Failed to load team: ${error.message}`);
+        }
+    }
+
+    async function saveTeamUpdates() {
+        const teamId = document.getElementById('editTeamId').value;
+        const response = await fetchAPI(`/api/tag-teams/${teamId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                team_name: document.getElementById('editTeamName').value.trim(),
+                chemistry: parseInt(document.getElementById('editTeamChemistry').value || '0', 10),
+                experience_weeks: parseInt(document.getElementById('editTeamExperience').value || '0', 10),
+                entrance_style: document.getElementById('editEntranceStyle').value.trim(),
+                manager_name: document.getElementById('editManagerName').value.trim() || null,
+                signature_double_team: document.getElementById('editSignatureDoubleTeam').value.trim() || null,
+                team_identity: document.getElementById('editTeamIdentity').value.trim()
+            })
+        });
+
+        if (!response.success) {
+            alert(`Failed to update team: ${response.error}`);
+            return;
+        }
+
+        bootstrap.Modal.getInstance(document.getElementById('editTeamModal')).hide();
+        loadTagTeams();
+    }
+
+    async function disbandTeam(teamId, teamName) {
+        if (!confirm(`Are you sure you want to disband "${teamName}"?`)) return;
+
+        try {
+            const response = await fetchAPI(`/api/tag-teams/${teamId}/disband`, { method: 'POST' });
+            if (response.success) {
+                loadTagTeams();
+                return;
+            }
+            alert(`Failed to disband team: ${response.error}`);
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        }
+    }
+
+    function showSuggestionsModal() {
+        new bootstrap.Modal(document.getElementById('suggestionsModal')).show();
+        loadSuggestions();
+    }
+
+    async function loadSuggestions() {
+        const brand = document.getElementById('suggestionBrand').value;
+        const container = document.getElementById('suggestionsList');
+        container.innerHTML = '<p class="text-center"><span class="spinner-border spinner-border-sm"></span> Loading...</p>';
+
+        try {
+            const response = await fetchAPI(`/api/tag-teams/suggestions/${encodeURIComponent(brand)}`);
+            const suggestions = response.suggestions || [];
+
+            if (!suggestions.length) {
+                container.innerHTML = '<p class="text-muted">No suitable pairings found for this brand.</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="list-group">
+                    ${suggestions.map(suggestion => `
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">${suggestion.suggested_name}</h6>
+                                    <p class="mb-1 small">${suggestion.wrestler_a_name} &amp; ${suggestion.wrestler_b_name}</p>
+                                    <p class="mb-0 text-muted small">${suggestion.reasons.join(', ')}</p>
+                                </div>
+                                <span class="badge bg-primary ms-3">Score: ${suggestion.score}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } catch (error) {
+            container.innerHTML = `<div class="alert alert-danger">Failed to load suggestions: ${error.message}</div>`;
+        }
+    }
+
+    loadTagTeams();
+})();
+</script>

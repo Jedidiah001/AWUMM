@@ -1,0 +1,4172 @@
+<!-- Enhanced Booking View - Gender-Separated Match Booking + Intergender Tags -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="bi bi-clipboard-check"></i> Enhanced Show Card Editor</h2>
+        <p class="lead">Build your show with gender-specific divisions and intergender tag team matches.</p>
+        <hr>
+    </div>
+</div>
+
+<!-- Show Information Banner -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-primary shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="mb-0">
+                            <i class="bi bi-calendar-event"></i> 
+                            <span id="showName">Loading...</span>
+                            <span id="showThemeBadge" class="badge bg-warning text-dark ms-2" style="display:none;"></span>
+                        </h5>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span class="badge bg-light text-dark fs-6" id="showTypeBadge">WEEKLY TV</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <small class="text-muted">Brand:</small><br>
+                        <strong id="showBrand">-</strong>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">Type:</small><br>
+                        <strong id="showType">-</strong>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">Date:</small><br>
+                        <strong id="showDate">-</strong>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">Runtime:</small><br>
+                        <strong id="showRuntime">120 min</strong>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">Matches:</small><br>
+                        <strong><span id="matchCount">0</span> / <span id="targetMatches">5</span></strong>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">Segments:</small><br>
+                        <strong id="segmentCount">0</strong>
+                    </div>
+                </div>
+                
+                <!-- Production Plan Info -->
+                <div class="mt-3" id="productionPlanInfo" style="display:none;">
+                    <div class="alert alert-info mb-0 py-2">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>📺 Opening:</strong> <span id="openingType">-</span>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>🏆 Main Event:</strong> <span id="mainEventCriteria">-</span>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>🎨 Theme:</strong> <span id="themeBonus">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3" id="profitProjectionPanel" style="display:none;">
+                    <div class="border rounded p-3 bg-light">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <strong>Weekly Profit Outlook</strong>
+                                <div class="small text-muted" id="projectionSubtitle">Calculating pre-show economics...</div>
+                            </div>
+                            <span class="badge bg-secondary" id="projectionStatusBadge">Pending</span>
+                        </div>
+                        <div class="row g-3 text-center mt-1">
+                            <div class="col-sm-4 col-lg-2">
+                                <small class="text-muted d-block">Attendance</small>
+                                <strong id="projectionAttendance">-</strong>
+                            </div>
+                            <div class="col-sm-4 col-lg-2">
+                                <small class="text-muted d-block">Payroll</small>
+                                <strong id="projectionPayroll">-</strong>
+                            </div>
+                            <div class="col-sm-4 col-lg-2">
+                                <small class="text-muted d-block">Venue</small>
+                                <strong id="projectionVenue">-</strong>
+                            </div>
+                            <div class="col-sm-4 col-lg-2">
+                                <small class="text-muted d-block">Production</small>
+                                <strong id="projectionProduction">-</strong>
+                            </div>
+                            <div class="col-sm-4 col-lg-2">
+                                <small class="text-muted d-block">Media Floor</small>
+                                <strong id="projectionMedia">-</strong>
+                            </div>
+                            <div class="col-sm-4 col-lg-2">
+                                <small class="text-muted d-block">Projected P/L</small>
+                                <strong id="projectionProfit">-</strong>
+                            </div>
+                        </div>
+                        <div class="small text-muted mt-2" id="projectionBreakdown">-</div>
+                        <div class="mt-3" id="projectionWarnings"></div>
+                        <div class="mt-2" id="projectionRecommendations"></div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="mt-3 d-flex gap-2 flex-wrap">
+                    <button class="btn btn-success btn-lg" id="runShowBtn" disabled>
+                        <i class="bi bi-play-fill"></i> Run Show
+                    </button>
+                    <div class="btn-group">
+                        <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="bi bi-plus-circle"></i> Add Match
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="openAddMatch('male'); return false;">
+                                <i class="bi bi-person-fill text-primary"></i> Men's Match
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="openAddMatch('female'); return false;">
+                                <i class="bi bi-person-fill text-danger"></i> Women's Match
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="openAddMatch('intergender'); return false;">
+                                <i class="bi bi-people-fill text-success"></i> Intergender Tag Match
+                            </a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-info" id="addSegmentBtn">
+                        <i class="bi bi-mic-fill"></i> Add Segment
+                    </button>
+                    <button class="btn btn-warning" onclick="regenerateCard()">
+                        <i class="bi bi-arrow-clockwise"></i> Regenerate All
+                    </button>
+                    <button class="btn btn-outline-success" onclick="loadShowrunnerDraftIntoBooking(true)">
+                        <i class="bi bi-magic"></i> Load Booker AI Draft
+                    </button>
+                    <button class="btn btn-outline-info" onclick="generatePromoDialogueBeats()">
+                        <i class="bi bi-chat-quote"></i> Promo Beats
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="forceLiveInterruptionPreview()">
+                        <i class="bi bi-broadcast"></i> Force Live Shock
+                    </button>
+                    <button class="btn btn-outline-warning" onclick="generateSegments()">
+                        <i class="bi bi-lightning"></i> Auto-Segments
+                    </button>
+                    <button class="btn btn-danger" onclick="clearAllItems()">
+                        <i class="bi bi-trash"></i> Clear All
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadView('office')">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Booking Timeline Builder -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-info shadow-sm">
+            <div class="card-header bg-info-subtle d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Time Slot Allocation</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success" id="timelineAvailableBadge">0 min available</span>
+                    <button class="btn btn-sm btn-outline-primary" onclick="saveBookingTimelinePlan()">
+                        <i class="bi bi-save"></i> Save Timeline
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-3" style="height: 18px;" id="timelineProgress"></div>
+                <div id="bookingTimelineList" class="vstack gap-2">
+                    <div class="text-muted small">Timeline will appear after the show card loads.</div>
+                </div>
+                <div id="timelineWarnings" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- LegacyMania Control Panel -->
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card border-warning shadow-sm">
+      <div class="card-header bg-warning-subtle d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-stars"></i> LegacyMania Control Panel</h5>
+        <button class="btn btn-sm btn-outline-dark" onclick="loadLegacyManiaPanel()">Refresh</button>
+      </div>
+      <div class="card-body">
+        <div class="small text-muted mb-2">Track and assign Rumble Royale and Elimination Chamber winners into the LegacyMania world-title picture.</div>
+        <div id="legacyManiaPanel">Loading LegacyMania opportunities...</div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Show Card Display -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-ol"></i> Full Show Card
+                </h5>
+                <div>
+                    <span class="badge bg-primary me-2" id="matchBadge">0 Matches</span>
+                    <span class="badge bg-info" id="segmentBadge">0 Segments</span>
+                    <span class="badge bg-success" id="runtimeBadge">0 min</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- View Toggle -->
+                <div class="btn-group mb-3" role="group">
+                    <input type="radio" class="btn-check" name="cardView" id="viewCombined" checked onchange="renderFullCard()">
+                    <label class="btn btn-outline-primary" for="viewCombined">
+                        <i class="bi bi-view-list"></i> Combined View
+                    </label>
+                    <input type="radio" class="btn-check" name="cardView" id="viewMatchesOnly" onchange="renderFullCard()">
+                    <label class="btn btn-outline-primary" for="viewMatchesOnly">
+                        <i class="bi bi-trophy"></i> Matches Only
+                    </label>
+                    <input type="radio" class="btn-check" name="cardView" id="viewSegmentsOnly" onchange="renderFullCard()">
+                    <label class="btn btn-outline-primary" for="viewSegmentsOnly">
+                        <i class="bi bi-mic"></i> Segments Only
+                    </label>
+                </div>
+                
+                <div id="showCardList">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-3">Generating card with AI Creative Director...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Match Modal - Enhanced with Gender Tabs -->
+<div class="modal fade" id="addMatchModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" id="addMatchModalHeader">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle"></i> <span id="matchModalTitle">Add Match</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Gender Division Indicator -->
+                <div class="alert alert-info mb-3" id="genderDivisionAlert">
+                    <strong id="divisionTypeText">Division:</strong> <span id="divisionTypeValue">-</span>
+                </div>
+                
+                <!-- Match Type Selection (Gender-Appropriate) -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-grid-3x3-gap"></i> Match Type
+                    </label>
+                    <select class="form-select" id="newMatchType" onchange="updateMatchTypeUI()">
+                        <!-- Populated dynamically based on gender division -->
+                    </select>
+                    <div id="matchTypeDescription" class="form-text text-info mt-2"></div>
+                </div>
+
+                <!-- Wrestler Selection Area (changes based on match type and gender) -->
+                <div id="wrestlerSelectionContainer">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                
+                <hr>
+                
+                <!-- Title Match Options -->
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="isTitleMatch" onchange="toggleTitleOptions()">
+                        <label class="form-check-label fw-bold" for="isTitleMatch">
+                            <i class="bi bi-trophy-fill text-warning"></i> Championship Match
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-3" id="titleSelectionDiv" style="display:none;">
+                    <label class="form-label">Select Championship</label>
+                    <select class="form-select" id="titleSelect" onchange="updateTitleInfo()">
+                        <option value="">Choose a title...</option>
+                    </select>
+                    <div id="addTitleInfo" class="mt-2 p-2 border rounded bg-warning bg-opacity-25" style="display:none;"></div>
+                </div>
+                
+                <!-- Winner Selection -->
+                <div class="mb-3" id="winnerSelectionDiv" style="display:none;">
+                    <label class="form-label fw-bold text-success">
+                        <i class="bi bi-trophy-fill"></i> Booked Winner
+                    </label>
+                    <select class="form-select" id="bookedWinnerSelect">
+                        <option value="">-- Random (Based on ratings) --</option>
+                    </select>
+                    <small class="text-muted">Optional: Pre-determine the winner</small>
+                </div>
+                
+
+                <div class="mb-3" id="rumbleBookingDiv" style="display:none;">
+                    <label class="form-label fw-bold text-primary"><i class="bi bi-list-stars"></i> Rumble Booking Controls</label>
+                    <select class="form-select mb-2" id="bookedRunnerUpSelect"><option value="">-- Runner-up / Last Eliminated (Optional) --</option></select>
+                    <select class="form-select mb-2" id="bookedIronManSelect"><option value="">-- Iron Man / Lasts Longest (Optional) --</option></select>
+                    <select class="form-select" id="bookedMostElimsSelect"><option value="">-- Most Eliminations (Optional) --</option></select>
+                </div>
+                <!-- Special Match Type -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-lightning-fill text-danger"></i> Special Stipulation (Optional)
+                    </label>
+                    <select class="form-select" id="specialMatchType">
+                        <option value="">No special stipulation</option>
+                        <optgroup label="Cage Matches">
+                            <option value="steel_cage">Steel Cage Match</option>
+                            <option value="hell_in_a_cell">Hell in a Cell</option>
+                        </optgroup>
+                        <optgroup label="Ladder Matches">
+                            <option value="ladder_match">Ladder Match</option>
+                            <option value="tlc">TLC (Tables, Ladders, Chairs)</option>
+                        </optgroup>
+                        <optgroup label="Hardcore">
+                            <option value="no_dq">No Disqualification</option>
+                            <option value="street_fight">Street Fight / Falls Count Anywhere</option>
+                            <option value="last_man_standing">Last Man Standing</option>
+                        </optgroup>
+                        <optgroup label="Specialty">
+                            <option value="iron_man">Iron Man Match (30 minutes)</option>
+                            <option value="submission">Submission Match</option>
+                            <option value="i_quit">I Quit Match</option>
+                        </optgroup>
+                    </select>
+                </div>
+                
+                <hr>
+                
+                <!-- Booking Controls -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Booking Bias</label>
+                        <select class="form-select" id="newMatchBias">
+                            <option value="strong_a">Strong Side A (85% win chance)</option>
+                            <option value="slight_a">Slight Side A (65% win chance)</option>
+                            <option value="even" selected>Even (50/50)</option>
+                            <option value="slight_b">Slight Side B (65% win chance)</option>
+                            <option value="strong_b">Strong Side B (85% win chance)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Match Importance</label>
+                        <select class="form-select" id="newMatchImportance">
+                            <option value="normal" selected>Normal</option>
+                            <option value="protect_both">Protect Both</option>
+                            <option value="high_drama">High Drama</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmAddMatchBtn" onclick="confirmAddMatch()">
+                    <i class="bi bi-check-circle"></i> Add Match
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Gender-specific styling */
+.wrestler-card-male {
+    border-left: 4px solid #0d6efd;
+}
+
+.wrestler-card-female {
+    border-left: 4px solid #dc3545;
+}
+
+.wrestler-card-intergender {
+    border-left: 4px solid #198754;
+    background: linear-gradient(90deg, rgba(13,110,253,0.1) 0%, rgba(220,53,69,0.1) 100%);
+}
+
+.gender-badge-male {
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+}
+
+.gender-badge-female {
+    background: linear-gradient(135deg, #dc3545, #b02a37);
+}
+
+.gender-badge-intergender {
+    background: linear-gradient(135deg, #198754, #146c43);
+}
+
+.match-card-intergender {
+    border: 2px solid #198754;
+    background: linear-gradient(135deg, rgba(13,110,253,0.05), rgba(220,53,69,0.05));
+}
+
+.intergender-team-display {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    background: rgba(25, 135, 84, 0.1);
+    border: 1px solid rgba(25, 135, 84, 0.3);
+}
+
+.division-banner {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.division-banner-male {
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    color: white;
+}
+
+.division-banner-female {
+    background: linear-gradient(135deg, #dc3545, #b02a37);
+    color: white;
+}
+
+.division-banner-intergender {
+    background: linear-gradient(135deg, #198754, #146c43);
+    color: white;
+}
+</style>
+
+<script>
+(function() {
+    // ========================================================================
+    // GLOBAL STATE
+    // ========================================================================
+    
+    var currentShowDraft = null;
+    var allWrestlers = {};
+    var allTitles = {};
+    var allFeuds = [];
+    var availableWrestlers = [];
+    var allTagTeams = {};
+    var tagTeamsList = [];
+    var allFactions = {};
+    var factionsList = [];
+    var productionPlan = null;
+    var currentEconomicsProjection = null;
+    var economicsRefreshToken = 0;
+    var currentGenderDivision = 'male'; // 'male', 'female', 'intergender'
+    var segmentTypeCatalogue = [];
+    var segmentTypeMap = {};
+    var editingMatchIndex = null;
+    var editingSegmentIndex = null;
+    
+    // ========================================================================
+    // GENDER-SPECIFIC MATCH TYPES
+    // ========================================================================
+    
+    var GENDER_MATCH_TYPES = {
+        'male': {
+            'singles': { label: "Men's Singles Match", teams: false, count: 2 },
+            'tag': { label: "Men's Tag Team Match", teams: true, count: 4 },
+            'trios_tag': { label: "Men's Trios Tag (3 vs 3)", teams: true, count: 6, team_size: 3, num_teams: 2 },
+            'triple_threat': { label: "Men's Triple Threat", teams: false, count: 3 },
+            'fatal_4way': { label: "Men's Fatal Four-Way", teams: false, count: 4 },
+            'elimination_chamber': { label: "Men's Elimination Chamber", teams: false, count: 6 },
+            'triple_threat_tag': { label: "Men's Triple Threat Tag", teams: true, count: 6 },
+            'fatal_4way_tag': { label: "Men's Fatal Four-Way Tag", teams: true, count: 8 },
+            'battle_royal': { label: "Men's Battle Royal", teams: false, count: '8-20' },
+            'rumble': { label: "Men's Royal Rumble", teams: false, count: 30 }
+        },
+        'female': {
+            'singles': { label: "Women's Singles Match", teams: false, count: 2 },
+            'tag': { label: "Women's Tag Team Match", teams: true, count: 4 },
+            'triple_threat': { label: "Women's Triple Threat", teams: false, count: 3 },
+            'fatal_4way': { label: "Women's Fatal Four-Way", teams: false, count: 4 },
+            'elimination_chamber': { label: "Women's Elimination Chamber", teams: false, count: 6 },
+            'battle_royal': { label: "Women's Battle Royal", teams: false, count: '8-15' },
+            'rumble': { label: "Women's Royal Rumble", teams: false, count: 30 }
+        },
+        'intergender': {
+            'mixed_tag': { label: "Mixed Tag Team Match (1M+1F vs 1M+1F)", teams: true, count: 4, special: 'mixed' },
+            'tornado_mixed_tag': { label: "Tornado Mixed Tag (no tags)", teams: true, count: 4, special: 'mixed_tornado' }
+        }
+    };
+    
+    // ========================================================================
+    // INITIALIZATION
+    // ========================================================================
+
+    function setTextIfPresent(id, value) {
+        var element = document.getElementById(id);
+        if (element) element.textContent = value;
+    }
+
+    function setHTMLIfPresent(id, value) {
+        var element = document.getElementById(id);
+        if (element) element.innerHTML = value;
+    }
+
+    function getRequiredParticipantCount(matchType) {
+        if (matchType === 'elimination_chamber') return 6;
+        if (matchType === 'triple_threat') return 3;
+        if (matchType === 'fatal_4way') return 4;
+        return 0;
+    }
+
+    function collectParticipantIds(participants) {
+        var ids = [];
+        (participants || []).forEach(function(participant) {
+            if (typeof participant === 'string') {
+                ids.push(participant);
+            } else if (Array.isArray(participant)) {
+                participant.forEach(function(id) { if (id) ids.push(id); });
+            } else if (participant && typeof participant === 'object') {
+                ['male', 'female'].forEach(function(key) {
+                    if (participant[key]) ids.push(participant[key]);
+                });
+            }
+        });
+        return ids;
+    }
+    
+    async function loadBookingView() {
+        console.log('Loading enhanced booking view...');
+        
+        try {
+            await loadWrestlerData();
+            await loadTitleData();
+            await loadFeudData();
+            await loadTagTeamData();
+            await loadFactionData();
+            await loadSegmentTypeCatalogue();
+
+            var shouldUseShowrunnerDraft = false;
+            try {
+                shouldUseShowrunnerDraft = sessionStorage.getItem('awumUseShowrunnerDraft') === '1';
+                if (shouldUseShowrunnerDraft) sessionStorage.removeItem('awumUseShowrunnerDraft');
+            } catch (e) {}
+            if (shouldUseShowrunnerDraft) {
+                var loadedAiDraft = await loadShowrunnerDraftIntoBooking(false);
+                if (loadedAiDraft) return;
+            }
+            
+            // Generate show card with production plan
+            var response = await fetch('/api/booking/generate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ include_production_plan: true })
+            });
+            
+            var data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to generate card');
+            }
+            
+            currentShowDraft = normalizeShowDraftForUI(data.show_draft);
+            productionPlan = data.production_plan || null;
+            currentEconomicsProjection = data.economics_projection || null;
+            
+            // Ensure segments array exists
+            if (!currentShowDraft.segments) {
+                currentShowDraft.segments = [];
+            }
+
+            if (!document.getElementById('showCardList')) {
+                console.warn('Booking view was unloaded before the card finished loading.');
+                return;
+            }
+            
+            renderShowInfo(currentShowDraft);
+            renderProductionPlan(productionPlan);
+            renderEconomicsProjection(currentEconomicsProjection);
+            renderFullCard();
+            loadLegacyManiaPanel();
+
+            // Reset edit state if modals are dismissed
+            try {
+                var matchModalEl = document.getElementById('addMatchModal');
+                if (matchModalEl && !matchModalEl.dataset.editBound) {
+                    matchModalEl.addEventListener('hidden.bs.modal', function() {
+                        editingMatchIndex = null;
+                    });
+                    matchModalEl.dataset.editBound = '1';
+                }
+            } catch (e) {}
+            
+            var runButton = document.getElementById('runShowBtn');
+            if (runButton) runButton.disabled = false;
+            
+        } catch (error) {
+            console.error('Failed to generate card:', error);
+            setHTMLIfPresent('showCardList',
+                '<div class="alert alert-danger">' +
+                '<i class="bi bi-exclamation-triangle"></i> ' +
+                '<strong>Failed to generate card:</strong> ' + error.message +
+                '</div>'
+            );
+        }
+    }
+
+    async function loadShowrunnerDraftIntoBooking(showNoDraftToast) {
+        try {
+            setHTMLIfPresent('showCardList',
+                '<div class="text-center py-5">' +
+                '<div class="spinner-border text-success" role="status"></div>' +
+                '<p class="mt-3">Loading Booker AI draft into the main Booking Office...</p>' +
+                '</div>'
+            );
+
+            var response = await fetch('/api/booker/showrunner/latest-booking-draft');
+            var data = await response.json();
+            if (!response.ok || data.error) {
+                throw new Error(data.error || 'Could not load Booker AI draft');
+            }
+            if (!data.available || !data.show_draft) {
+                setHTMLIfPresent('showCardList',
+                    '<div class="alert alert-warning mb-0">' +
+                    '<i class="bi bi-exclamation-circle"></i> No Booker AI draft exists yet. Run AI Week from the AI Showrunner page first.' +
+                    '</div>'
+                );
+                if (showNoDraftToast && window.showToast) showToast(data.message || 'No Booker AI draft available yet', 'warning');
+                return false;
+            }
+
+            currentShowDraft = normalizeShowDraftForUI(data.show_draft);
+            productionPlan = data.production_plan || null;
+            currentEconomicsProjection = data.economics_projection || null;
+            if (!currentShowDraft.segments) currentShowDraft.segments = [];
+            if (!currentShowDraft.matches) currentShowDraft.matches = [];
+
+            if (!document.getElementById('showCardList')) {
+                console.warn('Booking view was unloaded before the AI draft finished loading.');
+                return true;
+            }
+
+            renderShowInfo(currentShowDraft);
+            renderProductionPlan(productionPlan);
+            renderEconomicsProjection(currentEconomicsProjection);
+            renderFullCard();
+            loadLegacyManiaPanel();
+            refreshEconomicsProjection();
+
+            var runButton = document.getElementById('runShowBtn');
+            if (runButton) runButton.disabled = currentShowDraft.matches.length < 3;
+
+            if (window.showToast) {
+                showToast('Loaded Booker AI draft into Booking Office', 'success');
+            }
+            return true;
+        } catch (error) {
+            console.error('Could not load Booker AI draft:', error);
+            setHTMLIfPresent('showCardList',
+                '<div class="alert alert-danger mb-0">' +
+                '<i class="bi bi-exclamation-triangle"></i> ' +
+                '<strong>Booker AI draft failed:</strong> ' + error.message +
+                '</div>'
+            );
+            if (showNoDraftToast && window.showToast) showToast('Booker AI draft failed: ' + error.message, 'danger');
+            return false;
+        }
+    }
+
+    function applyPromoBeatsToSegments(beats) {
+        var applied = 0;
+        if (!currentShowDraft || !currentShowDraft.segments) return applied;
+        (beats || []).forEach(function(beat) {
+            var sourceId = beat.source_id;
+            var target = currentShowDraft.segments.find(function(segment) {
+                return segment.segment_id === sourceId || segment.id === sourceId;
+            });
+            if (!target) {
+                target = currentShowDraft.segments.find(function(segment) {
+                    return ['promo', 'interview', 'contract_signing', 'confrontation', 'announcement', 'vignette'].indexOf(segment.segment_type) !== -1 &&
+                        !segment.dialogue_beats;
+                });
+            }
+            if (!target) return;
+            target.description = beat.hook_text || target.description;
+            target.dialogue_beats = beat.lines_json || [];
+            target.crowd_goal = beat.crowd_goal;
+            target.promo_beat_id = beat.id;
+            applied += 1;
+        });
+        return applied;
+    }
+
+    async function generatePromoDialogueBeats() {
+        if (!currentShowDraft) {
+            showToast('Load or generate a card first', 'warning');
+            return;
+        }
+        try {
+            var response = await fetch('/api/booker/showrunner/promo-beats', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    show_draft: serializeShowDraftForBackend(currentShowDraft),
+                    force: true
+                })
+            });
+            var data = await response.json();
+            if (!response.ok || data.error) throw new Error(data.error || 'Failed to generate promo beats');
+            var applied = applyPromoBeatsToSegments(data.beats || []);
+            renderFullCard();
+            showToast('Generated ' + (data.total || 0) + ' promo beat(s), applied ' + applied + ' to this card', 'success');
+        } catch (error) {
+            console.error('Promo beat generation failed:', error);
+            showToast('Promo beat generation failed: ' + error.message, 'danger');
+        }
+    }
+
+    async function forceLiveInterruptionPreview() {
+        if (!currentShowDraft) {
+            showToast('Load or generate a card first', 'warning');
+            return;
+        }
+        try {
+            var response = await fetch('/api/booker/showrunner/live-interruption', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    show_draft: serializeShowDraftForBackend(currentShowDraft),
+                    force: true
+                })
+            });
+            var data = await response.json();
+            if (!response.ok || data.error) throw new Error(data.error || 'Failed to create live interruption');
+            if (data.inserted && data.show_draft) {
+                currentShowDraft = normalizeShowDraftForUI(data.show_draft);
+                renderShowInfo(currentShowDraft);
+                renderFullCard();
+                var intr = data.interruption || {};
+                showToast('Live shock inserted: ' + (intr.interruption_type || 'surprise'), 'warning');
+            } else {
+                showToast(data.reason || 'No live interruption triggered', 'info');
+            }
+        } catch (error) {
+            console.error('Live interruption failed:', error);
+            showToast('Live interruption failed: ' + error.message, 'danger');
+        }
+    }
+    
+    async function loadWrestlerData() {
+        try {
+            var response = await fetch('/api/roster');
+            var data = await response.json();
+
+            allWrestlers = {};
+
+            (data.wrestlers || []).forEach(function(w) {
+                var normalized = normalizeWrestler(w);
+                allWrestlers[normalized.id] = normalized;
+            });
+            
+            console.log('Loaded ' + Object.keys(allWrestlers).length + ' wrestlers');
+        } catch (error) {
+            console.error('Failed to load wrestler data:', error);
+        }
+    }
+    
+    async function loadTitleData() {
+        try {
+            var response = await fetch('/api/championships');
+            var data = await response.json();
+
+            allTitles = {};
+
+            var championships = Array.isArray(data)
+                ? data
+                : (Array.isArray(data.championships) ? data.championships : []);
+
+            championships.forEach(function(t) {
+                var normalized = normalizeTitle(t);
+                if (!normalized.id) return;
+                allTitles[normalized.id] = normalized;
+            });
+            
+            console.log('Loaded ' + Object.keys(allTitles).length + ' titles');
+        } catch (error) {
+            console.error('Failed to load title data:', error);
+        }
+    }
+    
+    async function loadFeudData() {
+        try {
+            var response = await fetch('/api/feuds');
+            var data = await response.json();
+            
+            if (data.success && data.feuds) {
+                allFeuds = data.feuds.filter(function(f) { return f.status === 'active'; });
+            }
+            
+            console.log('Loaded ' + allFeuds.length + ' active feuds');
+        } catch (error) {
+            console.error('Failed to load feud data:', error);
+            allFeuds = [];
+        }
+    }
+
+    async function loadTagTeamData() {
+        try {
+            var response = await fetch('/api/tag-teams?active_only=true');
+            var data = await response.json();
+            allTagTeams = {};
+            tagTeamsList = (data.teams || []).slice();
+            tagTeamsList.forEach(function(t) {
+                allTagTeams[t.team_id] = t;
+            });
+            console.log('Loaded ' + tagTeamsList.length + ' tag teams');
+        } catch (error) {
+            console.error('Failed to load tag team data:', error);
+            allTagTeams = {};
+            tagTeamsList = [];
+        }
+    }
+
+    async function loadFactionData() {
+        try {
+            var response = await fetch('/api/factions?active_only=true');
+            var data = await response.json();
+            allFactions = {};
+            factionsList = (data.factions || []).slice();
+            factionsList.forEach(function(f) {
+                allFactions[f.faction_id] = f;
+            });
+            console.log('Loaded ' + factionsList.length + ' factions');
+        } catch (error) {
+            console.error('Failed to load faction data:', error);
+            allFactions = {};
+            factionsList = [];
+        }
+    }
+
+    async function loadSegmentTypeCatalogue() {
+        try {
+            var response = await fetch('/api/show-production/segment-types');
+            var data = await response.json();
+            segmentTypeCatalogue = data.success && Array.isArray(data.segment_types) ? data.segment_types : [];
+            segmentTypeMap = {};
+            segmentTypeCatalogue.forEach(function(segmentType) {
+                segmentTypeMap[segmentType.segment_type] = segmentType;
+            });
+        } catch (error) {
+            console.error('Failed to load segment type catalogue:', error);
+            segmentTypeCatalogue = [];
+            segmentTypeMap = {};
+        }
+    }
+
+    function getSegmentTypeConfig(segmentType) {
+        return segmentTypeMap[segmentType] || null;
+    }
+
+    function getSegmentTypeLabel(segmentType, fallbackDisplayName) {
+        var config = getSegmentTypeConfig(segmentType);
+        if (config && config.display_name) return config.display_name;
+        if (fallbackDisplayName) return fallbackDisplayName;
+        return (segmentType || 'segment').replace(/_/g, ' ').toUpperCase();
+    }
+
+    function getSegmentTypeOptionsHtml() {
+        if (!segmentTypeCatalogue.length) {
+            return [
+                '<option value="promo">Promo / Interview</option>',
+                '<option value="interview">Backstage Interview</option>',
+                '<option value="contract_signing">Contract Signing</option>',
+                '<option value="announcement">General Manager Announcement</option>',
+                '<option value="vignette">Video Package</option>',
+                '<option value="run_in">Run-In Angle</option>'
+            ].join('');
+        }
+
+        return segmentTypeCatalogue.map(function(segmentType) {
+            return '<option value="' + segmentType.segment_type + '">' +
+                segmentType.display_name +
+                '</option>';
+        }).join('');
+    }
+
+    function updateSegmentTypePreview() {
+        var typeSelect = document.getElementById('newSegmentType');
+        var preview = document.getElementById('segmentTypePreview');
+        var durationInput = document.getElementById('segmentDuration');
+        if (!typeSelect || !preview) return;
+
+        var config = getSegmentTypeConfig(typeSelect.value);
+        if (!config) {
+            preview.innerHTML = '<small class="text-muted">Custom segment type.</small>';
+            return;
+        }
+
+        if (durationInput && (!durationInput.dataset.userEdited || durationInput.dataset.userEdited !== 'true')) {
+            durationInput.value = config.typical_duration || 5;
+        }
+
+        var badges = [];
+        if (config.suitable_for_opening) badges.push('<span class="badge bg-primary me-1">Opening OK</span>');
+        if (config.advances_feud) badges.push('<span class="badge bg-danger me-1">Feud+</span>');
+        if (config.creates_heat) badges.push('<span class="badge bg-dark me-1">Heat</span>');
+        if (config.creates_pop) badges.push('<span class="badge bg-success me-1">Pop</span>');
+        if (config.can_end_in_brawl) badges.push('<span class="badge bg-warning text-dark me-1">Can Brawl</span>');
+
+        preview.innerHTML =
+            '<div class="small text-muted mb-1">' + (config.description || '') + '</div>' +
+            '<div class="mb-1">' + badges.join('') + '</div>' +
+            '<small class="text-muted">Typical duration: ' + (config.typical_duration || 5) +
+            ' min | Crowd energy: ' + ((config.crowd_energy_impact || 0) >= 0 ? '+' : '') +
+            (config.crowd_energy_impact || 0) + '</small>';
+    }
+
+    function normalizeWrestler(wrestler) {
+        var attributes = wrestler.attributes || {};
+        var stats = wrestler.stats || {};
+        var normalizedGender = String(wrestler.gender || '').trim().toLowerCase();
+        var normalizedId = wrestler.id || wrestler.wrestler_id || wrestler.wrestlerId || wrestler.worker_id || null;
+
+        return Object.assign({}, wrestler, {
+            id: normalizedId,
+            name: wrestler.name || wrestler.ring_name || 'Unknown Wrestler',
+            ring_name: wrestler.ring_name || wrestler.name || 'Unknown Wrestler',
+            gender: normalizedGender || wrestler.gender || '',
+            overall_rating: wrestler.overall_rating != null
+                ? wrestler.overall_rating
+                : (attributes.overall != null ? attributes.overall : 0),
+            current_brand: wrestler.current_brand || wrestler.primary_brand || '',
+            primary_brand: wrestler.primary_brand || wrestler.current_brand || '',
+            status: String(wrestler.status || (wrestler.is_retired ? 'retired' : 'active')).toLowerCase(),
+            popularity: wrestler.popularity != null ? wrestler.popularity : (stats.popularity != null ? stats.popularity : 0),
+            momentum: wrestler.momentum != null ? wrestler.momentum : (stats.momentum != null ? stats.momentum : 0),
+            morale: wrestler.morale != null ? wrestler.morale : (stats.morale != null ? stats.morale : 0),
+            fatigue: wrestler.fatigue != null ? wrestler.fatigue : (stats.fatigue != null ? stats.fatigue : 0)
+        });
+    }
+
+    function inferTitleDivision(title) {
+        var explicitDivision = (title.division || '').toLowerCase();
+        if (explicitDivision === 'mens' || explicitDivision === "men's") return 'male';
+        if (explicitDivision === 'womens' || explicitDivision === "women's") return 'female';
+        if (explicitDivision) return explicitDivision;
+
+        var titleType = (title.title_type || '').toLowerCase();
+        var titleName = (title.name || title.title_name || '').toLowerCase();
+        if (titleType.indexOf('women') !== -1 || titleName.indexOf('women') !== -1) return 'female';
+        if (titleType.indexOf('intergender') !== -1 || titleType.indexOf('mixed') !== -1) return 'intergender';
+        return 'male';
+    }
+
+    function normalizeTitle(title) {
+        var normalizedId = title.id || title.title_id || title.championship_id || null;
+        var normalizedName = title.name || title.title_name || title.championship_name || 'Untitled Championship';
+
+        return Object.assign({}, title, {
+            id: normalizedId,
+            name: normalizedName,
+            current_brand: title.current_brand || title.assigned_brand || title.brand || '',
+            division: inferTitleDivision(title),
+            current_champion_id: title.current_champion_id || title.current_holder_id || title.effective_champion_id || null,
+            current_champion_name: title.current_champion_name || title.current_holder_display || title.current_holder_name || title.effective_champion_name || null,
+            prestige_level: title.prestige_level != null ? title.prestige_level : (title.prestige != null ? title.prestige : 0)
+        });
+    }
+
+    function createDraftId(prefix) {
+        return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+    }
+
+    function getWrestlerName(wrestlerId) {
+        var wrestler = allWrestlers[wrestlerId];
+        return wrestler ? (wrestler.name || wrestler.ring_name || wrestlerId) : wrestlerId;
+    }
+
+    function sameSet(a, b) {
+        if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+        var values = new Set(a);
+        for (var i = 0; i < b.length; i++) {
+            if (!values.has(b[i])) return false;
+        }
+        return true;
+    }
+
+    function getTeamDisplayLabel(memberIds, explicitLabel) {
+        var names = (memberIds || []).filter(Boolean).map(getWrestlerName);
+        if (explicitLabel && explicitLabel !== 'Custom Team') {
+            return explicitLabel;
+        }
+        return names.join(' & ');
+    }
+
+    function getParticipantIds(participants) {
+        var ids = [];
+
+        (participants || []).forEach(function(participant) {
+            if (typeof participant === 'string') {
+                ids.push(participant);
+            } else if (Array.isArray(participant)) {
+                participant.forEach(function(id) {
+                    if (id) ids.push(id);
+                });
+            } else if (participant && typeof participant === 'object') {
+                if (participant.male) ids.push(participant.male);
+                if (participant.female) ids.push(participant.female);
+                if (participant.wrestler_id) ids.push(participant.wrestler_id);
+                if (participant.id) ids.push(participant.id);
+            }
+        });
+
+        return ids.filter(Boolean);
+    }
+
+    function inferMatchDivision(participants) {
+        var genders = {};
+
+        getParticipantIds(participants).forEach(function(wrestlerId) {
+            var wrestler = allWrestlers[wrestlerId];
+            if (wrestler && wrestler.gender) {
+                genders[wrestler.gender] = true;
+            }
+        });
+
+        if (genders.male && genders.female) return 'intergender';
+        if (genders.female) return 'female';
+        return 'male';
+    }
+
+    function buildMixedTeam(ids) {
+        var team = { male: null, female: null };
+
+        (ids || []).forEach(function(wrestlerId) {
+            var wrestler = allWrestlers[wrestlerId];
+            if (!wrestler) return;
+
+            if (wrestler.gender === 'female' && !team.female) {
+                team.female = wrestlerId;
+            } else if (!team.male) {
+                team.male = wrestlerId;
+            } else if (!team.female) {
+                team.female = wrestlerId;
+            }
+        });
+
+        return team;
+    }
+
+    function normalizeUiMatch(match, index) {
+        var normalized = Object.assign({}, match);
+
+        if (!normalized.participants && (normalized.side_a || normalized.side_b)) {
+            var sideAIds = (normalized.side_a && normalized.side_a.wrestler_ids) || [];
+            var sideBIds = (normalized.side_b && normalized.side_b.wrestler_ids) || [];
+            var flatIds = sideAIds.concat(sideBIds);
+
+            if (normalized.match_type === 'mixed_tag' || normalized.match_type === 'tornado_mixed_tag') {
+                normalized.participants = [
+                    buildMixedTeam(sideAIds),
+                    buildMixedTeam(sideBIds)
+                ];
+            } else if (normalized.match_type === 'tag') {
+                normalized.participants = [sideAIds, sideBIds];
+            } else if (normalized.match_type === 'triple_threat_tag' || normalized.match_type === 'fatal_4way_tag') {
+                normalized.participants = [];
+                for (var i = 0; i < flatIds.length; i += 2) {
+                    normalized.participants.push(flatIds.slice(i, i + 2));
+                }
+            } else {
+                normalized.participants = flatIds;
+            }
+        }
+
+        normalized.match_id = normalized.match_id || createDraftId('match');
+        normalized.position = normalized.position || normalized.card_position || (index + 1);
+        normalized.card_position = normalized.position;
+        normalized.booking_bias = normalized.booking_bias || 'even';
+        normalized.importance = normalized.importance || 'normal';
+        normalized.special_stipulation = normalized.special_stipulation || normalized.special_match_type || normalized.stipulation || '';
+        normalized.title_name = normalized.title_name || (normalized.title_id && allTitles[normalized.title_id] ? allTitles[normalized.title_id].name : null);
+
+        if (normalized.booked_winner === 'side_a' || normalized.booked_winner === 'side_b') {
+            var participants = normalized.participants || [];
+            if (normalized.booked_winner === 'side_a' && participants.length > 0) {
+                normalized.booked_winner = Array.isArray(participants[0]) ? participants[0][0] : participants[0].male || participants[0];
+            } else if (normalized.booked_winner === 'side_b' && participants.length > 1) {
+                normalized.booked_winner = Array.isArray(participants[1]) ? participants[1][0] : participants[1].male || participants[1];
+            }
+        }
+
+        if (normalized.booked_winner && Array.isArray(normalized.participants)) {
+            normalized.participants.forEach(function(participant) {
+                if (Array.isArray(participant) && participant.indexOf(normalized.booked_winner) !== -1) {
+                    normalized.booked_winner = participant[0];
+                } else if (participant && typeof participant === 'object') {
+                    var mixedTeamIds = [participant.male, participant.female].filter(Boolean);
+                    if (mixedTeamIds.indexOf(normalized.booked_winner) !== -1) {
+                        normalized.booked_winner = mixedTeamIds[0];
+                    }
+                }
+            });
+        }
+
+        normalized.gender_division = normalized.gender_division || inferMatchDivision(normalized.participants);
+        normalized.is_intergender = normalized.is_intergender != null
+            ? normalized.is_intergender
+            : normalized.gender_division === 'intergender';
+
+        return normalized;
+    }
+
+    function normalizeUiSegment(segment, index) {
+        var normalized = Object.assign({}, segment);
+        var config = getSegmentTypeConfig(normalized.segment_type);
+
+        normalized.segment_id = normalized.segment_id || createDraftId('segment');
+        normalized.participant_name_map = normalized.participant_name_map || {};
+        var rawParticipants = normalized.participants || normalized.participant_ids || normalized.participants_ids || normalized.participantIds || [];
+        normalized.participants = (rawParticipants || []).map(function(participant) {
+            if (typeof participant === 'string') return participant;
+            if (participant && participant.wrestler_id) {
+                if (participant.wrestler_name) normalized.participant_name_map[participant.wrestler_id] = participant.wrestler_name;
+                return participant.wrestler_id;
+            }
+            if (participant && participant.wrestlerId) {
+                if (participant.wrestler_name) normalized.participant_name_map[participant.wrestlerId] = participant.wrestler_name;
+                return participant.wrestlerId;
+            }
+            if (participant && participant.participant_id) {
+                if (participant.name) normalized.participant_name_map[participant.participant_id] = participant.name;
+                return participant.participant_id;
+            }
+            if (participant && participant.id) {
+                if (participant.name) normalized.participant_name_map[participant.id] = participant.name;
+                return participant.id;
+            }
+            return participant;
+        }).filter(Boolean);
+        normalized.display_name = normalized.display_name || (config && config.display_name) || null;
+        normalized.description = normalized.description || (config && config.description) || null;
+        normalized.duration = normalized.duration || normalized.duration_minutes || (config && config.typical_duration) || 5;
+        normalized.duration_minutes = normalized.duration;
+        normalized.position = normalized.position || normalized.card_position || ((index * 100) + 50);
+        normalized.card_position = normalized.position;
+        normalized.purpose = normalized.purpose || 'general';
+        normalized.can_end_in_brawl = normalized.can_end_in_brawl != null
+            ? normalized.can_end_in_brawl
+            : !!(config && config.can_end_in_brawl);
+        normalized.can_cause_injury = normalized.can_cause_injury != null
+            ? normalized.can_cause_injury
+            : !!(config && config.can_cause_injury);
+        normalized.advances_feud = normalized.advances_feud != null
+            ? normalized.advances_feud
+            : !!(config && config.advances_feud);
+        normalized.creates_heat = normalized.creates_heat != null
+            ? normalized.creates_heat
+            : !!(config && config.creates_heat);
+        normalized.creates_pop = normalized.creates_pop != null
+            ? normalized.creates_pop
+            : !!(config && config.creates_pop);
+        normalized.is_intergender = normalized.is_intergender != null
+            ? normalized.is_intergender
+            : inferMatchDivision(normalized.participants) === 'intergender';
+
+        return normalized;
+    }
+
+    function normalizeShowDraftForUI(showDraft) {
+        var normalized = Object.assign({}, showDraft || {});
+        normalized.matches = (normalized.matches || []).map(function(match, index) {
+            return normalizeUiMatch(match, index);
+        });
+        normalized.segments = (normalized.segments || []).map(function(segment, index) {
+            return normalizeUiSegment(segment, index);
+        });
+        return normalized;
+    }
+
+    function serializeBookedWinner(match, sideAIds, sideBIds) {
+        if (!match.booked_winner) return null;
+
+        if (match.match_type === 'triple_threat' ||
+            match.match_type === 'fatal_4way' ||
+            match.match_type === 'elimination_chamber' ||
+            match.match_type === 'triple_threat_tag' ||
+            match.match_type === 'fatal_4way_tag' ||
+            match.match_type === 'battle_royal' ||
+            match.match_type === 'rumble') {
+            return match.booked_winner;
+        }
+
+        if (match.booked_winner === 'side_a' || match.booked_winner === 'side_b') {
+            return match.booked_winner;
+        }
+
+        if (sideAIds.indexOf(match.booked_winner) !== -1) return 'side_a';
+        if (sideBIds.indexOf(match.booked_winner) !== -1) return 'side_b';
+        return null;
+    }
+
+    function applyMultiTeamBiasPreference(match) {
+        if (!match || !Array.isArray(match.participants)) return match;
+        if (match.match_type !== 'triple_threat_tag' && match.match_type !== 'fatal_4way_tag') {
+            return match;
+        }
+
+        var bookingBias = match.booking_bias || 'even';
+        var matchInfo = bookingBias.match(/^(strong|slight)_team_(\d+)$/);
+        if (!matchInfo) return match;
+
+        var strength = matchInfo[1];
+        var preferredIndex = parseInt(matchInfo[2], 10);
+        if (!Number.isFinite(preferredIndex) || preferredIndex < 0 || preferredIndex >= match.participants.length) {
+            return match;
+        }
+
+        var reordered = Object.assign({}, match);
+        reordered.participants = match.participants.slice();
+        var favoredTeam = reordered.participants.splice(preferredIndex, 1)[0];
+        reordered.participants.unshift(favoredTeam);
+
+        if (Array.isArray(match.team_units)) {
+            reordered.team_units = match.team_units.slice();
+            var favoredMeta = reordered.team_units.splice(preferredIndex, 1)[0];
+            reordered.team_units.unshift(favoredMeta);
+        }
+
+        reordered.booking_bias = strength + '_a';
+        if (reordered.booked_winner && Array.isArray(favoredTeam) && favoredTeam.indexOf(reordered.booked_winner) !== -1) {
+            reordered.booked_winner = favoredTeam[0];
+        }
+        return reordered;
+    }
+
+    function serializeMatchForBackend(match, index) {
+        var normalized = applyMultiTeamBiasPreference(normalizeUiMatch(match, index));
+        var participants = normalized.participants || [];
+        var sideAIds = [];
+        var sideBIds = [];
+
+        if (normalized.is_intergender) {
+            var teamA = participants[0] || {};
+            var teamB = participants[1] || {};
+            sideAIds = [teamA.male, teamA.female].filter(Boolean);
+            sideBIds = [teamB.male, teamB.female].filter(Boolean);
+        } else if (normalized.match_type === 'tag' || normalized.match_type === 'trios_tag') {
+            sideAIds = (participants[0] || []).slice();
+            sideBIds = (participants[1] || []).slice();
+        } else if (normalized.match_type === 'triple_threat_tag' || normalized.match_type === 'fatal_4way_tag') {
+            participants.forEach(function(team) {
+                if (Array.isArray(team)) {
+                    sideAIds = sideAIds.concat(team);
+                }
+            });
+        } else if (normalized.match_type === 'triple_threat' ||
+                   normalized.match_type === 'fatal_4way' ||
+                   normalized.match_type === 'elimination_chamber' ||
+                   normalized.match_type === 'battle_royal' ||
+                   normalized.match_type === 'rumble') {
+            sideAIds = participants.slice();
+        } else {
+            if (participants[0]) sideAIds = [participants[0]];
+            if (participants[1]) sideBIds = [participants[1]];
+        }
+
+        return {
+            match_id: normalized.match_id || createDraftId('match'),
+            side_a: {
+                wrestler_ids: sideAIds,
+                wrestler_names: sideAIds.map(getWrestlerName),
+                is_tag_team: sideAIds.length > 1
+            },
+            side_b: {
+                wrestler_ids: sideBIds,
+                wrestler_names: sideBIds.map(getWrestlerName),
+                is_tag_team: sideBIds.length > 1
+            },
+            match_type: normalized.match_type,
+            is_title_match: !!normalized.is_title_match,
+            title_id: normalized.title_id || null,
+            title_name: normalized.title_name || (normalized.title_id && allTitles[normalized.title_id] ? allTitles[normalized.title_id].name : null),
+            card_position: normalized.position || normalized.card_position || (index + 1),
+            booking_bias: normalized.booking_bias || 'even',
+            importance: normalized.importance || 'normal',
+            feud_id: normalized.feud_id || null,
+            stipulation: normalized.special_stipulation || normalized.stipulation || null,
+            special_match_type: normalized.special_stipulation || normalized.special_match_type || normalized.stipulation || null,
+            planned_duration_minutes: normalized.planned_duration_minutes || normalized.duration || null,
+            booked_winner: serializeBookedWinner(normalized, sideAIds, sideBIds)
+        };
+    }
+
+    function serializeSegmentForBackend(segment, index) {
+        var normalized = normalizeUiSegment(segment, index);
+
+        return {
+            segment_id: normalized.segment_id || createDraftId('segment'),
+            segment_type: normalized.segment_type || 'promo',
+            display_name: normalized.display_name || getSegmentTypeLabel(normalized.segment_type),
+            description: normalized.description || null,
+            participants: (normalized.participants || []).map(function(wrestlerId) {
+                return {
+                    wrestler_id: wrestlerId,
+                    wrestler_name: getWrestlerName(wrestlerId),
+                    role: 'speaker'
+                };
+            }),
+            feud_id: normalized.feud_id || null,
+            title_id: normalized.title_id || null,
+            title_name: normalized.title_name || null,
+            tone: normalized.tone || 'intense',
+            duration_minutes: normalized.duration || normalized.duration_minutes || 5,
+            card_position: normalized.position || normalized.card_position || ((index * 100) + 50),
+            is_opening: !!normalized.is_opening,
+            ends_in_brawl: !!normalized.ends_in_brawl,
+            causes_injury: !!normalized.causes_injury,
+            can_end_in_brawl: !!normalized.can_end_in_brawl,
+            can_cause_injury: !!normalized.can_cause_injury,
+            advances_feud: !!normalized.advances_feud,
+            creates_heat: !!normalized.creates_heat,
+            creates_pop: !!normalized.creates_pop
+        };
+    }
+
+    function serializeShowDraftForBackend(showDraft) {
+        var normalized = normalizeShowDraftForUI(showDraft);
+
+        return {
+            show_id: normalized.show_id,
+            show_name: normalized.show_name,
+            brand: normalized.brand,
+            show_type: normalized.show_type,
+            is_ppv: !!normalized.is_ppv,
+            year: normalized.year,
+            week: normalized.week,
+            matches: (normalized.matches || []).map(function(match, index) {
+                return serializeMatchForBackend(match, index);
+            }),
+            segments: (normalized.segments || []).map(function(segment, index) {
+                return serializeSegmentForBackend(segment, index);
+            })
+        };
+    }
+    
+    // ========================================================================
+    // PRODUCTION PLAN RENDERING
+    // ========================================================================
+    
+    function renderProductionPlan(plan) {
+        if (!plan) return;
+        
+        var container = document.getElementById('productionPlanInfo');
+        container.style.display = 'block';
+        
+        // Show theme if not standard
+        if (plan.theme && plan.theme !== 'standard') {
+            var themeBadge = document.getElementById('showThemeBadge');
+            themeBadge.textContent = plan.theme_display_name || plan.theme;
+            themeBadge.style.display = 'inline-block';
+            themeBadge.title = plan.theme_description || '';
+        }
+        
+        // Opening segment
+        document.getElementById('openingType').textContent = 
+            (plan.opening_segment_type || 'hot_match').replace(/_/g, ' ').toUpperCase();
+        
+        // Main event criteria
+        var mainEventText = plan.main_event_criteria?.reason || 'Standard main event';
+        document.getElementById('mainEventCriteria').textContent = mainEventText.substring(0, 50) + '...';
+        
+        // Theme bonuses
+        var themeText = 'None';
+        if (plan.theme_bonus_match_quality > 0 || plan.theme_bonus_attendance_pct > 0) {
+            themeText = '+' + plan.theme_bonus_match_quality + ' stars, +' + 
+                        (plan.theme_bonus_attendance_pct * 100).toFixed(0) + '% attendance';
+        }
+        document.getElementById('themeBonus').textContent = themeText;
+        
+        // Runtime
+        document.getElementById('showRuntime').textContent = (plan.total_runtime_minutes || 120) + ' min';
+        document.getElementById('targetMatches').textContent = plan.target_matches || 5;
+    }
+
+    function formatMoney(value) {
+        return '$' + (parseInt(value || 0, 10)).toLocaleString();
+    }
+
+    function renderProjectionList(elementId, rows, alertClass, emptyText) {
+        var container = document.getElementById(elementId);
+        if (!container) return;
+        if (!rows || !rows.length) {
+            container.innerHTML = '<div class="small text-muted">' + emptyText + '</div>';
+            return;
+        }
+        container.innerHTML = rows.map(function(row) {
+            return '<div class="alert ' + alertClass + ' py-2 mb-2">' + row + '</div>';
+        }).join('');
+    }
+
+    function renderEconomicsProjection(projection) {
+        var panel = document.getElementById('profitProjectionPanel');
+        if (!panel) return;
+        if (!projection) {
+            panel.style.display = 'none';
+            return;
+        }
+
+        panel.style.display = 'block';
+
+        var profit = projection.projected_net_profit || 0;
+        var statusBadge = document.getElementById('projectionStatusBadge');
+        var profitEl = document.getElementById('projectionProfit');
+
+        document.getElementById('projectionSubtitle').textContent =
+            (projection.brand || 'Show') + ' • ' +
+            (projection.show_type || 'weekly_tv').replace(/_/g, ' ').toUpperCase() +
+            ' • Margin ' + ((projection.projected_margin_pct || 0).toFixed(2)) + '%';
+        document.getElementById('projectionAttendance').textContent = (projection.projected_attendance || 0).toLocaleString();
+        document.getElementById('projectionPayroll').textContent = formatMoney(projection.expense_breakdown?.payroll || 0);
+        document.getElementById('projectionVenue').textContent = formatMoney(projection.expense_breakdown?.venue || 0);
+        document.getElementById('projectionProduction').textContent = formatMoney(projection.expense_breakdown?.production || 0);
+        document.getElementById('projectionMedia').textContent = formatMoney(projection.revenue_breakdown?.guaranteed_media_revenue || 0);
+
+        profitEl.textContent = formatMoney(profit);
+        profitEl.className = profit >= 0 ? 'text-success' : 'text-danger';
+
+        statusBadge.className = 'badge ' + (profit >= 0 ? 'bg-success' : 'bg-danger');
+        statusBadge.textContent = profit >= 0 ? 'Projected Profit' : 'Projected Loss';
+
+        document.getElementById('projectionBreakdown').textContent =
+            'Gate ' + formatMoney(projection.revenue_breakdown?.gate_revenue || 0) +
+            ' • Merch ' + formatMoney(projection.revenue_breakdown?.merchandise_revenue || 0) +
+            ' • Local Sponsors ' + formatMoney(projection.revenue_breakdown?.local_sponsorship_revenue || 0) +
+            ' • Soft Cap ' + formatMoney(projection.expense_breakdown?.salary_soft_cap || 0) +
+            ' • Over Cap ' + formatMoney(projection.expense_breakdown?.payroll_over_soft_cap || 0);
+
+        renderProjectionList('projectionWarnings', projection.warnings, 'alert-warning', 'No major cost warnings right now.');
+        renderProjectionList('projectionRecommendations', projection.recommendations, 'alert-info', 'No extra booking recommendations.');
+    }
+
+    async function refreshEconomicsProjection() {
+        if (!currentShowDraft) return;
+
+        var token = ++economicsRefreshToken;
+        try {
+            var response = await fetch('/api/booking/projection', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    show_draft: serializeShowDraftForBackend(currentShowDraft)
+                })
+            });
+            var data = await response.json();
+            if (token !== economicsRefreshToken) return;
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to project show economics');
+            }
+            currentEconomicsProjection = data.projection || null;
+            renderEconomicsProjection(currentEconomicsProjection);
+        } catch (error) {
+            console.error('Failed to refresh economics projection:', error);
+        }
+    }
+    
+    // ========================================================================
+// PART 3B: GENDER-AWARE MATCH BOOKING LOGIC
+// ========================================================================
+
+// ========================================================================
+// OPEN ADD MATCH MODAL WITH GENDER DIVISION
+// ========================================================================
+
+function openAddMatch(genderDivision) {
+    currentGenderDivision = genderDivision || 'male';
+    
+    // Update modal header styling
+    var modalHeader = document.getElementById('addMatchModalHeader');
+    var modalTitle = document.getElementById('matchModalTitle');
+    var divisionAlert = document.getElementById('genderDivisionAlert');
+    var divisionTypeText = document.getElementById('divisionTypeText');
+    var divisionTypeValue = document.getElementById('divisionTypeValue');
+    
+    // Reset modal classes
+    modalHeader.className = 'modal-header';
+    divisionAlert.className = 'alert mb-3';
+    
+    if (genderDivision === 'male') {
+        modalHeader.classList.add('bg-primary', 'text-white');
+        divisionAlert.classList.add('alert-primary');
+        divisionTypeText.innerHTML = '<i class="bi bi-person-fill"></i> Division:';
+        divisionTypeValue.textContent = "Men's Division";
+        modalTitle.innerHTML = '<i class="bi bi-person-fill"></i> Add Men\'s Match';
+    } else if (genderDivision === 'female') {
+        modalHeader.classList.add('bg-danger', 'text-white');
+        divisionAlert.classList.add('alert-danger');
+        divisionTypeText.innerHTML = '<i class="bi bi-person-fill"></i> Division:';
+        divisionTypeValue.textContent = "Women's Division";
+        modalTitle.innerHTML = '<i class="bi bi-person-fill"></i> Add Women\'s Match';
+    } else if (genderDivision === 'intergender') {
+        modalHeader.classList.add('bg-success', 'text-white');
+        divisionAlert.classList.add('alert-success');
+        divisionTypeText.innerHTML = '<i class="bi bi-people-fill"></i> Division:';
+        divisionTypeValue.textContent = "Intergender (Mixed Tag)";
+        modalTitle.innerHTML = '<i class="bi bi-people-fill"></i> Add Intergender Tag Match';
+    }
+    
+    // Populate match types based on gender division
+    populateMatchTypes(genderDivision);
+    
+    // Filter available wrestlers by gender
+    filterWrestlersByGender(genderDivision);
+    
+    // Populate title dropdown (gender-filtered)
+    populateTitleDropdown(genderDivision);
+    
+    // Reset form
+    resetAddMatchForm();
+    
+    // Mode-specific UI
+    var isEditMode = editingMatchIndex !== null;
+    var modalTitleEl = document.getElementById('matchModalTitle');
+    var confirmBtn = document.getElementById('confirmAddMatchBtn');
+    if (modalTitleEl) modalTitleEl.textContent = isEditMode ? 'Edit Match' : 'Add Match';
+    if (confirmBtn) {
+        confirmBtn.innerHTML = isEditMode
+            ? '<i class="bi bi-check-circle"></i> Update Match'
+            : '<i class="bi bi-check-circle"></i> Add Match';
+    }
+
+    // Show modal
+    var modal = new bootstrap.Modal(document.getElementById('addMatchModal'));
+    modal.show();
+}
+
+// ========================================================================
+// POPULATE MATCH TYPES BY GENDER
+// ========================================================================
+
+function populateMatchTypes(genderDivision) {
+    var select = document.getElementById('newMatchType');
+    select.innerHTML = '<option value="">Choose match type...</option>';
+    
+    var types = GENDER_MATCH_TYPES[genderDivision] || {};
+    
+    for (var key in types) {
+        var type = types[key];
+        var option = document.createElement('option');
+        option.value = key;
+        option.textContent = type.label;
+        option.dataset.teams = type.teams;
+        option.dataset.count = type.count;
+        option.dataset.teamSize = type.team_size || 2;
+        option.dataset.numTeams = type.num_teams || '';
+        option.dataset.special = type.special || '';
+        select.appendChild(option);
+    }
+    
+    // Auto-select first option for intergender (only 2 options)
+    if (genderDivision === 'intergender' && select.options.length > 1) {
+        select.selectedIndex = 1;
+        updateMatchTypeUI();
+    }
+}
+
+// ========================================================================
+// FILTER WRESTLERS BY GENDER
+// ========================================================================
+
+function filterWrestlersByGender(genderDivision) {
+    availableWrestlers = [];
+    var isCrossBrandShow = currentShowDraft && (currentShowDraft.brand === 'Cross-Brand');
+    
+    if (genderDivision === 'intergender') {
+        // For intergender, we need both male and female wrestlers
+        availableWrestlers = Object.values(allWrestlers).filter(function(w) {
+            return w.status === 'active' && 
+                   (isCrossBrandShow || w.current_brand === currentShowDraft.brand) &&
+                   (w.gender === 'male' || w.gender === 'female');
+        });
+    } else {
+        // Filter by specific gender
+        availableWrestlers = Object.values(allWrestlers).filter(function(w) {
+            return w.status === 'active' && 
+                   (isCrossBrandShow || w.current_brand === currentShowDraft.brand) &&
+                   w.gender === genderDivision;
+        });
+    }
+    
+    console.log('Filtered ' + availableWrestlers.length + ' wrestlers for ' + genderDivision + ' division');
+}
+
+// ========================================================================
+// UPDATE MATCH TYPE UI (DYNAMIC WRESTLER SELECTION)
+// ========================================================================
+
+function updateMatchTypeUI() {
+    var matchTypeSelect = document.getElementById('newMatchType');
+    var selectedOption = matchTypeSelect.options[matchTypeSelect.selectedIndex];
+    
+    if (!selectedOption || !selectedOption.value) {
+        document.getElementById('wrestlerSelectionContainer').innerHTML = '';
+        document.getElementById('winnerSelectionDiv').style.display = 'none';
+    document.getElementById('rumbleBookingDiv').style.display = 'none';
+        return;
+    }
+    
+    var matchType = selectedOption.value;
+    var isTeams = selectedOption.dataset.teams === 'true';
+    var participantCount = selectedOption.dataset.count;
+    var isSpecial = selectedOption.dataset.special || '';
+    var teamSize = parseInt(selectedOption.dataset.teamSize || '2');
+    var numTeams = selectedOption.dataset.numTeams ? parseInt(selectedOption.dataset.numTeams) : null;
+    
+    // Show description
+    var desc = document.getElementById('matchTypeDescription');
+    desc.innerHTML = '<i class="bi bi-info-circle"></i> ' + 
+                     '<strong>' + selectedOption.textContent + '</strong> - ' +
+                     participantCount + ' participants';
+    
+    // Build wrestler selection UI
+    var container = document.getElementById('wrestlerSelectionContainer');
+    container.innerHTML = '';
+    
+    if (isSpecial === 'mixed' || isSpecial === 'mixed_tornado') {
+        // INTERGENDER MIXED TAG TEAM
+        renderIntergenderTagSelection(container, isSpecial);
+    } else if (isTeams) {
+        // REGULAR TAG TEAM MATCH
+        renderTagTeamSelection(container, participantCount, teamSize, numTeams);
+    } else if (matchType === 'battle_royal' || matchType === 'rumble') {
+        // BATTLE ROYAL / RUMBLE
+        renderBattleRoyalSelection(container, matchType);
+    } else {
+        // SINGLES OR MULTI-PERSON MATCH
+        renderSinglesSelection(container, participantCount);
+    }
+    
+    // Show winner selection
+    document.getElementById('winnerSelectionDiv').style.display = 'block';
+    document.getElementById('rumbleBookingDiv').style.display = (matchType === 'rumble' || matchType === 'battle_royal') ? 'block' : 'none';
+}
+
+// ========================================================================
+// RENDER INTERGENDER TAG TEAM SELECTION (1M+1F vs 1M+1F)
+// ========================================================================
+
+function renderIntergenderTagSelection(container, matchSpecial) {
+    var html = '<div class="division-banner division-banner-intergender mb-3">' +
+               '<i class="bi bi-people-fill"></i> Mixed Tag Team Match (1 Male + 1 Female per team)' +
+               '</div>';
+    
+    var maleWrestlers = availableWrestlers.filter(function(w) { return w.gender === 'male'; });
+    var femaleWrestlers = availableWrestlers.filter(function(w) { return w.gender === 'female'; });
+    
+    // Team A
+    html += '<div class="card wrestler-card-intergender mb-3">' +
+            '<div class="card-header bg-success text-white">' +
+            '<strong><i class="bi bi-people"></i> Team A</strong>' +
+            '</div>' +
+            '<div class="card-body">' +
+            '<div class="row">' +
+            '<div class="col-md-6">' +
+            '<label class="form-label"><i class="bi bi-person-fill text-primary"></i> Male Partner</label>' +
+            renderWrestlerDropdown('teamA_male', maleWrestlers, 'male') +
+            '</div>' +
+            '<div class="col-md-6">' +
+            '<label class="form-label"><i class="bi bi-person-fill text-danger"></i> Female Partner</label>' +
+            renderWrestlerDropdown('teamA_female', femaleWrestlers, 'female') +
+            '</div>' +
+            '</div></div></div>';
+    
+    // Team B
+    html += '<div class="card wrestler-card-intergender mb-3">' +
+            '<div class="card-header bg-success text-white">' +
+            '<strong><i class="bi bi-people"></i> Team B</strong>' +
+            '</div>' +
+            '<div class="card-body">' +
+            '<div class="row">' +
+            '<div class="col-md-6">' +
+            '<label class="form-label"><i class="bi bi-person-fill text-primary"></i> Male Partner</label>' +
+            renderWrestlerDropdown('teamB_male', maleWrestlers, 'male') +
+            '</div>' +
+            '<div class="col-md-6">' +
+            '<label class="form-label"><i class="bi bi-person-fill text-danger"></i> Female Partner</label>' +
+            renderWrestlerDropdown('teamB_female', femaleWrestlers, 'female') +
+            '</div>' +
+            '</div></div></div>';
+    
+    if (matchSpecial === 'mixed_tornado') {
+        html += '<div class="alert alert-warning">' +
+                '<i class="bi bi-lightning-fill"></i> <strong>Tornado Rules:</strong> All four participants active at once!' +
+                '</div>';
+    }
+    
+    container.innerHTML = html;
+    updateWinnerDropdown();
+}
+
+// ========================================================================
+// RENDER TAG TEAM SELECTION (GENDER-SPECIFIC)
+// ========================================================================
+
+function renderTagTeamSelection(container, participantCount, teamSize, numTeams) {
+    teamSize = parseInt(teamSize || '2');
+    var pc = parseInt(participantCount);
+    if (!numTeams) {
+        numTeams = (Number.isFinite(pc) && pc > 0) ? Math.floor(pc / teamSize) : 2;
+    }
+    numTeams = Math.max(2, parseInt(numTeams || '2'));
+
+    var genderLabel = currentGenderDivision === 'male' ? 'Men\'s' : 'Women\'s';
+    var genderClass = currentGenderDivision === 'male' ? 'wrestler-card-male' : 'wrestler-card-female';
+    var genderColor = currentGenderDivision === 'male' ? 'primary' : 'danger';
+
+    function isEligibleMember(wId) {
+        var w = allWrestlers[wId];
+        if (!w) return false;
+        if (w.status !== 'active') return false;
+        if (currentShowDraft && w.current_brand !== currentShowDraft.brand) return false;
+        if (currentGenderDivision === 'male' || currentGenderDivision === 'female') {
+            return w.gender === currentGenderDivision;
+        }
+        return true;
+    }
+
+    var eligibleTeams = (tagTeamsList || []).filter(function(t) {
+        var ids = t.member_ids || [];
+        if (ids.length < teamSize) return false;
+        for (var i = 0; i < teamSize; i++) {
+            if (!isEligibleMember(ids[i])) return false;
+        }
+        return true;
+    });
+
+    var eligibleFactions = (factionsList || []).filter(function(f) {
+        var ids = f.member_ids || [];
+        if (ids.length < teamSize) return false;
+        var eligibleCount = 0;
+        ids.forEach(function(id) { if (isEligibleMember(id)) eligibleCount++; });
+        return eligibleCount >= teamSize;
+    });
+
+    function unitOptionsHtml() {
+        var html = '<option value="">Custom (pick manually)</option>';
+        if (eligibleTeams.length) {
+            html += '<optgroup label="Tag Teams">';
+            eligibleTeams.forEach(function(t) {
+                var n = (t.member_names || []).slice(0, teamSize).join(' & ');
+                html += '<option value="tag:' + t.team_id + '">[Tag] ' + t.team_name + ' — ' + n + '</option>';
+            });
+            html += '</optgroup>';
+        }
+        if (eligibleFactions.length) {
+            html += '<optgroup label="Factions">';
+            eligibleFactions.forEach(function(f) {
+                html += '<option value="faction:' + f.faction_id + '">[Faction] ' + (f.faction_name || f.name || f.faction_id) + '</option>';
+            });
+            html += '</optgroup>';
+        }
+        return html;
+    }
+
+    var banner = (teamSize === 3)
+        ? (genderLabel + ' Trios Match (' + numTeams + ' teams of 3)')
+        : (genderLabel + ' Tag Team Match (' + numTeams + ' teams)');
+
+    var html = '<div class="division-banner division-banner-' + currentGenderDivision + ' mb-3">' +
+               '<i class="bi bi-people"></i> ' + banner +
+               '</div>';
+
+    for (var tIndex = 0; tIndex < numTeams; tIndex++) {
+        var teamLetter = String.fromCharCode(65 + tIndex);
+        var unitId = 'team' + teamLetter + '_unit';
+        var manualId = 'team' + teamLetter + '_manual';
+
+        html += '<div class="card ' + genderClass + ' mb-3">' +
+                '<div class="card-header bg-' + genderColor + ' text-white d-flex justify-content-between align-items-center">' +
+                '<strong><i class="bi bi-people"></i> Team ' + teamLetter + '</strong>' +
+                '<span class="small opacity-75">Pick Custom / Tag Team / Faction</span>' +
+                '</div>' +
+                '<div class="card-body">' +
+                '<div class="row g-2 mb-2">' +
+                '<div class="col-md-8">' +
+                '<label class="form-label">Unit</label>' +
+                '<select class="form-select" id="' + unitId + '" onchange="onTeamUnitChange(\'' + teamLetter + '\',' + teamSize + ')">' +
+                unitOptionsHtml() +
+                '</select>' +
+                '</div>' +
+                '<div class="col-md-4 d-flex align-items-end">' +
+                '<div class="form-check">' +
+                '<input class="form-check-input" type="checkbox" id="' + manualId + '" onchange="onTeamManualToggle(\'' + teamLetter + '\',' + teamSize + ')">' +
+                '<label class="form-check-label" for="' + manualId + '">Manual selection</label>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+
+        html += '<div class="row g-2">';
+        for (var m = 1; m <= teamSize; m++) {
+            var col = (teamSize === 3) ? 'col-md-4' : 'col-md-6';
+            html += '<div class="' + col + '">' +
+                    '<label class="form-label">Member ' + m + '</label>' +
+                    renderWrestlerDropdown('team' + teamLetter + '_' + m, availableWrestlers, currentGenderDivision) +
+                    '</div>';
+        }
+        html += '</div></div></div>';
+    }
+
+    container.innerHTML = html;
+    updateWinnerDropdown();
+}
+
+function isEligibleMemberForCurrentDivision(wId) {
+    var w = allWrestlers[wId];
+    if (!w) return false;
+    if (w.status !== 'active') return false;
+    if (currentShowDraft && w.current_brand !== currentShowDraft.brand) return false;
+    if (currentGenderDivision === 'male' || currentGenderDivision === 'female') {
+        return w.gender === currentGenderDivision;
+    }
+    return true;
+}
+
+function onTeamUnitChange(teamLetter, teamSize) {
+    teamSize = parseInt(teamSize || '2');
+    var unitSel = document.getElementById('team' + teamLetter + '_unit');
+    var manual = document.getElementById('team' + teamLetter + '_manual');
+    var unit = unitSel ? (unitSel.value || '') : '';
+
+    var members = [];
+    if (unit.startsWith('tag:')) {
+        var teamId = unit.split(':')[1];
+        var team = allTagTeams[teamId];
+        if (team && Array.isArray(team.member_ids)) {
+            members = team.member_ids.slice(0, teamSize);
+        }
+    } else if (unit.startsWith('faction:')) {
+        var factionId = unit.split(':')[1];
+        var faction = allFactions[factionId];
+        if (faction && Array.isArray(faction.member_ids)) {
+            var pool = faction.member_ids
+                .filter(isEligibleMemberForCurrentDivision)
+                .map(function(id) {
+                    return { id: id, rating: (allWrestlers[id] ? (allWrestlers[id].overall_rating || 0) : 0) };
+                })
+                .sort(function(a, b) { return b.rating - a.rating; })
+                .map(function(x) { return x.id; });
+            members = pool.slice(0, teamSize);
+        }
+    }
+
+    for (var i = 1; i <= teamSize; i++) {
+        var sel = document.getElementById('team' + teamLetter + '_' + i);
+        if (!sel) continue;
+        if (unit) {
+            sel.value = members[i - 1] || '';
+            sel.disabled = !(manual && manual.checked);
+        } else {
+            // Custom
+            sel.disabled = false;
+        }
+    }
+    updateWinnerDropdown();
+}
+
+function onTeamManualToggle(teamLetter, teamSize) {
+    teamSize = parseInt(teamSize || '2');
+    var unitSel = document.getElementById('team' + teamLetter + '_unit');
+    var manual = document.getElementById('team' + teamLetter + '_manual');
+    var unit = unitSel ? (unitSel.value || '') : '';
+    var shouldDisable = unit && !(manual && manual.checked);
+
+    for (var i = 1; i <= teamSize; i++) {
+        var sel = document.getElementById('team' + teamLetter + '_' + i);
+        if (!sel) continue;
+        sel.disabled = !!shouldDisable;
+    }
+}
+
+// ========================================================================
+// RENDER SINGLES SELECTION (GENDER-SPECIFIC)
+// ========================================================================
+
+function renderSinglesSelection(container, participantCount) {
+    var count = parseInt(participantCount);
+    var genderLabel = currentGenderDivision === 'male' ? 'Men\'s' : 'Women\'s';
+    var genderClass = currentGenderDivision === 'male' ? 'wrestler-card-male' : 'wrestler-card-female';
+    
+    var html = '<div class="division-banner division-banner-' + currentGenderDivision + ' mb-3">' +
+               '<i class="bi bi-trophy"></i> ' + genderLabel + ' Match (' + count + ' competitors)' +
+               '</div>';
+    
+    html += '<div class="row">';
+    
+    for (var i = 0; i < count; i++) {
+        var participantLabel = ['First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth'][i] || 'Participant ' + (i + 1);
+        
+        html += '<div class="col-md-6 mb-3">' +
+                '<div class="card ' + genderClass + '">' +
+                '<div class="card-body">' +
+                '<label class="form-label fw-bold">' + participantLabel + ' Competitor</label>' +
+                renderWrestlerDropdown('participant_' + i, availableWrestlers, currentGenderDivision) +
+                '</div></div></div>';
+    }
+    
+    html += '</div>';
+    
+    container.innerHTML = html;
+    updateWinnerDropdown();
+}
+
+// ========================================================================
+// RENDER BATTLE ROYAL SELECTION
+// ========================================================================
+
+function renderBattleRoyalSelection(container, matchType) {
+    var genderLabel = currentGenderDivision === 'male' ? 'Men\'s' : 'Women\'s';
+    var genderClass = currentGenderDivision === 'male' ? 'wrestler-card-male' : 'wrestler-card-female';
+    
+    var isRumbleRoyaleShow = currentShowDraft && (currentShowDraft.show_name || '').toLowerCase() === 'rumble royale';
+    var minCount = matchType === 'rumble' ? (isRumbleRoyaleShow ? 30 : 8) : 8;
+    var maxCount = matchType === 'rumble' ? 30 : 20;
+    
+    var html = '<div class="division-banner division-banner-' + currentGenderDivision + ' mb-3">' +
+               '<i class="bi bi-trophy-fill"></i> ' + genderLabel + ' ' + 
+               (matchType === 'rumble' ? 'Royal Rumble' : 'Battle Royal') +
+               '</div>';
+    
+    html += '<div class="card ' + genderClass + '">' +
+            '<div class="card-body">' +
+            '<label class="form-label fw-bold">Number of Participants</label>' +
+            '<input type="number" class="form-control mb-3" id="battleRoyalCount" ' +
+            'min="' + minCount + '" max="' + maxCount + '" value="' + minCount + '">' +
+            '<label class="form-label fw-bold">Select Participants</label>' +
+            '<select class="form-select" id="battleRoyalParticipants" multiple size="10" onchange="updateWinnerDropdown()">';
+    
+    availableWrestlers.forEach(function(w) {
+        html += '<option value="' + w.id + '">' + w.ring_name + ' (' + w.overall_rating + ')</option>';
+    });
+    
+    html += '</select>' +
+            '<small class="text-muted mt-2 d-block">Hold Ctrl/Cmd to select multiple wrestlers' +
+            (matchType === 'rumble' && isRumbleRoyaleShow ? ' (Rumble Royale requires exactly 30)' : '') +
+            '</small>' +
+            '</div></div>';
+    
+    container.innerHTML = html;
+    updateWinnerDropdown();
+}
+
+// ========================================================================
+// HELPER: RENDER WRESTLER DROPDOWN
+// ========================================================================
+
+function renderWrestlerDropdown(id, wrestlers, genderFilter) {
+    var html = '<select class="form-select" id="' + id + '" onchange="updateWinnerDropdown()">' +
+               '<option value="">-- Select Wrestler --</option>';
+    
+    // Sort by overall rating
+    var sorted = wrestlers.slice().sort(function(a, b) {
+        return b.overall_rating - a.overall_rating;
+    });
+    
+    sorted.forEach(function(w) {
+        var genderIcon = w.gender === 'male' ? '♂' : '♀';
+        var genderColor = w.gender === 'male' ? 'text-primary' : 'text-danger';
+        
+        html += '<option value="' + w.id + '">' +
+                '<span class="' + genderColor + '">' + genderIcon + '</span> ' +
+                w.ring_name + ' (' + w.overall_rating + ')' +
+                '</option>';
+    });
+    
+    html += '</select>';
+    return html;
+}
+
+// ========================================================================
+// UPDATE WINNER DROPDOWN (DYNAMIC BASED ON SELECTED WRESTLERS)
+// ========================================================================
+
+function getCurrentTeamEntries() {
+    var entries = [];
+
+    if (document.getElementById('teamA_male') || document.getElementById('teamB_male')) {
+        ['A', 'B'].forEach(function(letter) {
+            var male = document.getElementById('team' + letter + '_male');
+            var female = document.getElementById('team' + letter + '_female');
+            var ids = [male ? male.value : '', female ? female.value : ''].filter(Boolean);
+            if (!ids.length) return;
+
+            entries.push({
+                type: 'team',
+                key: 'team_' + entries.length,
+                value: ids[0],
+                wrestlerIds: ids,
+                label: getTeamDisplayLabel(ids)
+            });
+        });
+        return entries;
+    }
+
+    for (var idx = 0; idx < 8; idx++) {
+        var letter = String.fromCharCode(65 + idx);
+        var firstMember = document.getElementById('team' + letter + '_1');
+        if (!firstMember) break;
+
+        var memberIds = [];
+        for (var memberIndex = 1; memberIndex <= 4; memberIndex++) {
+            var memberSelect = document.getElementById('team' + letter + '_' + memberIndex);
+            if (!memberSelect) break;
+            if (memberSelect.value) memberIds.push(memberSelect.value);
+        }
+        if (!memberIds.length) continue;
+
+        var explicitLabel = '';
+        var unitSelect = document.getElementById('team' + letter + '_unit');
+        var unitValue = unitSelect ? (unitSelect.value || '') : '';
+        if (unitValue.indexOf('tag:') === 0) {
+            var tagTeam = allTagTeams[unitValue.split(':')[1]];
+            explicitLabel = tagTeam && tagTeam.team_name ? tagTeam.team_name : '';
+        } else if (unitValue.indexOf('faction:') === 0) {
+            var faction = allFactions[unitValue.split(':')[1]];
+            explicitLabel = faction ? (faction.faction_name || faction.name || '') : '';
+        }
+
+        entries.push({
+            type: 'team',
+            key: 'team_' + entries.length,
+            value: memberIds[0],
+            wrestlerIds: memberIds,
+            label: getTeamDisplayLabel(memberIds, explicitLabel)
+        });
+    }
+
+    return entries;
+}
+
+function getCurrentCompetitorEntries() {
+    var teamEntries = getCurrentTeamEntries();
+    if (teamEntries.length) return teamEntries;
+
+    var battleRoyalSelect = document.getElementById('battleRoyalParticipants');
+    if (battleRoyalSelect) {
+        return Array.from(battleRoyalSelect.selectedOptions || []).map(function(opt) {
+            var wrestler = allWrestlers[opt.value];
+            return wrestler ? {
+                type: 'wrestler',
+                key: wrestler.id,
+                value: wrestler.id,
+                wrestlerIds: [wrestler.id],
+                label: wrestler.ring_name
+            } : null;
+        }).filter(Boolean);
+    }
+
+    var entries = [];
+    for (var i = 0; i < 8; i++) {
+        var select = document.getElementById('participant_' + i);
+        if (!select) break;
+        if (!select.value) continue;
+        var wrestler = allWrestlers[select.value];
+        if (!wrestler) continue;
+        entries.push({
+            type: 'wrestler',
+            key: wrestler.id,
+            value: wrestler.id,
+            wrestlerIds: [wrestler.id],
+            label: wrestler.ring_name
+        });
+    }
+    return entries;
+}
+
+function rebuildBookingBiasOptions(competitors) {
+    var biasSelect = document.getElementById('newMatchBias');
+    if (!biasSelect) return;
+
+    var previousValue = biasSelect.value || biasSelect.dataset.lastValue || 'even';
+    var options = [];
+
+    if (competitors.length === 2) {
+        options = [
+            { value: 'strong_a', label: competitors[0].label + ' (85% win chance)' },
+            { value: 'slight_a', label: competitors[0].label + ' (65% win chance)' },
+            { value: 'even', label: 'Even (50/50)' },
+            { value: 'slight_b', label: competitors[1].label + ' (65% win chance)' },
+            { value: 'strong_b', label: competitors[1].label + ' (85% win chance)' }
+        ];
+    } else if (competitors.length > 2 && competitors.every(function(entry) { return entry.type === 'team'; })) {
+        competitors.forEach(function(entry, index) {
+            options.push({ value: 'strong_team_' + index, label: entry.label + ' (85% win chance)' });
+            options.push({ value: 'slight_team_' + index, label: entry.label + ' (65% win chance)' });
+        });
+        options.splice(2, 0, { value: 'even', label: 'Even (50/50)' });
+    } else {
+        options = [
+            { value: 'strong_a', label: 'Strong Side A (85% win chance)' },
+            { value: 'slight_a', label: 'Slight Side A (65% win chance)' },
+            { value: 'even', label: 'Even (50/50)' },
+            { value: 'slight_b', label: 'Slight Side B (65% win chance)' },
+            { value: 'strong_b', label: 'Strong Side B (85% win chance)' }
+        ];
+    }
+
+    biasSelect.innerHTML = options.map(function(option) {
+        return '<option value="' + option.value + '">' + option.label + '</option>';
+    }).join('');
+
+    var valueToApply = options.some(function(option) { return option.value === previousValue; }) ? previousValue : 'even';
+    biasSelect.value = valueToApply;
+    biasSelect.dataset.lastValue = valueToApply;
+}
+
+function getStoredCompetitorEntries(match) {
+    var entries = [];
+    var participants = (match && match.participants) || [];
+
+    if (match && match.is_intergender) {
+        participants.forEach(function(team, index) {
+            var ids = [team.male, team.female].filter(Boolean);
+            if (!ids.length) return;
+            var explicitLabel = match.team_units && match.team_units[index] ? match.team_units[index].display_name : '';
+            entries.push({
+                type: 'team',
+                key: 'team_' + index,
+                value: ids[0],
+                wrestlerIds: ids,
+                label: getTeamDisplayLabel(ids, explicitLabel)
+            });
+        });
+        return entries;
+    }
+
+    participants.forEach(function(participant, index) {
+        if (Array.isArray(participant)) {
+            var explicitLabel = match.team_units && match.team_units[index] ? match.team_units[index].display_name : '';
+            entries.push({
+                type: 'team',
+                key: 'team_' + index,
+                value: participant[0],
+                wrestlerIds: participant.slice(),
+                label: getTeamDisplayLabel(participant, explicitLabel)
+            });
+        } else if (participant) {
+            entries.push({
+                type: 'wrestler',
+                key: participant,
+                value: participant,
+                wrestlerIds: [participant],
+                label: getWrestlerName(participant)
+            });
+        }
+    });
+
+    return entries;
+}
+
+function getBookingBiasDisplay(match) {
+    var bookingBias = (match && match.booking_bias) || 'even';
+    var competitors = getStoredCompetitorEntries(match);
+    if (!competitors.length) return bookingBias.replace(/_/g, ' ').toUpperCase();
+    if (bookingBias === 'even') return 'Even (50/50)';
+
+    var labelMap = {
+        strong_a: competitors[0] ? competitors[0].label + ' (85% win chance)' : 'Strong Side A (85% win chance)',
+        slight_a: competitors[0] ? competitors[0].label + ' (65% win chance)' : 'Slight Side A (65% win chance)',
+        slight_b: competitors[1] ? competitors[1].label + ' (65% win chance)' : 'Slight Side B (65% win chance)',
+        strong_b: competitors[1] ? competitors[1].label + ' (85% win chance)' : 'Strong Side B (85% win chance)'
+    };
+    if (labelMap[bookingBias]) return labelMap[bookingBias];
+
+    var multiTeamMatch = bookingBias.match(/^(strong|slight)_team_(\d+)$/);
+    if (multiTeamMatch) {
+        var teamIndex = parseInt(multiTeamMatch[2], 10);
+        if (competitors[teamIndex]) {
+            return competitors[teamIndex].label + ' (' + (multiTeamMatch[1] === 'strong' ? '85' : '65') + '% win chance)';
+        }
+    }
+
+    if (competitors.length > 2 && competitors[0] && (bookingBias === 'strong_a' || bookingBias === 'slight_a')) {
+        return competitors[0].label + ' (' + (bookingBias === 'strong_a' ? '85' : '65') + '% win chance)';
+    }
+
+    return bookingBias.replace(/_/g, ' ').toUpperCase();
+}
+
+function getBookedWinnerDisplay(match) {
+    if (!match || !match.booked_winner) return '';
+    var competitors = getStoredCompetitorEntries(match);
+    for (var i = 0; i < competitors.length; i++) {
+        if (competitors[i].wrestlerIds.indexOf(match.booked_winner) !== -1) {
+            return competitors[i].label;
+        }
+    }
+    return getWrestlerName(match.booked_winner);
+}
+
+function updateWinnerDropdown() {
+    var winnerSelect = document.getElementById('bookedWinnerSelect');
+    if (!winnerSelect) return;
+
+    var runnerUpSelect = document.getElementById('bookedRunnerUpSelect');
+    var ironManSelect = document.getElementById('bookedIronManSelect');
+    var mostElimsSelect = document.getElementById('bookedMostElimsSelect');
+
+    winnerSelect.innerHTML = '<option value="">-- Random (Based on ratings) --</option>';
+    if (runnerUpSelect) runnerUpSelect.innerHTML = '<option value="">-- Runner-up / Last Eliminated (Optional) --</option>';
+    if (ironManSelect) ironManSelect.innerHTML = '<option value="">-- Iron Man / Lasts Longest (Optional) --</option>';
+    if (mostElimsSelect) mostElimsSelect.innerHTML = '<option value="">-- Most Eliminations (Optional) --</option>';
+
+    var competitorEntries = getCurrentCompetitorEntries();
+    rebuildBookingBiasOptions(competitorEntries);
+
+    if (competitorEntries.some(function(entry) { return entry.type === 'team'; })) {
+        competitorEntries.forEach(function(entry) {
+            var winnerOption = document.createElement('option');
+            winnerOption.value = entry.value;
+            winnerOption.textContent = entry.label;
+            winnerSelect.appendChild(winnerOption);
+        });
+        return;
+    }
+
+    var selectedWrestlers = [];
+    var selects = document.getElementById('wrestlerSelectionContainer').querySelectorAll('select');
+
+    selects.forEach(function(select) {
+        if (select.id === 'bookedWinnerSelect' || select.id === 'bookedRunnerUpSelect' || select.id === 'bookedIronManSelect' || select.id === 'bookedMostElimsSelect') {
+            return;
+        }
+
+        if (select.multiple) {
+            Array.from(select.selectedOptions || []).forEach(function(opt) {
+                var wrestlerId = opt.value;
+                var wrestler = allWrestlers[wrestlerId];
+                if (wrestler && !selectedWrestlers.find(function(w) { return w.id === wrestlerId; })) {
+                    selectedWrestlers.push(wrestler);
+                }
+            });
+        } else if (select.value) {
+            var wrestlerId = select.value;
+            var wrestler = allWrestlers[wrestlerId];
+            if (wrestler && !selectedWrestlers.find(function(w) { return w.id === wrestlerId; })) {
+                selectedWrestlers.push(wrestler);
+            }
+        }
+    });
+
+    selectedWrestlers.forEach(function(w) {
+        var genderIcon = w.gender === 'male' ? '♂' : '♀';
+
+        var winnerOption = document.createElement('option');
+        winnerOption.value = w.id;
+        winnerOption.textContent = genderIcon + ' ' + w.ring_name + ' (' + w.overall_rating + ')';
+        winnerSelect.appendChild(winnerOption);
+
+        [runnerUpSelect, ironManSelect, mostElimsSelect].forEach(function(targetSelect) {
+            if (!targetSelect) return;
+            var option = document.createElement('option');
+            option.value = w.id;
+            option.textContent = genderIcon + ' ' + w.ring_name + ' (' + w.overall_rating + ')';
+            targetSelect.appendChild(option);
+        });
+    });
+}
+
+// ========================================================================
+// POPULATE TITLE DROPDOWN (GENDER-FILTERED)
+// ========================================================================
+
+function populateTitleDropdown(genderDivision) {
+    var select = document.getElementById('titleSelect');
+    select.innerHTML = '<option value="">Choose a title...</option>';
+
+    var showBrand = String((currentShowDraft && currentShowDraft.brand) || '').trim().toLowerCase();
+
+    var titles = Object.values(allTitles).filter(function(t) {
+        var titleBrand = String(t.current_brand || t.assigned_brand || t.brand || '').trim().toLowerCase();
+        var isCrossBrandShow = showBrand === 'cross-brand';
+        var isBrandMatch = isCrossBrandShow || !showBrand || !titleBrand || titleBrand === showBrand || titleBrand === 'cross-brand';
+
+        if (!isBrandMatch) return false;
+
+        if (genderDivision === 'intergender') {
+            return true;
+        }
+
+        return (t.division || '').toLowerCase() === String(genderDivision || '').toLowerCase();
+    });
+
+    titles.sort(function(a, b) {
+        return (a.name || '').localeCompare(b.name || '');
+    });
+
+    titles.forEach(function(t) {
+        var divisionLabel = t.division === 'male' ? '♂' : (t.division === 'female' ? '♀' : '⚥');
+        var option = document.createElement('option');
+        option.value = t.id || '';
+        option.textContent = divisionLabel + ' ' + (t.name || t.title_name || 'Untitled Championship');
+        option.dataset.division = t.division;
+        if (option.value) {
+            select.appendChild(option);
+        }
+    });
+}
+
+// ========================================================================
+// TOGGLE TITLE OPTIONS
+// ========================================================================
+
+function toggleTitleOptions() {
+    var isTitleMatch = document.getElementById('isTitleMatch').checked;
+    var titleDiv = document.getElementById('titleSelectionDiv');
+    titleDiv.style.display = isTitleMatch ? 'block' : 'none';
+    
+    if (!isTitleMatch) {
+        document.getElementById('titleSelect').value = '';
+        document.getElementById('addTitleInfo').style.display = 'none';
+    }
+}
+
+function updateTitleInfo() {
+    var titleSelect = document.getElementById('titleSelect');
+    var titleId = titleSelect.value;
+    var infoDiv = document.getElementById('addTitleInfo');
+    
+    if (!titleId) {
+        infoDiv.style.display = 'none';
+        return;
+    }
+    
+    var title = allTitles[titleId];
+    if (!title) return;
+    
+    var currentChampion = 'Vacant';
+    var championId = title.current_champion_id || title.current_holder_id || title.effective_champion_id;
+    if (championId) {
+        var champ = allWrestlers[championId];
+        if (champ) {
+            var genderIcon = champ.gender === 'male' ? '♂' : '♀';
+            currentChampion = genderIcon + ' ' + champ.ring_name;
+        }
+    }
+    
+    var divisionIcon = title.division === 'male' ? '♂ Men\'s' : 
+                       (title.division === 'female' ? '♀ Women\'s' : '⚥ Intergender');
+    
+    if (currentChampion === 'Vacant' && title.current_champion_name) {
+        currentChampion = title.current_champion_name;
+    }
+
+    infoDiv.innerHTML = 
+        '<strong>' + title.name + '</strong><br>' +
+        '<small>' +
+        '<i class="bi bi-trophy"></i> Current Champion: <strong>' + currentChampion + '</strong><br>' +
+        '<i class="bi bi-people"></i> Division: ' + divisionIcon + '<br>' +
+        '<i class="bi bi-star"></i> Prestige: ' + title.prestige_level + '/100' +
+        '</small>';
+    
+    infoDiv.style.display = 'block';
+}
+
+// ========================================================================
+// RESET ADD MATCH FORM
+// ========================================================================
+
+function resetAddMatchForm() {
+    document.getElementById('newMatchType').selectedIndex = 0;
+    document.getElementById('isTitleMatch').checked = false;
+    document.getElementById('titleSelect').value = '';
+    document.getElementById('bookedWinnerSelect').value = '';
+    document.getElementById('specialMatchType').value = '';
+    document.getElementById('newMatchBias').value = 'even';
+    document.getElementById('newMatchImportance').value = 'normal';
+    
+    document.getElementById('wrestlerSelectionContainer').innerHTML = '';
+    document.getElementById('titleSelectionDiv').style.display = 'none';
+    document.getElementById('addTitleInfo').style.display = 'none';
+    document.getElementById('winnerSelectionDiv').style.display = 'none';
+    document.getElementById('matchTypeDescription').innerHTML = '';
+}
+
+// ========================================================================
+// CONFIRM ADD MATCH (VALIDATE & ADD TO CARD)
+// ========================================================================
+
+function confirmAddMatch() {
+    try {
+        var matchTypeSelect = document.getElementById('newMatchType');
+        var matchType = matchTypeSelect.value;
+        
+        if (!matchType) {
+            showToast('Please select a match type', 'warning');
+            return;
+        }
+        
+        var selectedOption = matchTypeSelect.options[matchTypeSelect.selectedIndex];
+        var isTeams = selectedOption.dataset.teams === 'true';
+        var isSpecial = selectedOption.dataset.special || '';
+        
+        // Collect participants
+        var participants = [];
+        
+        if (isSpecial === 'mixed' || isSpecial === 'mixed_tornado') {
+            // INTERGENDER MIXED TAG
+            participants = validateIntergenderTag();
+        } else if (matchType === 'battle_royal' || matchType === 'rumble') {
+            // BATTLE ROYAL
+            participants = validateBattleRoyal();
+        } else if (isTeams) {
+            // TAG TEAM
+            participants = validateTagTeam();
+        } else {
+            // SINGLES/MULTI-PERSON
+            participants = validateSingles();
+        }
+        
+        if (!participants || participants.length === 0) {
+            showToast('Please select all participants', 'warning');
+            return;
+        }
+
+        var requiredCount = getRequiredParticipantCount(matchType);
+        var selectedIds = collectParticipantIds(participants);
+        if (requiredCount && selectedIds.length !== requiredCount) {
+            var label = matchType === 'elimination_chamber'
+                ? 'Elimination Chamber'
+                : selectedOption.textContent;
+            showToast(label + ' requires exactly ' + requiredCount + ' competitors', 'warning');
+            return;
+        }
+        
+        // Check for duplicates
+        var uniqueIds = new Set();
+        for (var i = 0; i < participants.length; i++) {
+            var p = participants[i];
+            if (typeof p === 'string') {
+                if (uniqueIds.has(p)) {
+                    showToast('Cannot use the same wrestler twice in a match', 'danger');
+                    return;
+                }
+                uniqueIds.add(p);
+            } else if (Array.isArray(p)) {
+                // Team
+                for (var j = 0; j < p.length; j++) {
+                    if (uniqueIds.has(p[j])) {
+                        showToast('Cannot use the same wrestler twice in a match', 'danger');
+                        return;
+                    }
+                    uniqueIds.add(p[j]);
+                }
+            }
+        }
+        
+        // Build match object
+        var newMatch = {
+            match_id: createDraftId('match'),
+            match_type: matchType,
+            participants: participants,
+            gender_division: currentGenderDivision,
+            is_intergender: (currentGenderDivision === 'intergender'),
+            booking_bias: document.getElementById('newMatchBias').value,
+            importance: document.getElementById('newMatchImportance').value,
+            position: (currentShowDraft.matches ? currentShowDraft.matches.length : 0) + 1
+        };
+        if (isTeams) {
+            newMatch.team_units = collectTeamUnitMetadata(participants);
+        }
+        
+        // Title match
+        if (document.getElementById('isTitleMatch').checked) {
+            var titleId = document.getElementById('titleSelect').value;
+            if (titleId) {
+                newMatch.title_id = titleId;
+                newMatch.is_title_match = true;
+            }
+        }
+        
+        // Booked winner
+        var bookedWinner = document.getElementById('bookedWinnerSelect').value;
+        if (bookedWinner) {
+            newMatch.booked_winner = bookedWinner;
+        }
+
+        var bookedRunnerUp = document.getElementById('bookedRunnerUpSelect').value;
+        if (bookedRunnerUp) newMatch.booked_runner_up = bookedRunnerUp;
+        var bookedIronMan = document.getElementById('bookedIronManSelect').value;
+        if (bookedIronMan) newMatch.booked_iron_man = bookedIronMan;
+        var bookedMostElims = document.getElementById('bookedMostElimsSelect').value;
+        if (bookedMostElims) newMatch.booked_most_eliminations = bookedMostElims;
+        
+        // Special stipulation
+        var specialStip = document.getElementById('specialMatchType').value;
+        if (specialStip) {
+            newMatch.special_stipulation = specialStip;
+        }
+        
+        // Add/update draft
+        if (!currentShowDraft.matches) currentShowDraft.matches = [];
+
+        var isEditMode = editingMatchIndex !== null;
+        if (isEditMode && currentShowDraft.matches[editingMatchIndex]) {
+            var existing = currentShowDraft.matches[editingMatchIndex];
+            newMatch.match_id = existing.match_id || newMatch.match_id;
+            newMatch.position = existing.position || existing.card_position || newMatch.position;
+            if (existing.feud_id && !newMatch.feud_id) newMatch.feud_id = existing.feud_id;
+            currentShowDraft.matches[editingMatchIndex] = Object.assign({}, existing, newMatch);
+            editingMatchIndex = null;
+        } else {
+            currentShowDraft.matches.push(newMatch);
+        }
+        
+        // Re-render card
+        renderFullCard();
+        
+        // Close modal
+        var modal = bootstrap.Modal.getInstance(document.getElementById('addMatchModal'));
+        modal.hide();
+        
+        // Success message
+        var matchLabel = selectedOption.textContent;
+        showToast((isEditMode ? 'Updated ' : 'Added ') + matchLabel + (isEditMode ? '' : ' to the card'), 'success');
+        
+    } catch (error) {
+        console.error('Error adding match:', error);
+        showToast('Failed to add match: ' + error.message, 'danger');
+    }
+}
+
+// ========================================================================
+// VALIDATION FUNCTIONS
+// ========================================================================
+
+function validateIntergenderTag() {
+    var teamA_male = document.getElementById('teamA_male').value;
+    var teamA_female = document.getElementById('teamA_female').value;
+    var teamB_male = document.getElementById('teamB_male').value;
+    var teamB_female = document.getElementById('teamB_female').value;
+    
+    if (!teamA_male || !teamA_female || !teamB_male || !teamB_female) {
+        return null;
+    }
+    
+    // Return as mixed teams structure
+    return [
+        { male: teamA_male, female: teamA_female },
+        { male: teamB_male, female: teamB_female }
+    ];
+}
+
+function validateTagTeam() {
+    var teams = [];
+    var teamIndex = 0;
+    
+    while (true) {
+        var teamLetter = String.fromCharCode(65 + teamIndex); // A, B, C...
+        var members = [];
+        var memberIndex = 1;
+        while (true) {
+            var memberSel = document.getElementById('team' + teamLetter + '_' + memberIndex);
+            if (!memberSel) break;
+            if (!memberSel.value) return null;
+            members.push(memberSel.value);
+            memberIndex++;
+        }
+
+        if (members.length === 0) break;
+        if (members.length < 2) return null;
+
+        teams.push(members);
+        teamIndex++;
+    }
+    
+    return teams.length > 0 ? teams : null;
+}
+
+function collectTeamUnitMetadata(participants) {
+    if (!Array.isArray(participants)) return [];
+    var teamMeta = [];
+
+    participants.forEach(function(teamIds, idx) {
+        if (!Array.isArray(teamIds)) return;
+        var teamLetter = String.fromCharCode(65 + idx);
+        var unitSel = document.getElementById('team' + teamLetter + '_unit');
+        var unit = unitSel ? (unitSel.value || '') : '';
+        var meta = {
+            team_letter: teamLetter,
+            unit_type: 'custom',
+            unit_id: null,
+            display_name: 'Custom Team',
+            member_ids: teamIds.slice()
+        };
+
+        if (unit.indexOf('tag:') === 0) {
+            var teamId = unit.split(':')[1];
+            var team = allTagTeams[teamId];
+            meta.unit_type = 'tag_team';
+            meta.unit_id = teamId;
+            meta.display_name = (team && team.team_name) ? team.team_name : 'Tag Team';
+        } else if (unit.indexOf('faction:') === 0) {
+            var factionId = unit.split(':')[1];
+            var faction = allFactions[factionId];
+            meta.unit_type = 'faction';
+            meta.unit_id = factionId;
+            meta.display_name = (faction && (faction.faction_name || faction.name))
+                ? (faction.faction_name || faction.name)
+                : 'Faction Team';
+        }
+
+        teamMeta.push(meta);
+    });
+
+    return teamMeta;
+}
+
+function validateSingles() {
+    var participants = [];
+    var index = 0;
+    
+    while (true) {
+        var participant = document.getElementById('participant_' + index);
+        if (!participant) break;
+        
+        if (!participant.value) {
+            return null;
+        }
+        
+        participants.push(participant.value);
+        index++;
+    }
+    
+    return participants.length > 0 ? participants : null;
+}
+
+function validateBattleRoyal() {
+    var participantSelect = document.getElementById('battleRoyalParticipants');
+    if (!participantSelect) return null;
+
+    var matchType = document.getElementById('newMatchType').value;
+    var isRumbleRoyaleShow = currentShowDraft && (currentShowDraft.show_name || '').toLowerCase() === 'rumble royale';
+    var selectedOptions = Array.from(participantSelect.selectedOptions);
+    var requiredCount = (matchType === 'rumble' && isRumbleRoyaleShow) ? 30 : 8;
+
+    if (selectedOptions.length < requiredCount) {
+        var msg = requiredCount === 30
+            ? 'Rumble Royale Royal Rumble requires exactly 30 participants'
+            : 'Battle Royal requires at least 8 participants';
+        showToast(msg, 'warning');
+        return null;
+    }
+
+    if (requiredCount === 30 && selectedOptions.length !== 30) {
+        showToast('Rumble Royale Royal Rumble requires exactly 30 participants', 'warning');
+        return null;
+    }
+
+    return selectedOptions.map(function(opt) { return opt.value; });
+}
+
+// ========================================================================
+// RENDER FULL CARD WITH GENDER INDICATORS
+// ========================================================================
+
+function renderFullCard() {
+    var container = document.getElementById('showCardList');
+    if (!container) return;
+    
+    if (!currentShowDraft || (!currentShowDraft.matches && !currentShowDraft.segments)) {
+        container.innerHTML = '<div class="alert alert-info">No matches or segments yet. Click "Add Match" or "Add Segment" to start building your show.</div>';
+        updateCardStats();
+        refreshEconomicsProjection();
+        return;
+    }
+    
+    var selectedView = document.querySelector('input[name="cardView"]:checked');
+    var viewMode = selectedView ? selectedView.id : 'viewCombined';
+    
+    var html = '';
+    var itemNumber = 1;
+    var totalRuntime = 0;
+    
+    // Combine matches and segments, sorted by position
+    var allItems = [];
+    
+    if (currentShowDraft.matches) {
+        currentShowDraft.matches.forEach(function(match, index) {
+            allItems.push({
+                type: 'match',
+                data: match,
+                index: index,
+                position: match.position || (index * 100)
+            });
+        });
+    }
+    
+    if (currentShowDraft.segments) {
+        currentShowDraft.segments.forEach(function(segment, index) {
+            allItems.push({
+                type: 'segment',
+                data: segment,
+                index: index,
+                position: segment.position || ((index * 100) + 50)
+            });
+        });
+    }
+    
+    // Sort by position
+    allItems.sort(function(a, b) { return a.position - b.position; });
+    
+    // Filter by view mode
+    if (viewMode === 'viewMatchesOnly') {
+        allItems = allItems.filter(function(item) { return item.type === 'match'; });
+    } else if (viewMode === 'viewSegmentsOnly') {
+        allItems = allItems.filter(function(item) { return item.type === 'segment'; });
+    }
+    
+    // Render items
+    allItems.forEach(function(item) {
+        if (item.type === 'match') {
+            html += renderMatchCard(item.data, item.index, itemNumber);
+            totalRuntime += estimateMatchRuntime(item.data);
+        } else {
+            html += renderSegmentCard(item.data, item.index, itemNumber);
+            totalRuntime += item.data.duration || 5;
+        }
+        itemNumber++;
+    });
+    
+    if (html === '') {
+        html = '<div class="alert alert-info">No items to display for selected view.</div>';
+    }
+    
+    container.innerHTML = html;
+    updateCardStats();
+    renderBookingTimeline();
+    refreshEconomicsProjection();
+}
+
+// ========================================================================
+// RENDER INDIVIDUAL MATCH CARD WITH GENDER STYLING
+// ========================================================================
+
+function renderMatchCard(match, matchIndex, itemNumber) {
+    var matchTypeInfo = getMatchTypeInfo(match.match_type, match.gender_division);
+    var genderClass = 'match-card-' + (match.is_intergender ? 'intergender' : match.gender_division);
+    var genderBadgeClass = 'gender-badge-' + (match.is_intergender ? 'intergender' : match.gender_division);
+    
+    var genderIcon = match.gender_division === 'male' ? '♂' : 
+                     (match.gender_division === 'female' ? '♀' : '⚥');
+    
+    var genderLabel = match.gender_division === 'male' ? 'Men\'s Division' : 
+                      (match.gender_division === 'female' ? 'Women\'s Division' : 'Intergender');
+    
+    var html = '<div class="card mb-3 ' + genderClass + '" data-match-index="' + matchIndex + '">' +
+               '<div class="card-header d-flex justify-content-between align-items-center">' +
+               '<div>' +
+               '<span class="badge bg-dark me-2">#' + itemNumber + '</span>' +
+               '<span class="badge ' + genderBadgeClass + ' me-2">' + genderIcon + ' ' + genderLabel + '</span>' +
+               '<strong>' + matchTypeInfo.label + '</strong>';
+    
+    // Title match indicator
+    if (match.is_title_match && match.title_id) {
+        var title = allTitles[match.title_id];
+        if (title) {
+            html += ' <span class="badge bg-warning text-dark ms-2">' +
+                    '<i class="bi bi-trophy-fill"></i> ' + title.name + 
+                    '</span>';
+        }
+    }
+    
+    // Special stipulation
+    if (match.special_stipulation) {
+        html += ' <span class="badge bg-danger ms-2">' +
+                '<i class="bi bi-lightning-fill"></i> ' + 
+                match.special_stipulation.replace(/_/g, ' ').toUpperCase() +
+                '</span>';
+    }
+    
+    html += '</div>' +
+            '<div>' +
+            '<button class="btn btn-sm btn-outline-primary me-1" onclick="editMatch(' + matchIndex + ')">' +
+            '<i class="bi bi-pencil"></i>' +
+            '</button>' +
+            '<button class="btn btn-sm btn-outline-danger" onclick="removeMatch(' + matchIndex + ')">' +
+            '<i class="bi bi-trash"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '<div class="card-body">';
+    
+    // Render participants
+    if (match.is_intergender) {
+        html += renderIntergenderParticipants(match.participants);
+    } else {
+        html += renderRegularParticipants(match.participants, match.gender_division, match);
+    }
+    
+    // Booking info
+    html += '<div class="mt-3 pt-3 border-top">' +
+            '<div class="row text-center">' +
+            '<div class="col-md-4">' +
+            '<small class="text-muted">Booking Bias:</small><br>' +
+            '<span class="badge bg-secondary">' + getBookingBiasDisplay(match) + '</span>' +
+            '</div>' +
+            '<div class="col-md-4">' +
+            '<small class="text-muted">Importance:</small><br>' +
+            '<span class="badge bg-info">' + match.importance.toUpperCase() + '</span>' +
+            '</div>' +
+            '<div class="col-md-4">' +
+            '<small class="text-muted">Est. Runtime:</small><br>' +
+            '<span class="badge bg-success">' + estimateMatchRuntime(match) + ' min</span>' +
+            '</div>' +
+            '</div>';
+    
+    // Booked winner
+    if (match.booked_winner) {
+        var winnerLabel = getBookedWinnerDisplay(match);
+        if (winnerLabel) {
+            html += '<div class="alert alert-success mt-2 mb-0 py-2">' +
+                    '<i class="bi bi-trophy-fill"></i> <strong>Booked Winner:</strong> ' +
+                    winnerLabel +
+                    '</div>';
+        }
+    }
+    
+    html += '</div></div></div>';
+    
+    return html;
+}
+
+// ========================================================================
+// RENDER INTERGENDER PARTICIPANTS
+// ========================================================================
+
+function renderIntergenderParticipants(participants) {
+    if (!Array.isArray(participants) || participants.length === 0) {
+        return '<p class="text-muted">Invalid participant data</p>';
+    }
+    
+    var html = '<div class="row">';
+    
+    participants.forEach(function(team, teamIndex) {
+        var teamLetter = String.fromCharCode(65 + teamIndex); // A, B
+        
+        var maleWrestler = allWrestlers[team.male];
+        var femaleWrestler = allWrestlers[team.female];
+        
+        if (!maleWrestler || !femaleWrestler) return;
+        
+        html += '<div class="col-md-6">' +
+                '<div class="intergender-team-display">' +
+                '<strong>Team ' + teamLetter + ':</strong> ' +
+                '<span class="badge bg-primary">♂ ' + maleWrestler.ring_name + ' (' + maleWrestler.overall_rating + ')</span> ' +
+                '<span class="text-muted">+</span> ' +
+                '<span class="badge bg-danger">♀ ' + femaleWrestler.ring_name + ' (' + femaleWrestler.overall_rating + ')</span>' +
+                '</div>' +
+                '</div>';
+    });
+    
+    html += '</div>';
+    
+    return html;
+}
+
+// ========================================================================
+// RENDER REGULAR PARTICIPANTS (GENDER-SPECIFIC STYLING)
+// ========================================================================
+
+function renderRegularParticipants(participants, genderDivision, matchObj) {
+    if (!Array.isArray(participants) || participants.length === 0) {
+        return '<p class="text-muted">Invalid participant data</p>';
+    }
+    
+    var genderIcon = genderDivision === 'male' ? '♂' : '♀';
+    var badgeClass = genderDivision === 'male' ? 'bg-primary' : 'bg-danger';
+    
+    var html = '<div class="row">';
+    
+    participants.forEach(function(participant, index) {
+        if (Array.isArray(participant)) {
+            // Team (tag/trios/etc)
+            var teamLetter = String.fromCharCode(65 + index); // A, B, C...
+            var ids = participant.slice().filter(Boolean);
+            if (ids.length < 2) return;
+
+            function sameSet(a, b) {
+                if (a.length !== b.length) return false;
+                var s = new Set(a);
+                for (var i = 0; i < b.length; i++) if (!s.has(b[i])) return false;
+                return true;
+            }
+
+            var teamName = null;
+            if (matchObj && Array.isArray(matchObj.team_units) && matchObj.team_units[index] && matchObj.team_units[index].display_name) {
+                teamName = matchObj.team_units[index].display_name;
+            }
+            (tagTeamsList || []).some(function(t) {
+                var mids = (t.member_ids || []).slice(0, ids.length);
+                if (sameSet(ids, mids)) {
+                    teamName = t.team_name;
+                    return true;
+                }
+                return false;
+            });
+            if (!teamName) {
+                (factionsList || []).some(function(f) {
+                    var mids = f.member_ids || [];
+                    var ok = ids.every(function(x) { return mids.indexOf(x) >= 0; });
+                    if (ok) {
+                        teamName = (f.faction_name || f.name);
+                        return true;
+                    }
+                    return false;
+                });
+            }
+
+            var memberBadges = ids.map(function(wId) {
+                var w = allWrestlers[wId];
+                if (!w) return null;
+                return '<span class="badge ' + badgeClass + '">' + genderIcon + ' ' + w.ring_name + ' (' + w.overall_rating + ')</span>';
+            }).filter(Boolean).join(' <span class="text-muted">+</span> ');
+
+            html += '<div class="col-md-6 mb-2">' +
+                    '<strong>Team ' + teamLetter + (teamName ? (': ' + teamName) : ':') + '</strong><br>' +
+                    memberBadges +
+                    '</div>';
+        } else {
+            // Singles
+            var wrestler = allWrestlers[participant];
+            if (!wrestler) return;
+            
+            html += '<div class="col-md-6 mb-2">' +
+                    '<span class="badge ' + badgeClass + ' fs-6">' +
+                    genderIcon + ' ' + wrestler.ring_name + ' (' + wrestler.overall_rating + ')' +
+                    '</span>' +
+                    '</div>';
+        }
+    });
+    
+    html += '</div>';
+    
+    return html;
+}
+
+// ========================================================================
+// HELPER FUNCTIONS
+// ========================================================================
+
+function getMatchTypeInfo(matchType, genderDivision) {
+    var types = GENDER_MATCH_TYPES[genderDivision] || {};
+    return types[matchType] || { label: matchType.replace(/_/g, ' ').toUpperCase(), teams: false, count: 2 };
+}
+
+function estimateMatchRuntime(match) {
+    var baseTime = 15; // Default
+    
+    if (match.match_type === 'rumble') return 60;
+    if (match.match_type === 'elimination_chamber') return 40;
+    if (match.match_type === 'battle_royal') return 20;
+    if (match.match_type === 'iron_man') return 30;
+    if (match.special_stipulation === 'hell_in_a_cell') return 25;
+    if (match.special_stipulation === 'ladder_match') return 20;
+    
+    if (match.importance === 'high_drama') baseTime += 5;
+    if (match.is_title_match) baseTime += 5;
+    
+    return baseTime;
+}
+
+function removeMatch(matchIndex) {
+    if (!confirm('Remove this match from the card?')) return;
+    
+    currentShowDraft.matches.splice(matchIndex, 1);
+    renderFullCard();
+    showToast('Match removed', 'info');
+}
+
+function editMatch(matchIndex) {
+    try {
+        if (!currentShowDraft || !currentShowDraft.matches || !currentShowDraft.matches[matchIndex]) {
+            showToast('Match not found', 'warning');
+            return;
+        }
+
+        var match = normalizeUiMatch(currentShowDraft.matches[matchIndex], matchIndex);
+        editingMatchIndex = matchIndex;
+
+        openAddMatch(match.gender_division || 'male');
+
+        // Set match type and rebuild UI
+        var matchTypeSelect = document.getElementById('newMatchType');
+        if (matchTypeSelect) {
+            matchTypeSelect.value = match.match_type;
+            updateMatchTypeUI();
+        }
+
+        // Fill bias/importance/stipulation
+        var biasEl = document.getElementById('newMatchBias');
+        if (biasEl) biasEl.value = match.booking_bias || 'even';
+        var impEl = document.getElementById('newMatchImportance');
+        if (impEl) impEl.value = match.importance || 'normal';
+        var stipEl = document.getElementById('specialMatchType');
+        if (stipEl) stipEl.value = match.special_stipulation || '';
+
+        // Title match
+        var isTitle = document.getElementById('isTitleMatch');
+        if (isTitle) isTitle.checked = !!match.is_title_match;
+        toggleTitleOptions();
+        var titleSel = document.getElementById('titleSelect');
+        if (titleSel && match.title_id) {
+            titleSel.value = match.title_id;
+            updateTitleInfo();
+        }
+
+        // Participants
+        if (match.is_intergender) {
+            var a = match.participants && match.participants[0] ? match.participants[0] : {};
+            var b = match.participants && match.participants[1] ? match.participants[1] : {};
+            var am = document.getElementById('teamA_male'); if (am) am.value = a.male || '';
+            var af = document.getElementById('teamA_female'); if (af) af.value = a.female || '';
+            var bm = document.getElementById('teamB_male'); if (bm) bm.value = b.male || '';
+            var bf = document.getElementById('teamB_female'); if (bf) bf.value = b.female || '';
+        } else if (Array.isArray(match.participants) && match.participants.length && Array.isArray(match.participants[0])) {
+            // Team-based
+            var teamSize = Array.isArray(match.participants[0]) ? match.participants[0].length : 2;
+            match.participants.forEach(function(team, idx) {
+                var letter = String.fromCharCode(65 + idx);
+                var unitSel = document.getElementById('team' + letter + '_unit');
+                if (unitSel) unitSel.value = ''; // custom
+                var manual = document.getElementById('team' + letter + '_manual');
+                if (manual) manual.checked = true;
+                for (var i = 1; i <= teamSize; i++) {
+                    var sel = document.getElementById('team' + letter + '_' + i);
+                    if (sel) {
+                        sel.disabled = false;
+                        sel.value = (team[i - 1] || '');
+                    }
+                }
+            });
+        } else if (match.match_type === 'rumble' || match.match_type === 'battle_royal') {
+            var brSelect = document.getElementById('battleRoyalParticipants');
+            var brCount = document.getElementById('battleRoyalCount');
+            var ids = Array.isArray(match.participants) ? match.participants : [];
+            if (brCount) brCount.value = ids.length || brCount.value;
+            if (brSelect) {
+                Array.from(brSelect.options || []).forEach(function(opt) {
+                    opt.selected = ids.indexOf(opt.value) !== -1;
+                });
+            }
+        } else {
+            // Singles/multi-person
+            (match.participants || []).forEach(function(pid, idx) {
+                var sel = document.getElementById('participant_' + idx);
+                if (sel) sel.value = pid;
+            });
+        }
+
+        updateWinnerDropdown();
+
+        // Winner
+        var winnerSel = document.getElementById('bookedWinnerSelect');
+        if (winnerSel) winnerSel.value = match.booked_winner || '';
+        var ruSel = document.getElementById('bookedRunnerUpSelect'); if (ruSel) ruSel.value = match.booked_runner_up || '';
+        var imSel = document.getElementById('bookedIronManSelect'); if (imSel) imSel.value = match.booked_iron_man || '';
+        var meSel = document.getElementById('bookedMostElimsSelect'); if (meSel) meSel.value = match.booked_most_eliminations || '';
+
+    } catch (e) {
+        console.error('Edit match failed:', e);
+        showToast('Failed to edit match: ' + e.message, 'danger');
+    }
+}
+
+// ========================================================================
+// PART 3D: SEGMENTS, STATS & FINAL FUNCTIONS
+// ========================================================================
+
+// ========================================================================
+// SEGMENT MANAGEMENT
+// ========================================================================
+
+document.getElementById('addSegmentBtn').addEventListener('click', function() {
+    editingSegmentIndex = null;
+    showAddSegmentModal();
+});
+
+function showAddSegmentModal(existingSegment) {
+    var isEditMode = !!existingSegment;
+    var html = '<div class="modal fade" id="addSegmentModal" tabindex="-1">' +
+               '<div class="modal-dialog modal-lg">' +
+               '<div class="modal-content">' +
+               '<div class="modal-header bg-info text-white">' +
+               '<h5 class="modal-title"><i class="bi bi-mic-fill"></i> ' + (isEditMode ? 'Edit Segment' : 'Add Segment') + '</h5>' +
+               '<button type="button" class="btn-close" data-bs-dismiss="modal"></button>' +
+               '</div>' +
+               '<div class="modal-body">' +
+               
+               '<div class="mb-3">' +
+               '<label class="form-label fw-bold">Segment Type</label>' +
+               '<select class="form-select" id="newSegmentType" onchange="updateSegmentTypePreview()">' +
+               getSegmentTypeOptionsHtml() +
+               '</select>' +
+               '<div class="mt-2" id="segmentTypePreview"><small class="text-muted">Select a segment type to see production notes.</small></div>' +
+               '</div>' +
+               
+               '<div class="mb-3">' +
+               '<label class="form-label fw-bold">Participants (Gender-Inclusive)</label>' +
+               '<select class="form-select" id="segmentParticipants" multiple size="8">';
+    
+    // Show all active wrestlers (both genders)
+    var allActiveWrestlers = Object.values(allWrestlers).filter(function(w) {
+        var showBrand = currentShowDraft ? currentShowDraft.brand : '';
+        return w.status === 'active' && (showBrand === 'Cross-Brand' || w.current_brand === showBrand);
+    }).sort(function(a, b) {
+        return b.overall_rating - a.overall_rating;
+    });
+    
+    allActiveWrestlers.forEach(function(w) {
+        var genderIcon = w.gender === 'male' ? '♂' : '♀';
+        var genderClass = w.gender === 'male' ? 'text-primary' : 'text-danger';
+        html += '<option value="' + w.id + '">' +
+                '<span class="' + genderClass + '">' + genderIcon + '</span> ' +
+                w.ring_name + ' (' + w.overall_rating + ')' +
+                '</option>';
+    });
+    
+    html += '</select>' +
+            '<small class="text-muted">Hold Ctrl/Cmd to select multiple wrestlers</small>' +
+            '</div>' +
+            
+            '<div class="mb-3">' +
+            '<label class="form-label fw-bold">Duration (minutes)</label>' +
+            '<input type="number" class="form-control" id="segmentDuration" value="5" min="2" max="20">' +
+            '</div>' +
+            
+            '<div class="mb-3">' +
+            '<label class="form-label fw-bold">Segment Purpose</label>' +
+            '<select class="form-select" id="segmentPurpose">' +
+            '<option value="build_feud">Build Existing Feud</option>' +
+            '<option value="start_feud">Start New Feud</option>' +
+            '<option value="hype_match">Hype Upcoming Match</option>' +
+            '<option value="character_development">Character Development</option>' +
+            '<option value="comedy">Comedy / Entertainment</option>' +
+            '<option value="shock_value">Shock Value / Surprise</option>' +
+            '</select>' +
+            '</div>' +
+            
+            '<div class="mb-3">' +
+            '<div class="form-check form-switch">' +
+            '<input class="form-check-input" type="checkbox" id="segmentIsIntergender">' +
+            '<label class="form-check-label" for="segmentIsIntergender">' +
+            '<i class="bi bi-people-fill text-success"></i> <strong>Intergender Segment</strong> (Male & Female wrestlers interact)' +
+            '</label>' +
+            '</div>' +
+            '</div>' +
+            
+            '</div>' +
+            '<div class="modal-footer">' +
+            '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>' +
+            '<button type="button" class="btn btn-info" id="confirmAddSegmentBtn" onclick="confirmAddSegment()">' + (isEditMode ? 'Update Segment' : 'Add Segment') + '</button>' +
+            '</div>' +
+            '</div></div></div>';
+    
+    // Remove existing modal if any
+    var existingModal = document.getElementById('addSegmentModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', html);
+    
+    var modal = new bootstrap.Modal(document.getElementById('addSegmentModal'));
+    modal.show();
+
+    try {
+        var modalEl = document.getElementById('addSegmentModal');
+        if (modalEl) {
+            modalEl.addEventListener('hidden.bs.modal', function() {
+                editingSegmentIndex = null;
+            }, { once: true });
+        }
+    } catch (e) {}
+
+    // Prefill edit fields
+    if (isEditMode) {
+        try {
+            document.getElementById('newSegmentType').value = existingSegment.segment_type || 'promo';
+            updateSegmentTypePreview();
+
+            var pSel = document.getElementById('segmentParticipants');
+            var ids = (existingSegment.participants || []).slice();
+            Array.from(pSel.options).forEach(function(opt) {
+                opt.selected = ids.indexOf(opt.value) >= 0;
+            });
+
+            var dur = document.getElementById('segmentDuration');
+            if (dur) dur.value = existingSegment.duration || existingSegment.duration_minutes || 5;
+
+            var pur = document.getElementById('segmentPurpose');
+            if (pur) pur.value = existingSegment.purpose || 'general';
+
+            var ig = document.getElementById('segmentIsIntergender');
+            if (ig) ig.checked = !!existingSegment.is_intergender;
+        } catch (e) {}
+    }
+
+    var durationInput = document.getElementById('segmentDuration');
+    if (durationInput) {
+        durationInput.addEventListener('input', function() {
+            this.dataset.userEdited = 'true';
+        });
+    }
+    updateSegmentTypePreview();
+}
+
+function confirmAddSegment() {
+    var segmentType = document.getElementById('newSegmentType').value;
+    var segmentConfig = getSegmentTypeConfig(segmentType) || {};
+    var participantSelect = document.getElementById('segmentParticipants');
+    var selectedParticipants = Array.from(participantSelect.selectedOptions).map(function(opt) {
+        return opt.value;
+    });
+    var duration = parseInt(document.getElementById('segmentDuration').value);
+    var purpose = document.getElementById('segmentPurpose').value;
+    var isIntergender = document.getElementById('segmentIsIntergender').checked;
+    
+    if (selectedParticipants.length === 0) {
+        showToast('Please select at least one participant', 'warning');
+        return;
+    }
+
+    if ((purpose === 'build_feud' || purpose === 'start_feud') && selectedParticipants.length < 2) {
+        showToast('Feud segments need at least two participants', 'warning');
+        return;
+    }
+    
+    // Validate intergender selection
+    if (isIntergender) {
+        var hasMale = false;
+        var hasFemale = false;
+        
+        selectedParticipants.forEach(function(wId) {
+            var wrestler = allWrestlers[wId];
+            if (wrestler) {
+                if (wrestler.gender === 'male') hasMale = true;
+                if (wrestler.gender === 'female') hasFemale = true;
+            }
+        });
+        
+        if (!hasMale || !hasFemale) {
+            showToast('Intergender segment requires at least one male and one female wrestler', 'warning');
+            return;
+        }
+    }
+    
+    var newSegment = {
+        segment_id: createDraftId('segment'),
+        segment_type: segmentType,
+        display_name: segmentConfig.display_name || getSegmentTypeLabel(segmentType),
+        description: segmentConfig.description || null,
+        participants: selectedParticipants,
+        duration: duration,
+        purpose: purpose,
+        is_intergender: isIntergender,
+        can_end_in_brawl: !!segmentConfig.can_end_in_brawl,
+        can_cause_injury: !!segmentConfig.can_cause_injury,
+        advances_feud: !!segmentConfig.advances_feud,
+        creates_heat: !!segmentConfig.creates_heat,
+        creates_pop: !!segmentConfig.creates_pop,
+        position: (currentShowDraft.segments ? currentShowDraft.segments.length * 100 : 0) + 50
+    };
+    
+    if (!currentShowDraft.segments) {
+        currentShowDraft.segments = [];
+    }
+
+    var isEditMode = editingSegmentIndex !== null;
+    if (isEditMode && currentShowDraft.segments[editingSegmentIndex]) {
+        var existing = currentShowDraft.segments[editingSegmentIndex];
+        newSegment.segment_id = existing.segment_id || newSegment.segment_id;
+        newSegment.position = existing.position || existing.card_position || newSegment.position;
+        currentShowDraft.segments[editingSegmentIndex] = Object.assign({}, existing, newSegment);
+        editingSegmentIndex = null;
+    } else {
+        currentShowDraft.segments.push(newSegment);
+    }
+    
+    renderFullCard();
+    
+    var modal = bootstrap.Modal.getInstance(document.getElementById('addSegmentModal'));
+    modal.hide();
+    
+    var segmentLabel = getSegmentTypeLabel(segmentType, newSegment.display_name);
+    showToast((isEditMode ? 'Updated ' : 'Added ') + segmentLabel + ' segment', 'success');
+}
+
+// ========================================================================
+// RENDER SEGMENT CARD
+// ========================================================================
+
+function renderSegmentCard(segment, segmentIndex, itemNumber) {
+    var segmentTypeLabel = getSegmentTypeLabel(segment.segment_type, segment.display_name);
+    
+    var cardClass = segment.is_intergender ? 'border-success' : 'border-info';
+    var headerClass = segment.is_intergender ? 'bg-success' : 'bg-info';
+    
+    var html = '<div class="card mb-3 ' + cardClass + '" data-segment-index="' + segmentIndex + '">' +
+               '<div class="card-header ' + headerClass + ' text-white d-flex justify-content-between align-items-center">' +
+               '<div>' +
+               '<span class="badge bg-dark me-2">#' + itemNumber + '</span>' +
+               '<i class="bi bi-mic-fill"></i> <strong>' + segmentTypeLabel + '</strong>';
+    
+    if (segment.is_intergender) {
+        html += ' <span class="badge bg-light text-dark ms-2">' +
+                '<i class="bi bi-people-fill"></i> Intergender' +
+                '</span>';
+    }
+    
+    html += ' <span class="badge bg-dark ms-2">' + segment.duration + ' min</span>' +
+            '</div>' +
+            '<div>' +
+            '<button class="btn btn-sm btn-outline-light me-1" onclick="editSegment(' + segmentIndex + ')">' +
+            '<i class="bi bi-pencil"></i>' +
+            '</button>' +
+            '<button class="btn btn-sm btn-outline-light" onclick="removeSegment(' + segmentIndex + ')">' +
+            '<i class="bi bi-trash"></i>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '<div class="card-body">' +
+            (segment.description ? '<div class="small text-muted mb-2">' + segment.description + '</div>' : '') +
+            '<div class="mb-2">' +
+            (segment.advances_feud ? '<span class="badge bg-danger me-1">Feud+</span>' : '') +
+            (segment.creates_heat ? '<span class="badge bg-dark me-1">Heat</span>' : '') +
+            (segment.creates_pop ? '<span class="badge bg-success me-1">Pop</span>' : '') +
+            (segment.can_end_in_brawl ? '<span class="badge bg-warning text-dark me-1">Can Brawl</span>' : '') +
+            (segment.can_cause_injury ? '<span class="badge bg-danger me-1">Risky</span>' : '') +
+            '</div>' +
+            '<div class="mb-2"><strong>Participants:</strong></div>' +
+            '<div class="d-flex flex-wrap gap-2 mb-3">';
+    
+    segment.participants.forEach(function(wId) {
+        var wrestler = allWrestlers[wId];
+        if (wrestler) {
+            var genderIcon = wrestler.gender === 'male' ? '♂' : '♀';
+            var badgeClass = wrestler.gender === 'male' ? 'bg-primary' : 'bg-danger';
+            html += '<span class="badge ' + badgeClass + '">' +
+                    genderIcon + ' ' + wrestler.ring_name +
+                    '</span>';
+        } else if (segment.participant_name_map && segment.participant_name_map[wId]) {
+            html += '<span class="badge bg-secondary">' +
+                    segment.participant_name_map[wId] +
+                    '</span>';
+        } else {
+            html += '<span class="badge bg-secondary">' + String(wId) + '</span>';
+        }
+    });
+    
+    html += '</div>' +
+            '<div class="row text-center">' +
+            '<div class="col-md-6">' +
+            '<small class="text-muted">Purpose:</small><br>' +
+            '<span class="badge bg-secondary">' + (segment.purpose || 'general').replace(/_/g, ' ').toUpperCase() + '</span>' +
+            '</div>' +
+            '<div class="col-md-6">' +
+            '<small class="text-muted">Duration:</small><br>' +
+            '<span class="badge bg-success">' + segment.duration + ' min</span>' +
+            '</div>' +
+            '</div>' +
+            (segment.dialogue_beats && segment.dialogue_beats.length
+                ? '<div class="mt-3 border rounded p-2 bg-light">' +
+                  '<div class="small fw-bold mb-1"><i class="bi bi-chat-quote"></i> Dialogue Beats' +
+                  (segment.crowd_goal ? ' <span class="badge bg-dark ms-1">' + escapeHtml(segment.crowd_goal) + '</span>' : '') +
+                  '</div>' +
+                  segment.dialogue_beats.map(function(line) {
+                      return '<div class="small mb-1"><strong>' + escapeHtml(line.speaker_name || line.speaker_id || 'Speaker') + ':</strong> ' +
+                          escapeHtml(line.line || '') + '</div>';
+                  }).join('') +
+                  '</div>'
+                : '') +
+            '</div></div>';
+    
+    return html;
+}
+
+function removeSegment(segmentIndex) {
+    if (!confirm('Remove this segment from the card?')) return;
+    
+    currentShowDraft.segments.splice(segmentIndex, 1);
+    renderFullCard();
+    showToast('Segment removed', 'info');
+}
+
+function editSegment(segmentIndex) {
+    try {
+        if (!currentShowDraft || !currentShowDraft.segments || !currentShowDraft.segments[segmentIndex]) {
+            showToast('Segment not found', 'warning');
+            return;
+        }
+        var seg = normalizeUiSegment(currentShowDraft.segments[segmentIndex], segmentIndex);
+        editingSegmentIndex = segmentIndex;
+        showAddSegmentModal(seg);
+    } catch (e) {
+        console.error('Edit segment failed:', e);
+        showToast('Failed to edit segment: ' + e.message, 'danger');
+    }
+}
+
+// ========================================================================
+// AUTO-GENERATE SEGMENTS
+// ========================================================================
+
+function generateSegments() {
+    if (!confirm('Auto-generate segments based on active feuds and match card?')) return;
+    
+    showToast('Generating segments with AI Creative Director...', 'info');
+    
+    fetch('/api/booking/generate_segments', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            show_draft: serializeShowDraftForBackend(currentShowDraft),
+            feud_data: allFeuds
+        })
+    })
+    .then(function(response) { return response.json(); })
+    .then(async function(data) {
+        if (data.success && data.segments) {
+            currentShowDraft.segments = (data.segments || []).map(function(seg, index) {
+                return normalizeUiSegment(seg, index);
+            });
+
+            renderFullCard();
+            loadLegacyManiaPanel();
+            showToast('Generated ' + data.segments.length + ' segments', 'success');
+        } else {
+            throw new Error(data.error || 'Failed to generate segments');
+        }
+    })
+    .catch(function(error) {
+        console.error('Error generating segments:', error);
+        showToast('Failed to generate segments: ' + error.message, 'danger');
+    });
+}
+
+// ========================================================================
+// REGENERATE ENTIRE CARD
+// ========================================================================
+
+function regenerateCard() {
+    if (!confirm('Regenerate the entire card? This will replace all matches and segments.')) return;
+    
+    document.getElementById('showCardList').innerHTML = 
+        '<div class="text-center py-5">' +
+        '<div class="spinner-border text-primary" role="status"></div>' +
+        '<p class="mt-3">AI Creative Director is rebuilding your show...</p>' +
+        '</div>';
+    
+    fetch('/api/booking/generate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ 
+            include_production_plan: true,
+            force_regenerate: true
+        })
+    })
+    .then(function(response) { return response.json(); })
+    .then(async function(data) {
+        if (data.success) {
+            currentShowDraft = normalizeShowDraftForUI(data.show_draft);
+            productionPlan = data.production_plan || null;
+            
+            renderShowInfo(currentShowDraft);
+            renderProductionPlan(productionPlan);
+            renderFullCard();
+            loadLegacyManiaPanel();
+            
+            showToast('Card regenerated successfully!', 'success');
+        } else {
+            throw new Error(data.error || 'Failed to regenerate');
+        }
+    })
+    .catch(function(error) {
+        console.error('Error regenerating card:', error);
+        showToast('Failed to regenerate: ' + error.message, 'danger');
+    });
+}
+
+// ========================================================================
+// CLEAR ALL ITEMS
+// ========================================================================
+
+function clearAllItems() {
+    if (!confirm('Clear all matches and segments? This cannot be undone.')) return;
+    
+    currentShowDraft.matches = [];
+    currentShowDraft.segments = [];
+    
+    renderFullCard();
+    showToast('All items cleared', 'info');
+}
+
+// ========================================================================
+// UPDATE CARD STATISTICS
+// ========================================================================
+
+function updateCardStats() {
+    var matchCount = currentShowDraft.matches ? currentShowDraft.matches.length : 0;
+    var segmentCount = currentShowDraft.segments ? currentShowDraft.segments.length : 0;
+    
+    var totalRuntime = 0;
+    
+    if (currentShowDraft.matches) {
+        currentShowDraft.matches.forEach(function(match) {
+            totalRuntime += parseInt(match.planned_duration_minutes || match.duration || estimateMatchRuntime(match), 10) || estimateMatchRuntime(match);
+        });
+    }
+    
+    if (currentShowDraft.segments) {
+        currentShowDraft.segments.forEach(function(segment) {
+            totalRuntime += segment.duration || 5;
+        });
+    }
+    
+    setTextIfPresent('matchCount', matchCount);
+    setTextIfPresent('segmentCount', segmentCount);
+    
+    setTextIfPresent('matchBadge', matchCount + ' Matches');
+    setTextIfPresent('segmentBadge', segmentCount + ' Segments');
+    setTextIfPresent('runtimeBadge', totalRuntime + ' min');
+    
+    // Enable/disable run show button
+    var canRunShow = matchCount >= 3; // Minimum 3 matches
+    var runShowBtn = document.getElementById('runShowBtn');
+    if (!runShowBtn) return;
+    runShowBtn.disabled = !canRunShow;
+    
+    if (!canRunShow) {
+        runShowBtn.title = 'Need at least 3 matches to run show';
+    } else {
+        runShowBtn.title = 'Simulate this show';
+    }
+}
+
+// ========================================================================
+// RENDER SHOW INFO
+// ========================================================================
+
+function renderShowInfo(show) {
+    show = show || {};
+    setTextIfPresent('showName', show.show_name || show.name || 'Weekly TV');
+    setTextIfPresent('showBrand', show.brand || '-');
+    setTextIfPresent('showType', show.show_type || 'weekly_tv');
+    setTextIfPresent('showDate', show.date || 'TBD');
+    
+    var typeBadge = document.getElementById('showTypeBadge');
+    if (!typeBadge) return;
+    typeBadge.textContent = (show.show_type || 'weekly_tv').replace(/_/g, ' ').toUpperCase();
+    
+    // Set badge color based on type
+    typeBadge.className = 'badge fs-6';
+    if (show.show_type === 'ppv') {
+        typeBadge.classList.add('bg-danger');
+    } else if (show.show_type === 'supercard') {
+        typeBadge.classList.add('bg-warning', 'text-dark');
+    } else {
+        typeBadge.classList.add('bg-light', 'text-dark');
+    }
+}
+
+function getTimelineRuntimeTarget() {
+    if (productionPlan && productionPlan.total_runtime_minutes) {
+        return parseInt(productionPlan.total_runtime_minutes, 10) || 120;
+    }
+    if (currentShowDraft && currentShowDraft.show_type && currentShowDraft.show_type !== 'weekly_tv') {
+        return currentShowDraft.is_ppv ? 180 : 120;
+    }
+    return 120;
+}
+
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function renderMatchLabel(match) {
+    var ids = [];
+    (match.participants || []).forEach(function(participant) {
+        if (Array.isArray(participant)) {
+            ids = ids.concat(participant);
+        } else if (participant && typeof participant === 'object') {
+            if (participant.male) ids.push(participant.male);
+            if (participant.female) ids.push(participant.female);
+        } else if (participant) {
+            ids.push(participant);
+        }
+    });
+    var names = ids.map(getWrestlerName).filter(Boolean);
+    if (names.length) return names.join(' vs ');
+    return (match.match_type || 'match').replace(/_/g, ' ').toUpperCase();
+}
+
+function getTimelineItems() {
+    var items = [];
+    (currentShowDraft.matches || []).forEach(function(match, index) {
+        items.push({
+            type: 'match',
+            index: index,
+            position: match.position || match.card_position || (index + 1),
+            label: renderMatchLabel(match),
+            segmentType: match.match_type || 'match',
+            duration: parseInt(match.planned_duration_minutes || match.duration || estimateMatchRuntime(match), 10) || 10
+        });
+    });
+    (currentShowDraft.segments || []).forEach(function(segment, index) {
+        items.push({
+            type: 'segment',
+            index: index,
+            position: segment.position || segment.card_position || ((index * 100) + 50),
+            label: segment.display_name || getSegmentTypeLabel(segment.segment_type),
+            segmentType: segment.segment_type || 'promo',
+            duration: parseInt(segment.duration || segment.duration_minutes || 5, 10) || 5
+        });
+    });
+    return items.sort(function(a, b) { return a.position - b.position; });
+}
+
+function getTimelineStatus(item, elapsed, target) {
+    var minimums = {
+        promo: 4,
+        promo_battle: 7,
+        interview: 3,
+        backstage: 3,
+        backstage_attack: 3,
+        in_ring_attack: 3,
+        contract_signing: 8,
+        vignette: 2,
+        singles: 8,
+        tag: 10,
+        triple_threat: 11,
+        fatal_4way: 12,
+        battle_royal: 14,
+        rumble: 45,
+        elimination_chamber: 28
+    };
+    if (elapsed + item.duration > target) return {className: 'bg-danger', label: 'Over allocated'};
+    if (item.duration < (minimums[item.segmentType] || 3)) return {className: 'bg-warning text-dark', label: 'Suspiciously short'};
+    return {className: 'bg-success', label: 'Within budget'};
+}
+
+function renderBookingTimeline() {
+    var list = document.getElementById('bookingTimelineList');
+    var progress = document.getElementById('timelineProgress');
+    var badge = document.getElementById('timelineAvailableBadge');
+    var warnings = document.getElementById('timelineWarnings');
+    if (!list || !progress || !badge || !warnings || !currentShowDraft) return;
+
+    var target = getTimelineRuntimeTarget();
+    var items = getTimelineItems();
+    var elapsed = 0;
+    var html = '';
+    var progressHtml = '';
+    var warningRows = [];
+
+    items.forEach(function(item, orderIndex) {
+        var status = getTimelineStatus(item, elapsed, target);
+        var width = Math.max(2, Math.min(100, (item.duration / target) * 100));
+        progressHtml += '<div class="progress-bar ' + status.className + '" style="width:' + width + '%" title="' +
+            escapeHtml(item.label) + ' - ' + item.duration + ' min"></div>';
+        if (status.label !== 'Within budget') {
+            warningRows.push('<div class="alert alert-' + (status.label === 'Over allocated' ? 'danger' : 'warning') + ' py-2 mb-2">' +
+                escapeHtml(item.label) + ': ' + status.label + '</div>');
+        }
+        html += '<div class="d-flex align-items-center gap-2 border rounded p-2">' +
+            '<span class="badge bg-dark">#' + (orderIndex + 1) + '</span>' +
+            '<span class="badge ' + status.className + '">' + status.label + '</span>' +
+            '<div class="flex-grow-1">' +
+            '<strong>' + escapeHtml(item.label) + '</strong>' +
+            '<div class="small text-muted">' + item.segmentType.replace(/_/g, ' ') + ' starts at minute ' + elapsed + '</div>' +
+            '</div>' +
+            '<input class="form-control form-control-sm" style="width: 92px" type="number" min="1" value="' + item.duration + '" ' +
+            'onchange="setTimelineDuration(\'' + item.type + '\',' + item.index + ', this.value)">' +
+            '</div>';
+        elapsed += item.duration;
+    });
+
+    if (!items.length) {
+        html = '<div class="text-muted small">No card items yet.</div>';
+    }
+
+    progress.innerHTML = progressHtml || '<div class="progress-bar bg-secondary" style="width:100%"></div>';
+    list.innerHTML = html;
+    var remaining = target - elapsed;
+    badge.textContent = remaining >= 0 ? (remaining + ' min available') : (Math.abs(remaining) + ' min over');
+    badge.className = 'badge ' + (remaining >= 0 ? 'bg-success' : 'bg-danger');
+    warnings.innerHTML = warningRows.join('');
+}
+
+function setTimelineDuration(itemType, index, value) {
+    var minutes = Math.max(1, parseInt(value, 10) || 1);
+    if (itemType === 'match' && currentShowDraft.matches && currentShowDraft.matches[index]) {
+        currentShowDraft.matches[index].planned_duration_minutes = minutes;
+        currentShowDraft.matches[index].duration = minutes;
+    }
+    if (itemType === 'segment' && currentShowDraft.segments && currentShowDraft.segments[index]) {
+        currentShowDraft.segments[index].duration = minutes;
+        currentShowDraft.segments[index].duration_minutes = minutes;
+    }
+    renderFullCard();
+}
+
+function saveBookingTimelinePlan() {
+    if (!currentShowDraft) {
+        showToast('No show draft loaded', 'warning');
+        return;
+    }
+    var target = getTimelineRuntimeTarget();
+    var used = getTimelineItems().reduce(function(total, item) { return total + item.duration; }, 0);
+    var acceptOverrun = used > target && confirm('This card is over the runtime. Save as an accepted overrun?');
+    fetch('/api/booking-enhancements/show-plan', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            show_draft: serializeShowDraftForBackend(currentShowDraft),
+            production_plan: productionPlan,
+            accept_overrun: acceptOverrun
+        })
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        if (!data.success) throw new Error(data.error || 'Failed to save timeline');
+        var plan = data.data || {};
+        showToast('Timeline saved with ' + ((plan.segments || []).length) + ' allocations', 'success');
+    })
+    .catch(function(error) {
+        showToast('Timeline save failed: ' + error.message, 'danger');
+    });
+}
+
+// ========================================================================
+// RUN SHOW (SIMULATE)
+// ========================================================================
+
+var runShowButton = document.getElementById('runShowBtn');
+if (runShowButton) {
+    runShowButton.addEventListener('click', function() {
+        runShow();
+    });
+}
+
+function runShow() {
+    if (!currentShowDraft.matches || currentShowDraft.matches.length < 3) {
+        showToast('Need at least 3 matches to run the show', 'warning');
+        return;
+    }
+
+    var confirmMessage = 'Run this show and simulate all matches? This will generate results and update storylines.';
+    if (currentEconomicsProjection && (currentEconomicsProjection.projected_net_profit || 0) < 0) {
+        confirmMessage =
+            'This show is projected to lose ' +
+            formatMoney(Math.abs(currentEconomicsProjection.projected_net_profit || 0)) +
+            '. Continue anyway?';
+    }
+
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+    
+    var btn = document.getElementById('runShowBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Running Show...';
+    
+    fetch('/api/booking/run_show', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            show_draft: serializeShowDraftForBackend(currentShowDraft),
+            production_plan: productionPlan,
+            live_interruption_mode: true
+        })
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        if (data.success) {
+            if (data.live_interruption && data.live_interruption.inserted) {
+                var intr = data.live_interruption.interruption || {};
+                showToast('Live interruption hit the show: ' + (intr.interruption_type || 'surprise'), 'warning');
+            }
+            showToast('Show completed successfully!', 'success');
+            
+            // Save show result for recap page
+            sessionStorage.setItem('lastShowResult', JSON.stringify(data.show_result));
+            
+            // Redirect to recap page
+            setTimeout(function() {
+                loadView('recap');
+            }, 500);
+        } else {
+            throw new Error(data.error || 'Failed to run show');
+        }
+    })
+    .catch(function(error) {
+        console.error('Error running show:', error);
+        showToast('Failed to run show: ' + error.message, 'danger');
+        
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-play-fill"></i> Run Show';
+    });
+}
+
+// ========================================================================
+// SHOW RESULTS MODAL
+// ========================================================================
+
+function showShowResults(showResult) {
+    var html = '<div class="modal fade" id="showResultsModal" tabindex="-1">' +
+               '<div class="modal-dialog modal-xl">' +
+               '<div class="modal-content">' +
+               '<div class="modal-header bg-success text-white">' +
+               '<h5 class="modal-title"><i class="bi bi-trophy-fill"></i> Show Results: ' + showResult.name + '</h5>' +
+               '<button type="button" class="btn-close" data-bs-dismiss="modal"></button>' +
+               '</div>' +
+               '<div class="modal-body">' +
+               
+               '<div class="row mb-4">' +
+               '<div class="col-md-3 text-center">' +
+               '<h3 class="text-primary">' + (showResult.overall_rating || 0).toFixed(2) + '</h3>' +
+               '<small class="text-muted">Overall Rating</small>' +
+               '</div>' +
+               '<div class="col-md-3 text-center">' +
+               '<h3 class="text-success">' + (showResult.attendance || 0).toLocaleString() + '</h3>' +
+               '<small class="text-muted">Attendance</small>' +
+               '</div>' +
+               '<div class="col-md-3 text-center">' +
+               '<h3 class="text-warning">' + (showResult.revenue || 0).toLocaleString('en-US', {style: 'currency', currency: 'USD'}) + '</h3>' +
+               '<small class="text-muted">Revenue</small>' +
+               '</div>' +
+               '<div class="col-md-3 text-center">' +
+               '<h3 class="text-info">' + (showResult.tv_rating || 0).toFixed(2) + '</h3>' +
+               '<small class="text-muted">TV Rating</small>' +
+               '</div>' +
+               '</div>' +
+               
+               '<h5 class="mb-3"><i class="bi bi-list-ol"></i> Match Results</h5>' +
+               '<div class="list-group">';
+    
+    if (showResult.match_results && showResult.match_results.length > 0) {
+        showResult.match_results.forEach(function(matchResult, index) {
+            var winner = allWrestlers[matchResult.winner_id];
+            var winnerName = winner ? winner.ring_name : 'Unknown';
+            var winnerGender = winner ? (winner.gender === 'male' ? '♂' : '♀') : '';
+            
+            html += '<div class="list-group-item">' +
+                    '<div class="d-flex justify-content-between align-items-center">' +
+                    '<div>' +
+                    '<span class="badge bg-dark me-2">#' + (index + 1) + '</span>' +
+                    '<strong>' + (matchResult.match_type || 'Match').replace(/_/g, ' ').toUpperCase() + '</strong>' +
+                    '</div>' +
+                    '<div>' +
+                    '<span class="badge bg-warning text-dark me-2">' +
+                    '<i class="bi bi-star-fill"></i> ' + (matchResult.rating || 0).toFixed(2) + ' stars' +
+                    '</span>' +
+                    '<span class="badge bg-success">' +
+                    '<i class="bi bi-trophy-fill"></i> Winner: ' + winnerGender + ' ' + winnerName +
+                    '</span>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+        });
+    } else {
+        html += '<div class="alert alert-info">No match results available</div>';
+    }
+    
+    html += '</div>' +
+            
+            '<h5 class="mt-4 mb-3"><i class="bi bi-graph-up"></i> Notable Highlights</h5>' +
+            '<ul class="list-unstyled">';
+    
+    if (showResult.highlights && showResult.highlights.length > 0) {
+        showResult.highlights.forEach(function(highlight) {
+            html += '<li class="mb-2"><i class="bi bi-check-circle text-success"></i> ' + highlight + '</li>';
+        });
+    } else {
+        html += '<li class="text-muted">No special highlights</li>';
+    }
+    
+    html += '</ul>' +
+            
+            '</div>' +
+            '<div class="modal-footer">' +
+            '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>' +
+            '<button type="button" class="btn btn-primary" onclick="loadView(\'office\')">Return to Office</button>' +
+            '</div>' +
+            '</div></div></div>';
+    
+    // Remove existing modal
+    var existingModal = document.getElementById('showResultsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', html);
+    
+    var modal = new bootstrap.Modal(document.getElementById('showResultsModal'));
+    modal.show();
+    
+    // Clear show button
+    var runBtn = document.getElementById('runShowBtn');
+    runBtn.disabled = true;
+    runBtn.innerHTML = '<i class="bi bi-check-circle"></i> Show Completed';
+}
+
+// ========================================================================
+// UTILITY: SHOW TOAST NOTIFICATION
+// ========================================================================
+
+function showShowResults(showResult) {
+    var html = '<div class="modal fade" id="showResultsModal" tabindex="-1">' +
+               '<div class="modal-dialog modal-xl">' +
+               '<div class="modal-content">' +
+               '<div class="modal-header bg-success text-white">' +
+               '<h5 class="modal-title"><i class="bi bi-trophy-fill"></i> Show Results: ' + showResult.name + '</h5>' +
+               '<button type="button" class="btn-close" data-bs-dismiss="modal"></button>' +
+               '</div>' +
+               '<div class="modal-body">' +
+               '<div class="row mb-4">' +
+               '<div class="col-md-3 text-center">' +
+               '<h3 class="text-primary">' + (showResult.overall_rating || 0).toFixed(2) + '</h3>' +
+               '<small class="text-muted">Overall Rating</small>' +
+               '</div>' +
+               '<div class="col-md-3 text-center">' +
+               '<h3 class="text-success">' + (showResult.attendance || 0).toLocaleString() + '</h3>' +
+               '<small class="text-muted">Attendance</small>' +
+               '</div>' +
+               '<div class="col-md-3 text-center">' +
+               '<h3 class="text-warning">' + (showResult.revenue || 0).toLocaleString('en-US', {style: 'currency', currency: 'USD'}) + '</h3>' +
+               '<small class="text-muted">Revenue</small>' +
+               '</div>' +
+               '<div class="col-md-3 text-center">' +
+               '<h3 class="text-info">' + (showResult.tv_rating || 0).toFixed(2) + '</h3>' +
+               '<small class="text-muted">TV Rating</small>' +
+               '</div>' +
+               '</div>' +
+               '<h5 class="mb-3"><i class="bi bi-list-ol"></i> Match Results</h5>' +
+               '<div class="list-group">';
+
+    if (showResult.match_results && showResult.match_results.length > 0) {
+        showResult.match_results.forEach(function(matchResult, index) {
+            var winnerName = (matchResult.winner_names && matchResult.winner_names.length > 0)
+                ? matchResult.winner_names.join(' & ')
+                : 'Unknown';
+            var matchLabel = matchResult.title_name || matchResult.match_summary || ('Match ' + (index + 1));
+
+            html += '<div class="list-group-item">' +
+                    '<div class="d-flex justify-content-between align-items-center">' +
+                    '<div>' +
+                    '<span class="badge bg-dark me-2">#' + (index + 1) + '</span>' +
+                    '<strong>' + matchLabel + '</strong>' +
+                    '</div>' +
+                    '<div>' +
+                    '<span class="badge bg-warning text-dark me-2">' +
+                    '<i class="bi bi-star-fill"></i> ' + (matchResult.star_rating || 0).toFixed(2) + ' stars' +
+                    '</span>' +
+                    '<span class="badge bg-success">' +
+                    '<i class="bi bi-trophy-fill"></i> Winner: ' + winnerName +
+                    '</span>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+        });
+    } else {
+        html += '<div class="alert alert-info">No match results available</div>';
+    }
+
+    html += '</div>' +
+            '<h5 class="mt-4 mb-3"><i class="bi bi-graph-up"></i> Notable Highlights</h5>' +
+            '<ul class="list-unstyled">';
+
+    if (showResult.highlights && showResult.highlights.length > 0) {
+        showResult.highlights.forEach(function(highlight) {
+            html += '<li class="mb-2"><i class="bi bi-check-circle text-success"></i> ' + highlight + '</li>';
+        });
+    } else {
+        html += '<li class="text-muted">No special highlights</li>';
+    }
+
+    html += '</ul>' +
+            '</div>' +
+            '<div class="modal-footer">' +
+            '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>' +
+            '<button type="button" class="btn btn-primary" onclick="loadView(\'office\')">Return to Office</button>' +
+            '</div>' +
+            '</div></div></div>';
+
+    var existingModal = document.getElementById('showResultsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    document.body.insertAdjacentHTML('beforeend', html);
+
+    var modal = new bootstrap.Modal(document.getElementById('showResultsModal'));
+    modal.show();
+
+    var runBtn = document.getElementById('runShowBtn');
+    runBtn.disabled = true;
+    runBtn.innerHTML = '<i class="bi bi-check-circle"></i> Show Completed';
+}
+
+function showToast(message, type) {
+    type = type || 'info';
+    
+    var bgClass = 'bg-' + type;
+    var icon = type === 'success' ? 'check-circle' : 
+               (type === 'danger' ? 'exclamation-triangle' : 
+               (type === 'warning' ? 'exclamation-circle' : 'info-circle'));
+    
+    var toastHtml = '<div class="toast align-items-center text-white ' + bgClass + ' border-0" role="alert">' +
+                    '<div class="d-flex">' +
+                    '<div class="toast-body">' +
+                    '<i class="bi bi-' + icon + ' me-2"></i>' + message +
+                    '</div>' +
+                    '<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>' +
+                    '</div></div>';
+    
+    var container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+    }
+    
+    container.insertAdjacentHTML('beforeend', toastHtml);
+    
+    var toastElement = container.lastElementChild;
+    var toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
+    toast.show();
+    
+    toastElement.addEventListener('hidden.bs.toast', function() {
+        toastElement.remove();
+    });
+}
+
+// ========================================================================
+// EXPORT GLOBAL FUNCTIONS
+// ========================================================================
+
+
+
+    async function loadLegacyManiaPanel() {
+        var container = document.getElementById('legacyManiaPanel');
+        if (!container) return;
+        try {
+            var resp = await fetch('/api/booking/legacy/rumble-opportunities');
+            var data = await resp.json();
+            if (!data.success) throw new Error(data.error || 'Failed to load opportunities');
+            var rows = data.opportunities || [];
+            if (!rows.length) {
+                container.innerHTML = '<div class="alert alert-secondary mb-0">No LegacyMania opportunities recorded yet. Run Rumble Royale or Elimination Chamber first.</div>';
+                return;
+            }
+
+            var worldTitles = Object.values(allTitles).filter(function(t){
+                var n = (t.name || '').toLowerCase();
+                return n.indexOf('world') !== -1 && (n.indexOf('women') !== -1 || n.indexOf('heavyweight') !== -1 || n.indexOf('championship') !== -1);
+            });
+            function normalizeDivision(value) {
+                var division = String(value || '').toLowerCase();
+                if (division === 'womens' || division === "women's" || division === 'women') return 'female';
+                if (division === 'mens' || division === "men's" || division === 'men') return 'male';
+                return division;
+            }
+
+            var html = '<div class="table-responsive"><table class="table table-sm align-middle"><thead><tr><th>Source</th><th>Winner</th><th>Division</th><th>Target Title</th><th>Legacy Night</th><th>Status</th><th></th></tr></thead><tbody>';
+            rows.forEach(function(r){
+                var rowDivision = normalizeDivision(r.division || '');
+                var opts = worldTitles
+                  .filter(function(t){ return normalizeDivision(t.division || '') === rowDivision; })
+                  .map(function(t){ return '<option value="'+t.id+'" '+(r.target_title_id===t.id?'selected':'')+'>'+t.name+' ('+t.current_brand+')</option>'; }).join('');
+                html += '<tr>' +
+                    '<td><span class="badge bg-dark">'+ (r.source_event || 'LegacyMania') +'</span></td>' +
+                    '<td><strong>'+ (r.winner_name || r.rumble_winner_name || r.winner_id || r.rumble_winner_id) +'</strong></td>' +
+                    '<td>'+ r.division +'</td>' +
+                    '<td><select class="form-select form-select-sm" id="legacy_title_'+r.id+'"><option value="">Choose...</option>'+opts+'</select></td>' +
+                    '<td><select class="form-select form-select-sm" id="legacy_night_'+r.id+'"><option '+((r.legacy_night||'Night 1')==='Night 1'?'selected':'')+'>Night 1</option><option '+((r.legacy_night||'Night 1')==='Night 2'?'selected':'')+'>Night 2</option></select></td>' +
+                    '<td><span class="badge bg-info">'+(r.status||'pending')+'</span></td>' +
+                    '<td><button class="btn btn-sm btn-primary" onclick="assignLegacyOpportunity(&quot;'+r.id+'&quot;)">Assign</button></td>' +
+                    '</tr>';
+            });
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = '<div class="alert alert-danger mb-0">'+e.message+'</div>';
+        }
+    }
+
+    async function assignLegacyOpportunity(id) {
+        var titleId = document.getElementById('legacy_title_'+id).value;
+        var night = document.getElementById('legacy_night_'+id).value;
+        if (!titleId) return showToast('Select a title first', 'warning');
+        var t = allTitles[titleId] || {};
+        var resp = await fetch('/api/booking/legacy/rumble-opportunities/'+id+'/assign', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({target_title_id:titleId, target_title_name:t.name || '', target_brand:t.current_brand || '', legacy_night: night, status:'assigned'})
+        });
+        var data = await resp.json();
+        if (!data.success) return showToast(data.error || 'Failed to assign', 'danger');
+        showToast('LegacyMania challenge assigned', 'success');
+        loadLegacyManiaPanel();
+    }
+
+window.openAddMatch = openAddMatch;
+window.confirmAddMatch = confirmAddMatch;
+window.confirmAddSegment = confirmAddSegment;
+window.updateSegmentTypePreview = updateSegmentTypePreview;
+window.loadLegacyManiaPanel = loadLegacyManiaPanel;
+window.assignLegacyOpportunity = assignLegacyOpportunity;
+window.loadShowrunnerDraftIntoBooking = loadShowrunnerDraftIntoBooking;
+window.generatePromoDialogueBeats = generatePromoDialogueBeats;
+window.forceLiveInterruptionPreview = forceLiveInterruptionPreview;
+window.regenerateCard = regenerateCard;
+window.clearAllItems = clearAllItems;
+window.renderFullCard = renderFullCard;
+window.saveBookingTimelinePlan = saveBookingTimelinePlan;
+window.setTimelineDuration = setTimelineDuration;
+window.updateMatchTypeUI = updateMatchTypeUI;
+window.toggleTitleOptions = toggleTitleOptions;
+window.updateTitleInfo = updateTitleInfo;
+window.updateWinnerDropdown = updateWinnerDropdown;
+window.onTeamUnitChange = onTeamUnitChange;
+window.onTeamManualToggle = onTeamManualToggle;
+window.removeMatch = removeMatch;
+window.editMatch = editMatch;
+window.removeSegment = removeSegment;
+window.editSegment = editSegment;
+window.generateSegments = generateSegments;
+
+// ========================================================================
+// INITIALIZATION
+// ========================================================================
+
+    
+    window.loadBookingView = loadBookingView;
+    window.confirmAddMatch = confirmAddMatch;
+    
+
+    window.confirmAddMatch = confirmAddMatch;
+    window.renderFullCard = renderFullCard;
+    
+    // Initialize
+    loadBookingView();
+    
+})();
+</script>

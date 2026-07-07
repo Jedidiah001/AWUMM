@@ -1,0 +1,428 @@
+I'm building a game. Study the below. Don't do anything else. Don't implement yet
+awum/
+├── backend/
+│   ├── app.py                 # Flask application entry point
+├── routes/                         #Routes and Endpoints folder
+│   ├── __init__.py                 # Blueprint registration
+│   ├── core_routes.py              # Status, universe state, calendar
+│   ├── roster_routes.py            # Roster management
+│   ├── feud_routes.py              # Feuds
+│   ├── match_routes.py             # Match simulation & multi-competitor testing
+│   ├── booking_routes.py           # Booking & show generation
+│   ├── contract_routes.py          # Contract management
+│   ├── stats_routes.py             # Statistics & records
+│   ├── save_routes.py              # Save/Load system
+│   ├── tag_team_routes.py          # Tag teams
+│   ├── segment_routes.py           # Segments & promos
+│   ├── storyline_routes.py         # Scripted storylines
+│   ├── awards_routes.py            # End-of-year awards
+│   ├── caw_routes.py               # Create-A-Wrestler
+│   ├── draft_routes.py             # Brand draft
+│   ├── injury_routes.py            # Injury system
+│   ├── title_situation_routes.py   # Championship hierarchy & situations
+│   ├── custom_championship_routes.py # Custom championship creation
+│   ├── defense_frequency_routes.py # Championship defense frequency
+│   ├── free_agent_routes.py        # Free agents
+│   ├── market_value_routes.py      # Market value calculations
+│   ├── show_routes.py              # Show simulation & history
+│   ├── lineage_routes.py           # Championship lineage
+│   └── debug_routes.py             # Debug & testing endpoints
+│   ├── models/
+│   │   ├── wrestler.py        # Wrestler class & attributes
+│   │   ├── championship.py    # Title definitions & tracking
+│   │   ├── faction.py         # Stables/groups
+│   │   ├── feud.py           # Rivalry tracking
+│   │   ├── match.py          # Match drafts & results
+│   │   ├── show.py           # Show drafts & results
+│   │   ├── calendar.py       # Scheduling system
+│   │   ├── contract.py       # Contract & salary management
+│   │   └── free_agent.py     # Free agent pool
+│   ├── simulation/
+│   │   ├── match_sim.py      # Core match simulation engine
+│   │   ├── show_sim.py       # Show simulation orchestrator
+│   │   ├── aging.py          # Aging & attribute degradation
+│   │   ├── injuries.py       # Injury system
+│   │   ├── morale.py         # Morale & locker room politics
+│   │   └── events.py         # Upsets, returns, special events
+│   ├── creative/
+│   │   ├── ai_director.py    # Rules-based booking AI
+│   │   ├── feuds.py          # Feud creation & management
+│   │   ├── storylines.py     # Scripted year-one story beats
+│   │   ├── segments.py       # Backstage segments, promos
+│   │   └── social_media.py   # Twitter/social sim
+│   ├── economy/
+│   │   ├── finance.py        # Revenue, expenses, balance
+│   │   ├── attendance.py     # Gate calculations
+│   │   └── contracts.py      # Contract negotiations
+│   ├── persistence/
+│   │   ├── universe_db.py # Main game state management
+│   │   ├── save_load.py      # Save/load to JSON/SQLite
+│   │   └── history.py        # Match history, stats tracking
+│   └── data/
+│       ├── initial_roster.json
+│       ├── championships.json
+│       ├── calendar_template.json
+│       └── saves/            # User save files
+├── frontend/
+│   ├── static/
+│   │   ├── css/
+│   │   │   └── styles.css
+│   │   └── js/
+│   │       ├── office.js     # Office view logic
+│   │       ├── booking.js    # Card editing
+│   │       ├── recap.js      # Show results
+│   │       ├── roster.js     # Roster management
+│   │       ├── feuds.js      # Feud viewer
+│   │       └── api.js        # API calls wrapper
+│   └── templates/
+│       ├── index.html        # Main SPA shell
+│       ├── office.html       # Office view
+│       ├── booking.html      # Card editor
+│       ├── recap.html        # Show recap
+│       ├── roster.html       # Roster table
+│       ├── feuds.html        # Feuds list
+│       ├── contracts.html    # Contract management
+│       └── finance.html      # Financial dashboard
+└── requirements.txt
+
+Implementation Plan - 10 Core Steps
+Here are the 10 foundational steps we'll build incrementally, with each step producing a working, testable prototype:
+
+Step 1: Project Setup & Basic Flask Server
+Initialize Flask app
+Create folder structure
+Set up static file serving
+Build minimal HTML shell with Bootstrap 5
+Confirm http://localhost:8080 accessible in Termux browser
+Deliverable: Empty but running web app
+
+Step 2: Core Data Models & Initial Roster
+Define Wrestler class with:
+Identity (name, alignment, role, brand, gender)
+Attributes (brawling, technical, speed, mic, psychology, stamina)
+Dynamic stats (popularity, momentum, morale, fatigue, injury)
+Age, years experience
+Contract (salary, length, expiration)
+Major superstar flag
+Define Championship class with:
+Name, brand, prestige, holder, history
+Create initial_roster.json with 40-50 wrestlers covering:
+All 3 brands (Alpha, Velocity, Vanguard)
+Mix of men/women
+Role distribution (main event, upper mid, mid, lower, jobber)
+Age variety (20-50)
+Designated major superstars
+Create championships.json with all 8 titles
+Deliverable: JSON-loaded roster visible in /api/roster endpoint
+
+Step 3: Calendar System & PPV/PLE Scheduling
+Calendar class managing:
+Current year/week
+Weekly show schedule (Monday Alpha, Friday Velocity, Saturday Vanguard)
+8 named PPV/PLE events at correct months:
+Rumble Royale (January, week 4)
+Clash of Titans (March, week 12)
+Overdrive (May, week 20)
+Champions' Ascent (June, week 24)
+Summer Slamfest (August, week 32)
+Autumn Annihilation (October, week 40)
+Night of Glory (November, week 44)
+Victory Dome (December, week 52)
+Each event marked with:
+is_ppv, name, tier (major/minor), brand
+Method: get_next_show() returns upcoming event details
+Deliverable: /api/calendar/next endpoint showing correct upcoming show
+
+Step 4: Match Simulation Engine
+simulate_match(match_draft, universe_state) implementing:
+Rating calculation:
+Combine attributes (brawling, technical, speed, psychology, stamina)
+Factor in popularity, momentum, fatigue, injury severity
+Role modifiers (main event = higher quality ceiling)
+Win probability:
+Base 50/50
+Adjusted by bookingBias (Strong A = 85%, Slight A = 65%, Even = 50%, etc.)
+Random outcome based on probability
+Match duration (5-30 minutes based on card position)
+Highlight moments:
+Opening exchange
+Momentum shifts (2-4 beats)
+Near-falls
+Big signature spots
+Finish sequence
+Finish type:
+Clean pin (faces tend to win clean)
+Cheating (heels with managers/weapons)
+Roll-up (upset finishes)
+DQ/countout (heel heat)
+Star rating (0-5 stars):
+Base on combined wrestler quality
+Boost for high importance
+Slight random variance
+Post-match effects:
+Winner: +momentum, +popularity (scaled by opponent quality)
+Loser: -momentum, small -popularity
+Both: +fatigue
+Injury probability (2-5%, higher if match went long or high-impact styles)
+Upset detection:
+If underdog (lower popularity/role) wins: mark shock_upset
+Extra momentum boost for winner, extra popularity loss for loser
+Deliverable: /api/test/simulate_match endpoint returning full MatchResult JSON
+
+Step 5: Feud System
+Feud class:
+Type (personal, title, faction, mentor_vs_protege)
+Participants (2+ wrestler IDs)
+Title involvement
+Intensity (0-100)
+Start/last segment dates
+Planned payoff show
+Resolution status
+Feud creation triggers:
+Major upsets auto-create personal feuds
+Title matches create title feuds
+Repeated bookings intensify existing feuds
+Feud intensity affects:
+Match importance
+Finish type (more cheating/drama)
+Segment frequency
+Feud resolution:
+At planned payoff (usually PPV)
+Intensity drops to 0, marked resolved
+Can be reignited later
+Deliverable: /api/feuds endpoint listing active feuds with intensity
+
+Step 6: AI Creative Director (Rules-Based Booking)
+AIDirector.generate_show_draft(show_date, universe_state) logic:
+
+Context awareness:
+
+Identify brand (Alpha/Velocity/Vanguard/cross-brand PPV)
+Identify show type (weekly TV / PPV / major PLE)
+Pull brand-specific roster (respect injuries, fatigue)
+Pull brand-specific titles (+ Women's World for all)
+Check active feuds for this brand
+Look ahead to next PPV
+Card construction:
+
+Main Event:
+Weekly TV: Brand's top title defense OR hottest feud
+Minor PPV: Title match OR feud blowoff
+Major PPV (Victory Dome, Summer Slamfest, Night of Glory):
+Biggest available title match (World/United Championship)
+OR highest intensity feud climax
+Rumble Royale: Multi-man battle royal (special sim)
+Feature Matches (2-4):
+Secondary title defenses (IC, Tag, Vanguard titles)
+High-intensity feuds (70+ intensity)
+Pushes for rising stars (role upgrade paths)
+Cross-brand Women's World Championship
+Filler Matches (2-5):
+Fresh matchups (avoid repeating exact same match within 4 weeks)
+Showcase undercard talent
+Tag matches pairing singles wrestlers
+Face vs Face / Heel vs Heel variety
+Booking bias assignment:
+
+Title matches: Favor champion (Slight Champion) unless storyline upset planned
+Pushes: Strong bias toward pushed wrestler
+Feuds: Even or slight bias for narrative drama
+Filler: Even
+Importance assignment:
+
+Main event: High Drama
+Title matches: High Drama or Protect Both (if champion is protected)
+Feuds: High Drama
+Filler: Normal
+Deliverable: /api/booking/generate returns complete ShowDraft JSON
+
+Step 7: Show Simulation & Universe State Updates
+simulate_show(show_draft, universe_state):
+
+Pre-show:
+
+Calculate base attendance (brand prestige + show type + time of year)
+Match-by-match:
+
+Call simulate_match for each match in card order
+Apply results to universe state:
+Wrestler stat updates (popularity, momentum, fatigue, injuries)
+Title changes (update holder, add to history)
+Feud intensity adjustments
+Post-show:
+
+Financial calculations:
+Gross revenue = attendance × ticket price ($50 base, $150 for major PPV)
+Payroll = sum of salaries for all wrestlers on card
+Net profit/loss = revenue - payroll
+Update promotion balance
+Contract management:
+Decrement contract weeks remaining
+Detect expirations (within 4 weeks = alert)
+Age/attribute degradation (if show is year-end):
+All wrestlers age +1 year
+Apply degradation formulas:
+Age 35+: -1 speed, -1 stamina per year
+Age 40+: -1 brawling, -1 technical per year
+Age 45+: -1 mic, -1 psychology per year
+Retirement checks:
+Age 45+ AND (attributes declining OR severe injury OR low morale):
+Move to retired pool
+Log retirement event
+Surprise return checks (major PPVs only):
+15% chance at Rumble Royale
+10% chance at Victory Dome
+5% chance at Summer Slamfest/Night of Glory
+Select random retired major superstar
+Move back to active roster
++40 popularity, +50 momentum
+Log surprise return event
+ShowResult output:
+
+Match results array
+Overall show rating (average star rating)
+Attendance & financial summary
+Event log (upsets, title changes, retirements, returns, injuries)
+Deliverable: /api/show/simulate accepts ShowDraft, returns ShowResult + updated state
+
+Step 8: Frontend - Office View & Card Editor
+Office View (office.html):
+
+Display:
+Current year/week
+Next show (brand, name, type)
+Next PPV (name, weeks away, tier)
+Promotion balance (color-coded: green if positive, red if negative)
+Contract alerts (wrestlers expiring within 4 weeks):
+Name, brand, weeks remaining
+[Extend Contract] button (adds 52 weeks)
+[Release Wrestler] button (moves to free agents)
+Button: "Generate Card for [Show Name]"
+Calls /api/booking/generate
+Transitions to Booking View
+Booking View (booking.html):
+
+Show header:
+Show name, brand, type
+Match list (card order):
+Match #, participants (with alignments in parentheses)
+Title match indicator (e.g., "🏆 ROC World Championship")
+Booking Bias dropdown:
+Strong [Side A] / Slight [Side A] / Even / Slight [Side B] / Strong [Side B]
+Importance dropdown:
+Normal / Protect Both / High Drama
+Buttons:
+"Add Match" (manual match creation - optional for v1)
+"Remove Match" (delete from card)
+"Run Show"
+Sends edited ShowDraft to /api/show/simulate
+Transitions to Recap View
+Deliverable: Working office → booking flow with live API integration
+
+Step 9: Frontend - Recap View & Roster Management
+Recap View (recap.html):
+
+Show summary:
+Name, brand, overall rating (X.XX stars)
+Attendance: X,XXX
+Revenue: $XXX,XXX
+Payroll: $XXX,XXX
+Net: $XX,XXX (profit/loss color-coded)
+Match results table:
+Match #
+Matchup: "Winner (alignment) defeated Loser (alignment)"
+Star rating (★★★★☆ visual)
+Finish type
+Highlight summary (condensed key moments)
+Special tags:
+🚨 MAJOR UPSET (if shock_upset)
+🏆 TITLE CHANGE (if title switched hands)
+Event log:
+📉 Injuries: "John Doe suffered a moderate knee injury (4 weeks)"
+👴 Retirements: "Jane Smith has announced her retirement after 20 years"
+🎉 Surprise Returns: "LEGEND RETURNS! Mike Johnson shocked the world!"
+📊 Notable stat changes: "Alex Rising's popularity surged to 85 (+12)"
+Button: "Continue to Next Show"
+Advances calendar
+Returns to Office View
+Roster View (roster.html):
+
+Filterable/sortable table:
+Name | Brand | Alignment | Role | Age | Pop | Mom | Morale | Injury | Contract Exp
+Click wrestler name → detail modal:
+Full attributes
+Contract details
+Recent match history (last 5 matches)
+Active feuds
+Deliverable: Full gameplay loop functional (Office → Booking → Recap → Office)
+
+Step 10: Contract Management, Aging, Retirements, Returns
+Contract expiration flow:
+Office view shows alerts
+Extend: add 52 weeks (or custom length), optionally increase salary
+Release: move to free_agents pool
+Aging system:
+Triggered at year boundary (week 52 → week 1)
+All wrestlers +1 year
+Attribute degradation applied based on age thresholds
+Retirement logic:
+Check after each show:
+Age 45+ AND (avg attributes < 60 OR severe injury OR morale < 20)
+Probability increases with age and poor stats
+Retired wrestlers:
+Stored in retired_wrestlers list
+Flagged with is_major_superstar for return eligibility
+Surprise returns:
+Only at major PPVs (Victory Dome, Rumble Royale, Summer Slamfest, Night of Glory)
+Random selection from retired major superstars
+Return adds:
++40 popularity
++50 momentum
+New contract (1-year deal)
+Logged as special event with bold recap mention
+Deliverable: Full lifecycle management (hire → age → retire → return)
+
+Additional Systems (Post-Core 10 Steps)
+Once the core loop is working, we'll add these in 3 batches:
+
+Batch 1: Tag Teams, Stats, Multi-Save
+Formal tag team system with team names & chemistry
+Historical stats tracking (W/L records, title reign lengths)
+Save/load multiple universe files
+Batch 2: Storylines, Segments, Promos
+Scripted Year One story beats (triggered at specific PPVs)
+Expanded backstage segments (celebrations, attacks, alliances)
+Interactive promo battles
+Batch 3: Drafts, Rehab, CAW, Awards
+Annual brand draft system
+Injury recovery mini-game
+Create-A-Wrestler tool
+End-of-year awards ceremony
+Enhanced Features You Requested
+
+Implement:
+
+✅ Face vs Face, Heel vs Heel - Not just Face vs Heel
+✅ Tag matches with singles wrestlers - Creative Director suggests temporary teams
+✅ All wrestlers eligible for titles - Sufficient storyline = title shot
+✅ Alignment turns - Heels → Face, Face → Heel based on crowd reaction & booking
+✅ Shock title changes - Jobbers/Lower card winning belts for surprise value (risk/reward)
+✅ Faction system - Stables with leaders, hierarchy, faction warfare
+✅ Social media events - Wrestlers tweet, fans react, trends
+✅ Dirt sheets - Leaks that spoil surprises
+✅ Morale system - Unhappy wrestlers phone it in or demand releases
+✅ Locker room politics - Veterans vs rookies, cliques, backstage leaders
+
+Storage Choice: SQLite + JSON Hybrid
+SQLite for:
+Wrestlers (with full attribute tracking)
+Match history
+Show results
+Title histories
+Contracts
+JSON files for:
+Universe state snapshots (save files)
+Calendar templates
+Initial roster data
+Configuration
+Why: SQLite gives us relational querying for stats/history, JSON gives us easy save/load portability for Termux.

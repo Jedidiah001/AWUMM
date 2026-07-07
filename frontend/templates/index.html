@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWUM — AI Wrestling Universe Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* ── TOKENS ─────────────────────────────────────────────────────── */
+        :root {
+            --gold:       #D4AF37;
+            --gold-lt:    #F0CE6A;
+            --gold-dk:    #9A7D1A;
+            --red:        #C0392B;
+            --red-lt:     #E74C3C;
+            --bg:         #080808;
+            --bg2:        #0F0F0F;
+            --bg3:        #161616;
+            --bg4:        #1C1C1C;
+            --border:     #242424;
+            --border-lt:  #2E2E2E;
+            --txt:        #E8E8E8;
+            --txt-dim:    #999;
+            --txt-faint:  #555;
+        }
+
+        /* ── RESET / BASE ───────────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Barlow', sans-serif;
+            background: var(--bg);
+            color: var(--txt);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── SCROLLBAR ──────────────────────────────────────────────────── */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg2); }
+        ::-webkit-scrollbar-thumb { background: var(--border-lt); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--gold-dk); }
+
+        /* ── NAVBAR ─────────────────────────────────────────────────────── */
+        .awum-nav {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 1000;
+            padding: 0 1.5rem;
+            height: 52px;
+            display: flex; align-items: center;
+            box-shadow: 0 1px 24px rgba(0,0,0,.6);
+        }
+        .awum-nav .nav-inner {
+            display: flex; align-items: center;
+            width: 100%; gap: 0;
+        }
+        .brand {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: var(--gold);
+            letter-spacing: .06em;
+            text-decoration: none;
+            white-space: nowrap;
+            display: flex; align-items: center; gap: .4rem;
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+        .brand i { font-size: 1.2rem; }
+
+        /* Scrollable nav links */
+        .nav-links {
+            display: flex; align-items: center;
+            gap: 2px;
+            overflow-x: auto;
+            flex: 1;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 6px 0;
+        }
+        .nav-links::-webkit-scrollbar { display: none; }
+
+        .nav-links a {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 600;
+            font-size: .82rem;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: var(--txt-dim);
+            text-decoration: none;
+            padding: .3rem .65rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            transition: color .15s, background .15s;
+            display: flex; align-items: center; gap: .3rem;
+            flex-shrink: 0;
+        }
+        .nav-links a:hover {
+            color: var(--txt);
+            background: var(--bg3);
+        }
+        .nav-links a.nav-office {
+            color: var(--gold);
+            background: rgba(212,175,55,.08);
+        }
+        .nav-links a.nav-office:hover {
+            background: rgba(212,175,55,.16);
+        }
+        .nav-links a.nav-controversy {
+            color: #E74C3C;
+        }
+        .nav-links a.nav-controversy:hover {
+            background: rgba(192,57,43,.12);
+        }
+        .nav-sep {
+            width: 1px; height: 18px;
+            background: var(--border-lt);
+            margin: 0 .4rem;
+            flex-shrink: 0;
+        }
+
+        /* Alert badge */
+        .nav-badge {
+            background: var(--red);
+            color: #fff;
+            font-size: .58rem;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 8px;
+            margin-left: 2px;
+            line-height: 1.4;
+        }
+
+        /* Status chip */
+        .nav-status {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .05em;
+            color: var(--gold);
+            background: rgba(212,175,55,.08);
+            border: 1px solid rgba(212,175,55,.2);
+            border-radius: 20px;
+            padding: .25rem .85rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-left: 1rem;
+            text-transform: uppercase;
+        }
+
+        /* Hamburger for mobile */
+        .nav-toggle {
+            display: none;
+            background: none; border: none; color: var(--txt-dim);
+            font-size: 1.3rem; cursor: pointer; padding: .25rem; margin-left: .5rem;
+        }
+
+        /* ── HERO ───────────────────────────────────────────────────────── */
+        .hero {
+            position: relative;
+            min-height: 340px;
+            display: flex; align-items: flex-end;
+            overflow: hidden;
+            padding: 3rem 2.5rem 2.5rem;
+            margin: 1.5rem 1.5rem 0;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        /* Layered background */
+        .hero-bg {
+            position: absolute; inset: 0;
+            background:
+                linear-gradient(135deg, #0a0a0a 0%, #0f0f0f 50%, #111010 100%);
+        }
+        .hero-bg::before {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse 70% 80% at 90% 50%, rgba(192,57,43,.07) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 60% at 10% 80%, rgba(212,175,55,.06) 0%, transparent 60%);
+        }
+        /* Diagonal gold accent bar */
+        .hero-accent {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--gold-dk), var(--gold), var(--gold-lt), transparent 80%);
+        }
+        /* Big ring graphic (decorative) */
+        .hero-ring {
+            position: absolute;
+            right: -60px; top: 50%;
+            transform: translateY(-50%);
+            width: 420px; height: 420px;
+            border-radius: 50%;
+            border: 1px solid rgba(212,175,55,.06);
+            pointer-events: none;
+        }
+        .hero-ring::before {
+            content: '';
+            position: absolute;
+            inset: 30px;
+            border-radius: 50%;
+            border: 1px solid rgba(212,175,55,.05);
+        }
+        .hero-ring::after {
+            content: '';
+            position: absolute;
+            inset: 70px;
+            border-radius: 50%;
+            border: 1px solid rgba(212,175,55,.04);
+        }
+
+        /* Roman numeral watermark */
+        .hero-numeral {
+            position: absolute;
+            right: 2rem; bottom: 1rem;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 9rem;
+            font-weight: 900;
+            color: rgba(212,175,55,.04);
+            line-height: 1;
+            pointer-events: none;
+            user-select: none;
+            letter-spacing: -.02em;
+        }
+
+        .hero-content { position: relative; z-index: 1; max-width: 620px; }
+
+        .hero-eyebrow {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: .75rem;
+            display: flex; align-items: center; gap: .5rem;
+        }
+        .hero-eyebrow::before {
+            content: '';
+            display: block;
+            width: 28px; height: 1px;
+            background: var(--gold);
+            opacity: .6;
+        }
+
+        .hero-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(3rem, 6vw, 5rem);
+            font-weight: 900;
+            line-height: .95;
+            letter-spacing: -.01em;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+        .hero-title em {
+            font-style: normal;
+            color: var(--gold);
+            -webkit-text-stroke: 0px;
+        }
+        .hero-title .outline {
+            -webkit-text-stroke: 1px rgba(255,255,255,.25);
+            color: transparent;
+        }
+
+        .hero-sub {
+            font-size: .95rem;
+            color: var(--txt-dim);
+            line-height: 1.5;
+            margin-bottom: 1.75rem;
+            max-width: 480px;
+        }
+
+        .hero-actions { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
+
+        .btn-primary-gold {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: .95rem;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dk) 100%);
+            color: #000;
+            border: none;
+            padding: .65rem 1.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all .2s;
+            box-shadow: 0 4px 20px rgba(212,175,55,.3);
+            display: flex; align-items: center; gap: .5rem;
+            text-decoration: none;
+        }
+        .btn-primary-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(212,175,55,.4);
+            color: #000;
+        }
+        .btn-ghost {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 600;
+            font-size: .9rem;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            background: transparent;
+            color: var(--txt-dim);
+            border: 1px solid var(--border-lt);
+            padding: .62rem 1.4rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex; align-items: center; gap: .4rem;
+            text-decoration: none;
+        }
+        .btn-ghost:hover {
+            color: var(--txt);
+            border-color: var(--txt-dim);
+        }
+
+        /* ── STAT BAR ───────────────────────────────────────────────────── */
+        .stat-bar {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin: 1.5rem 1.5rem 0;
+        }
+        .stat-cell {
+            background: var(--bg3);
+            padding: 1rem 1.25rem;
+            display: flex; flex-direction: column; gap: .2rem;
+            transition: background .18s;
+            cursor: default;
+        }
+        .stat-cell:hover { background: var(--bg4); }
+        .stat-num {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--gold);
+            line-height: 1;
+            letter-spacing: -.01em;
+        }
+        .stat-label {
+            font-size: .68rem;
+            font-weight: 600;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--txt-faint);
+        }
+
+        /* ── MAIN GRID ──────────────────────────────────────────────────── */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        /* ── SECTION LABEL ──────────────────────────────────────────────── */
+        .section-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--txt-faint);
+            margin-bottom: 1rem;
+            display: flex; align-items: center; gap: .6rem;
+        }
+        .section-label::after {
+            content: '';
+            flex: 1; height: 1px;
+            background: var(--border);
+        }
+
+        /* ── MODULE GRID ────────────────────────────────────────────────── */
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: .75rem;
+            margin-bottom: 2rem;
+        }
+
+        .module-card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.1rem 1rem;
+            cursor: pointer;
+            transition: all .2s;
+            text-decoration: none;
+            display: flex; flex-direction: column; gap: .5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .module-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--card-clr, var(--gold));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform .22s ease;
+        }
+        .module-card:hover {
+            background: var(--bg4);
+            border-color: var(--card-clr, var(--gold));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.4);
+            text-decoration: none;
+        }
+        .module-card:hover::after { transform: scaleX(1); }
+
+        .module-icon {
+            font-size: 1.3rem;
+            color: var(--card-clr, var(--gold));
+            line-height: 1;
+        }
+        .module-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: .95rem;
+            font-weight: 700;
+            letter-spacing: .02em;
+            color: var(--txt);
+            line-height: 1.2;
+        }
+        .module-desc {
+            font-size: .72rem;
+            color: var(--txt-faint);
+            line-height: 1.35;
+        }
+        .module-new {
+            position: absolute;
+            top: .55rem; right: .55rem;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: .6rem;
+            font-weight: 800;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            background: var(--red);
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            line-height: 1.4;
+        }
+
+        /* Featured card (wider) */
+        .module-card.featured {
+            background: linear-gradient(135deg, rgba(192,57,43,.12) 0%, var(--bg3) 60%);
+            border-color: rgba(192,57,43,.3);
+            grid-column: span 2;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.25rem 1.25rem;
+        }
+        .module-card.featured:hover {
+            border-color: var(--red-lt);
+        }
+        .module-card.featured .module-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+            margin-top: .1rem;
+        }
+        .module-card.featured .module-name { font-size: 1.15rem; }
+        .module-card.featured .module-desc { font-size: .78rem; color: var(--txt-dim); }
+
+        /* ── SIDEBAR ────────────────────────────────────────────────────── */
+        .sidebar-panel {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .sidebar-panel-head {
+            background: var(--bg4);
+            border-bottom: 1px solid var(--border);
+            padding: .65rem 1rem;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: var(--txt-dim);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .sidebar-panel-head a {
+            color: var(--gold);
+            text-decoration: none;
+            font-size: .65rem;
+            letter-spacing: .08em;
+        }
+        .sidebar-panel-head a:hover { color: var(--gold-lt); }
+        .sidebar-panel-body { padding: 0; }
+
+        .alert-row {
+            padding: .65rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: .78rem;
+            display: flex; align-items: center; gap: .65rem;
+            transition: background .15s;
+            cursor: pointer;
+        }
+        .alert-row:last-child { border-bottom: none; }
+        .alert-row:hover { background: var(--bg4); }
+        .alert-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .alert-msg { flex: 1; color: var(--txt-dim); line-height: 1.3; }
+        .alert-week { font-size: .68rem; color: var(--txt-faint); white-space: nowrap; }
+
+        /* What's new */
+        .whats-new-item {
+            padding: .65rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: .78rem;
+            display: flex; align-items: flex-start; gap: .6rem;
+        }
+        .whats-new-item:last-child { border-bottom: none; }
+        .wn-dot {
+            width: 5px; height: 5px; border-radius: 50%;
+            background: var(--gold); margin-top: .4rem; flex-shrink: 0;
+        }
+        .wn-title { font-weight: 600; color: var(--txt); font-size: .8rem; }
+        .wn-desc { color: var(--txt-faint); font-size: .72rem; margin-top: .1rem; line-height: 1.3; }
+
+        /* Universe info */
+        .info-row {
+            padding: .5rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: .78rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-key { color: var(--txt-faint); }
+        .info-val { font-weight: 600; color: var(--txt); font-size: .78rem; }
+        .info-val.gold { color: var(--gold); }
+
+        /* ── FOOTER ─────────────────────────────────────────────────────── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            font-size: .72rem;
+            color: var(--txt-faint);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: .5rem;
+        }
+        footer .brand-small { color: var(--gold); font-weight: 700; }
+
+        /* ── SPINNER ─────────────────────────────────────────────────────── */
+        .spinner-border { color: var(--gold) !important; }
+
+        /* ── RESPONSIVE ─────────────────────────────────────────────────── */
+        @media (max-width: 1100px) {
+            .module-grid { grid-template-columns: repeat(3, 1fr); }
+            .module-card.featured { grid-column: span 3; }
+        }
+        @media (max-width: 860px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .stat-bar { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .module-grid { grid-template-columns: repeat(2, 1fr); }
+            .module-card.featured { grid-column: span 2; flex-direction: column; }
+            .hero { padding: 2rem 1.25rem 1.75rem; min-height: 280px; }
+            .hero-title { font-size: 2.6rem; }
+            .stat-bar { grid-template-columns: repeat(2, 1fr); margin: 1rem 1rem 0; }
+            .main-grid { padding: 1rem; }
+            .nav-status { display: none; }
+        }
+        @media (max-width: 991px) {
+            .nav-toggle { display: block; }
+            .nav-links { display: none; }
+            .nav-links.open { display: flex; flex-direction: column; align-items: flex-start; position: absolute; top: 52px; left: 0; right: 0; background: var(--bg2); border-bottom: 1px solid var(--border); padding: .75rem; gap: 4px; z-index: 999; }
+            .nav-sep { display: none; }
+        }
+
+        /* ── ENTRY ANIMATION ─────────────────────────────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .hero         { animation: fadeUp .45s ease both; }
+        .stat-bar     { animation: fadeUp .45s .08s ease both; }
+        .main-grid    { animation: fadeUp .45s .15s ease both; }
+
+        .dynamic-event-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,.78);
+            padding: 1rem;
+        }
+        .dynamic-event-backdrop.active { display: flex; }
+        .dynamic-event-modal {
+            width: min(720px, 100%);
+            background: var(--bg2);
+            border: 1px solid rgba(212,175,55,.42);
+            border-radius: 8px;
+            box-shadow: 0 28px 80px rgba(0,0,0,.72);
+            overflow: hidden;
+        }
+        .dynamic-event-head {
+            background: linear-gradient(90deg, rgba(192,57,43,.28), rgba(212,175,55,.16));
+            border-bottom: 1px solid var(--border-lt);
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .dynamic-event-kicker {
+            font-family: 'Barlow Condensed', sans-serif;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            font-size: .72rem;
+            color: var(--gold);
+            font-weight: 800;
+        }
+        .dynamic-event-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.05;
+            margin-top: .25rem;
+        }
+        .dynamic-event-close {
+            background: transparent;
+            border: 1px solid var(--border-lt);
+            color: var(--txt-dim);
+            border-radius: 4px;
+            width: 34px;
+            height: 34px;
+            flex: 0 0 auto;
+        }
+        .dynamic-event-body { padding: 1.25rem; }
+        .dynamic-event-summary {
+            color: var(--txt-dim);
+            line-height: 1.45;
+            margin-bottom: 1rem;
+        }
+        .dynamic-event-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+            margin-bottom: 1rem;
+        }
+        .dynamic-event-pill {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            font-size: .7rem;
+            border: 1px solid var(--border-lt);
+            border-radius: 999px;
+            color: var(--txt-dim);
+            padding: .2rem .55rem;
+        }
+        .dynamic-event-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .65rem;
+            margin-top: 1rem;
+        }
+        .dynamic-event-action {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 800;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            border: 1px solid rgba(212,175,55,.42);
+            color: var(--gold);
+            background: transparent;
+            border-radius: 5px;
+            padding: .55rem .8rem;
+        }
+        .dynamic-event-action:hover { background: rgba(212,175,55,.12); }
+        .dynamic-event-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: center;
+            color: var(--txt-faint);
+            font-size: .8rem;
+            border-top: 1px solid var(--border);
+            padding: .85rem 1.25rem;
+        }
+    </style>
+</head>
+<body>
+
+<div id="dynamicEventBackdrop" class="dynamic-event-backdrop" aria-live="assertive">
+    <div class="dynamic-event-modal" role="dialog" aria-modal="true" aria-labelledby="dynamicEventTitle">
+        <div class="dynamic-event-head">
+            <div>
+                <div class="dynamic-event-kicker" id="dynamicEventKicker">Dynamic Event</div>
+                <div class="dynamic-event-title" id="dynamicEventTitle">Unexpected event</div>
+            </div>
+            <button class="dynamic-event-close" onclick="dismissDynamicEventPopup()" aria-label="Dismiss dynamic event">x</button>
+        </div>
+        <div class="dynamic-event-body">
+            <div class="dynamic-event-summary" id="dynamicEventSummary"></div>
+            <div class="dynamic-event-meta" id="dynamicEventMeta"></div>
+            <div class="dynamic-event-actions" id="dynamicEventActions"></div>
+        </div>
+        <div class="dynamic-event-footer">
+            <span id="dynamicEventFooterText">This event has been saved to the database.</span>
+            <button class="btn-ghost" id="dynamicEventOpenButton" onclick="loadView('simulation-expansion'); dismissDynamicEventPopup(); return false;">Open Event Hub</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════ NAVBAR ══════════════════════════════════════ -->
+<nav class="awum-nav">
+    <div class="nav-inner">
+        <a class="brand" href="/"><i class="bi bi-trophy-fill"></i>AWUM</a>
+
+        <div class="nav-links" id="navLinks">
+            <a href="#" onclick="loadView('office');return false;" class="nav-office">
+                <i class="bi bi-building-fill"></i> Office
+            </a>
+            <a href="#" onclick="loadView('booker');return false;">
+                <i class="bi bi-magic"></i> Booker AI
+            </a>
+            <a href="#" onclick="loadView('roster');return false;">
+                <i class="bi bi-people-fill"></i> Roster
+            </a>
+            <a href="#" onclick="loadView('caw');return false;">
+                <i class="bi bi-person-plus-fill"></i> Create
+
+            <div class="nav-sep"></div>
+
+            <a href="#" onclick="loadView('feuds');return false;">
+                <i class="bi bi-lightning-fill"></i> Feuds
+            </a>
+            <a href="#" onclick="loadView('championships');return false;">
+                <i class="bi bi-trophy"></i> Titles
+            </a>
+            <a href="#" onclick="loadView('tag-teams');return false;">
+                <i class="bi bi-people"></i> Tag Teams
+            </a>
+            <a href="#" onclick="loadView('factions');return false;">
+                <i class="bi bi-diagram-3"></i> Factions
+            </a>
+            <a href="#" onclick="loadView('relationships');return false;">
+                <i class="bi bi-heart-half"></i> Relationships
+            </a>
+            <a href="#" onclick="loadView('storylines');return false;">
+                <i class="bi bi-book-half"></i> Storylines
+            </a>
+
+            <div class="nav-sep"></div>
+
+            <a href="#" onclick="loadView('free-agents');return false;">
+                <i class="bi bi-person-badge"></i> Free Agents
+            </a>
+            <a href="#" onclick="loadView('agents');return false;">
+                <i class="bi bi-briefcase"></i> Agents
+            </a>
+            <a href="#" onclick="loadView('contracts');return false;">
+                <i class="bi bi-file-earmark-text"></i> Contracts
+            </a>
+            <a href="#" onclick="loadView('draft');return false;">
+                <i class="bi bi-arrow-left-right"></i> Draft
+            </a>
+            <a href="/developmental" onclick="loadView('developmental');return false;">
+                <i class="bi bi-stars"></i> Developmental
+            </a>
+            <a href="#" onclick="loadView('controversy');return false;" class="nav-controversy">
+                <i class="bi bi-shield-exclamation"></i> Controversy
+
+            <div class="nav-sep"></div>
+
+            <a href="#" onclick="loadView('injuries');return false;">
+                <i class="bi bi-bandaid"></i> Rehab
+            </a>
+            <a href="#" onclick="loadView('wellness');return false;">
+                <i class="bi bi-heart-pulse-fill"></i> Wellness
+            </a>
+            <a href="#" onclick="loadView('finance');return false;">
+                <i class="bi bi-cash-stack"></i> Finance
+            </a>
+            <a href="#" onclick="loadView('media-business');return false;">
+                <i class="bi bi-broadcast"></i> Media
+            </a>
+            <a href="#" onclick="loadView('stats');return false;"><i class="bi bi-graph-up"></i> Stats</a>
+            <a href="#" onclick="loadView('awards');return false;"><i class="bi bi-star"></i> Awards</a>
+
+            <a href="/morale" onclick="loadView('morale');return false;">
+                <i class="bi bi-heart-pulse"></i> Morale
+            </a>
+            <a href="#" onclick="loadView('locker-room');return false;">
+                <i class="bi bi-house-heart-fill"></i> Locker Room
+            </a>
+            <a href="#" onclick="loadView('calendar');return false;">
+                <i class="bi bi-calendar-week"></i> Calendar
+            </a>
+            <a href="#" onclick="loadView('show-production');return false;">
+                <i class="bi bi-camera-video-fill"></i> Show Production
+            </a>
+            <a href="#" onclick="loadView('evolve');return false;">
+                <i class="bi bi-mortarboard-fill"></i> Evolve
+            </a>
+            <a href="#" onclick="loadView('character-system');return false;">
+                <i class="bi bi-person-bounding-box"></i> Character
+            </a>
+            <a href="#" onclick="loadView('world-feed');return false;">
+                <i class="bi bi-megaphone-fill"></i> World Feed
+            </a>
+            <a href="#" onclick="loadView('rivals-intelligence');return false;">
+                <i class="bi bi-broadcast-pin"></i> Rival Intel
+            </a>
+            <a href="#" onclick="loadView('history-hub');return false;">
+                <i class="bi bi-hourglass-split"></i> History Hub
+            </a>
+            <a href="#" onclick="loadView('legacy-expansion');return false;">
+                <i class="bi bi-clock-history"></i> Legacy Hub
+            </a>
+            <a href="#" onclick="loadView('simulation-expansion');return false;">
+                <i class="bi bi-diagram-3"></i> Enterprise Sim
+            </a>
+
+            <div class="nav-sep"></div>
+
+            <a href="#" onclick="loadView('alerts');return false;" style="position:relative">
+                <i class="bi bi-bell"></i> Alerts
+                <span id="alertBadge" class="nav-badge" style="display:none">0</span>
+            </a>
+            <a href="#" onclick="loadView('saves');return false;">
+                <i class="bi bi-floppy"></i> Saves
+            </a>
+        </div>
+
+        <span class="nav-status" id="universeStatus">YR 1 · WK 1 · $1,000,000</span>
+        <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')">
+            <i class="bi bi-list"></i>
+        </button>
+    </div>
+</nav>
+
+
+<!-- ══════════════════════════ APP CONTENT ═════════════════════════════════ -->
+<div id="appContent">
+
+    <!-- HERO -->
+    <div class="hero" id="welcomeHero">
+        <div class="hero-bg"></div>
+        <div class="hero-accent"></div>
+        <div class="hero-ring"></div>
+        <div class="hero-numeral welcome-year">I</div>
+
+        <div class="hero-content">
+            <div class="hero-eyebrow">Ring of Champions Universe</div>
+            <h1 class="hero-title">
+                Welcome<br>
+                back, <em>Booker.</em>
+            </h1>
+            <p class="hero-sub">
+                Three brands. 45 superstars. 8 championships. One vision.
+                <br>
+                <span id="connectionStatus" style="font-size:.78rem;color:#4ade80;margin-top:.35rem;display:inline-block">● Connected</span>
+            </p>
+            <div class="hero-actions">
+                <button class="btn-primary-gold" onclick="loadView('office')">
+                    <i class="bi bi-play-fill"></i> Enter Office
+                </button>
+                <button class="btn-ghost" onclick="loadView('saves')">
+                    <i class="bi bi-floppy"></i> Load Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STAT BAR -->
+    <div class="stat-bar">
+        <div class="stat-cell">
+            <span class="stat-num">45</span>
+            <span class="stat-label">Wrestlers</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-num">3</span>
+            <span class="stat-label">Brands</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-num">8</span>
+            <span class="stat-label">Championships</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-num">52</span>
+            <span class="stat-label">Weeks / Year</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-num welcome-week">1</span>
+            <span class="stat-label">Current Week</span>
+        </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+
+        <!-- LEFT: modules -->
+        <div>
+            <!-- Core -->
+            <p class="section-label">Core Management</p>
+            <div class="module-grid" style="margin-bottom:1.75rem">
+
+                <a class="module-card" href="#" onclick="loadView('office');return false;"
+                   style="--card-clr:#D4AF37">
+                    <i class="bi bi-building-fill module-icon"></i>
+                    <span class="module-name">Office</span>
+                    <span class="module-desc">Run weekly shows &amp; advance time</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('roster');return false;"
+                   style="--card-clr:#3B82F6">
+                    <i class="bi bi-people-fill module-icon"></i>
+                    <span class="module-name">Roster</span>
+                    <span class="module-desc">45 superstars across 3 brands</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('feuds');return false;"
+                   style="--card-clr:#E63946">
+                    <i class="bi bi-lightning-fill module-icon"></i>
+                    <span class="module-name">Feuds</span>
+                    <span class="module-desc">Build rivalries &amp; heat</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('championships');return false;"
+                   style="--card-clr:#D4AF37">
+                    <i class="bi bi-trophy-fill module-icon"></i>
+                    <span class="module-name">Championships</span>
+                    <span class="module-desc">8 titles &amp; reign histories</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('storylines');return false;"
+                   style="--card-clr:#8B5CF6">
+                    <i class="bi bi-book-half module-icon"></i>
+                    <span class="module-name">Storylines</span>
+                    <span class="module-desc">Write &amp; manage narrative arcs</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('tag-teams');return false;"
+                   style="--card-clr:#06B6D4">
+                    <i class="bi bi-people module-icon"></i>
+                    <span class="module-name">Tag Teams</span>
+                    <span class="module-desc">Form &amp; manage tag divisions</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('factions');return false;"
+                   style="--card-clr:#14B8A6">
+                    <i class="bi bi-diagram-3-fill module-icon"></i>
+                    <span class="module-name">Factions</span>
+                    <span class="module-desc">Create stables, leaders &amp; power struggles</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('relationships');return false;"
+                   style="--card-clr:#F97316">
+                    <i class="bi bi-heart-half module-icon"></i>
+                    <span class="module-name">Relationships</span>
+                    <span class="module-desc">Friendships, heat, mentors &amp; managers</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('caw');return false;"
+                   style="--card-clr:#3B82F6">
+                    <i class="bi bi-person-plus-fill module-icon"></i>
+                    <span class="module-name">Create Wrestler</span>
+                    <span class="module-desc">Design original talent</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('draft');return false;"
+                   style="--card-clr:#EC4899">
+                    <i class="bi bi-arrow-left-right module-icon"></i>
+                    <span class="module-name">Brand Draft</span>
+                    <span class="module-desc">Redistribute talent across brands</span>
+                </a>
+
+            </div>
+
+            <!-- Talent -->
+            <p class="section-label">Talent &amp; Contracts</p>
+            <div class="module-grid" style="margin-bottom:1.75rem">
+
+                <a class="module-card" href="/free-agents"
+                   style="--card-clr:#10B981">
+                    <i class="bi bi-person-badge-fill module-icon"></i>
+                    <span class="module-name">Free Agents</span>
+                    <span class="module-desc">Scout, bid &amp; sign talent</span>
+                </a>
+
+                <a class="module-card" href="/agents"
+                   style="--card-clr:#64748B">
+                    <i class="bi bi-briefcase-fill module-icon"></i>
+                    <span class="module-name">Agents</span>
+                    <span class="module-desc">Negotiate through representatives</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('contracts');return false;"
+                   style="--card-clr:#F59E0B">
+                    <i class="bi bi-file-earmark-text-fill module-icon"></i>
+                    <span class="module-name">Contracts</span>
+                    <span class="module-desc">Renewals, extensions &amp; releases</span>
+                </a>
+
+                <a class="module-card featured" href="/controversy"
+                   style="--card-clr:#E74C3C">
+                    <i class="bi bi-shield-exclamation module-icon" style="color:#E74C3C"></i>
+                    <div>
+                        <span class="module-new">New</span>
+                        <div class="module-name">Controversy &amp; Loyalty</div>
+                        <div class="module-desc">
+                            Risk/reward assessments, rehab plans, holdouts, tampering, secret signings &amp; forbidden door cross-promotional events.
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+
+            <!-- Operations -->
+            <p class="section-label">Operations</p>
+            <div class="module-grid">
+
+                <a class="module-card" href="#" onclick="loadView('injuries');return false;"
+                   style="--card-clr:#EF4444">
+                    <i class="bi bi-bandaid-fill module-icon"></i>
+                    <span class="module-name">Rehab Center</span>
+                    <span class="module-desc">Injuries &amp; return timelines</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('wellness');return false;"
+                   style="--card-clr:#8B5CF6">
+                    <i class="bi bi-heart-pulse-fill module-icon"></i>
+                    <span class="module-name">Wellness</span>
+                    <span class="module-desc">Fatigue, burnout, policy &amp; veteran watch</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('finance');return false;"
+                   style="--card-clr:#22C55E">
+                    <i class="bi bi-cash-stack module-icon"></i>
+                    <span class="module-name">Finance</span>
+                    <span class="module-desc">Revenue, expenses &amp; projections</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('media-business');return false;"
+                   style="--card-clr:#0EA5E9">
+                    <i class="bi bi-broadcast module-icon"></i>
+                    <span class="module-name">Media &amp; Business</span>
+                    <span class="module-desc">TV ratings, networks, social and licensing</span>
+                </a>
+
+                <a class="module-card" href="/stats"
+                   style="--card-clr:#6366F1">
+                    <i class="bi bi-graph-up-arrow module-icon"></i>
+                    <span class="module-name">Stats</span>
+                    <span class="module-desc">Match ratings &amp; performance data</span>
+                </a>
+
+                <a class="module-card" href="/awards"
+                   style="--card-clr:#D4AF37">
+                    <i class="bi bi-star-fill module-icon"></i>
+                    <span class="module-name">Awards</span>
+                    <span class="module-desc">Season honours &amp; accolades</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('alerts');return false;"
+                   style="--card-clr:#EF4444">
+                    <i class="bi bi-bell-fill module-icon"></i>
+                    <span class="module-name">Alerts</span>
+                    <span class="module-desc">Expiring contracts &amp; urgent actions</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('locker-room');return false;"
+                   style="--card-clr:#EC4899">
+                    <i class="bi bi-house-heart-fill module-icon"></i>
+                    <span class="module-new">New</span>
+                    <span class="module-name">Locker Room</span>
+                    <span class="module-desc">Crisis monitor, morale digest &amp; creative seeds</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('show-production');return false;"
+                   style="--card-clr:#0EA5E9">
+                    <i class="bi bi-camera-video-fill module-icon"></i>
+                    <span class="module-new">New</span>
+                    <span class="module-name">Show Production</span>
+                    <span class="module-desc">Themes, pacing, dark matches, run-ins &amp; debuts</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('evolve');return false;"
+                   style="--card-clr:#22D3EE">
+                    <i class="bi bi-mortarboard-fill module-icon"></i>
+                    <span class="module-new">New</span>
+                    <span class="module-name">Evolve</span>
+                    <span class="module-desc">Performance center, trainers, progression, tryouts, call-ups and excursions</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('world-feed');return false;"
+                   style="--card-clr:#F97316">
+                    <i class="bi bi-megaphone-fill module-icon"></i>
+                    <span class="module-new">New</span>
+                    <span class="module-name">World Feed</span>
+                    <span class="module-desc">Live kayfabe headlines with persistent, evolving world reactions</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('rivals-intelligence');return false;"
+                   style="--card-clr:#EF4444">
+                    <i class="bi bi-broadcast-pin module-icon"></i>
+                    <span class="module-new">New</span>
+                    <span class="module-name">Rival Intelligence</span>
+                    <span class="module-desc">Monitor rival strategy, simulate competitive reactions, and exploit promotion weaknesses</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('history-hub');return false;"
+                   style="--card-clr:#D4AF37">
+                    <i class="bi bi-hourglass-split module-icon"></i>
+                    <span class="module-new">New</span>
+                    <span class="module-name">History Hub</span>
+                    <span class="module-desc">Match archive, records, anniversaries, rivalries, Hall of Fame and era tracking</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('legacy-expansion');return false;"
+                   style="--card-clr:#A855F7">
+                    <i class="bi bi-clock-history module-icon"></i>
+                    <span class="module-new">New</span>
+                    <span class="module-name">Legacy Hub</span>
+                    <span class="module-desc">TV/media, industry, ROC Evolve and historical system dashboards</span>
+                </a>
+
+                <a class="module-card" href="#" onclick="loadView('saves');return false;"
+                   style="--card-clr:#94A3B8">
+                    <i class="bi bi-floppy-fill module-icon"></i>
+                    <span class="module-name">Save / Load</span>
+                    <span class="module-desc">Manage universe save files</span>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- RIGHT: sidebar -->
+        <div>
+
+            <!-- Contract Alerts -->
+            <p class="section-label">Alerts</p>
+            <div class="sidebar-panel">
+                <div class="sidebar-panel-head">
+                    <span><i class="bi bi-bell-fill me-1" style="color:var(--gold)"></i>Contract Alerts</span>
+                    <a href="#" onclick="loadView('alerts');return false;">View all →</a>
+                </div>
+                <div class="sidebar-panel-body" id="alertsPanelBody">
+                    <div class="alert-row">
+                        <span class="spinner-border spinner-border-sm"></span>
+                        <span class="alert-msg">Loading…</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What's New -->
+            <p class="section-label" style="margin-top:1.25rem">What's New</p>
+            <div class="sidebar-panel">
+                <div class="sidebar-panel-head">
+                    <span><i class="bi bi-stars me-1" style="color:var(--gold)"></i>Latest Features</span>
+                    <a href="#" onclick="loadView('locker-room');return false;">Open →</a>
+                </div>
+                <div class="sidebar-panel-body">
+                    <div class="whats-new-item">
+                        <div class="wn-dot" style="background:#EC4899"></div>
+                        <div>
+                            <div class="wn-title">Locker Room Hub</div>
+                            <div class="wn-desc">Crisis tiers, morale digest, creative seeds &amp; office alert feed (Steps 260-265)</div>
+                        </div>
+                    </div>
+                <div class="whats-new-item">
+                        <div class="wn-dot"></div>
+                        <div>
+                            <div class="wn-title">Controversy &amp; Loyalty</div>
+                            <div class="wn-desc">Risk/reward system, rehab plans, holdouts &amp; tampering counter-measures</div>
+                        </div>
+                    </div>
+                    <div class="whats-new-item">
+                        <div class="wn-dot"></div>
+                        <div>
+                            <div class="wn-title">Secret Signings</div>
+                            <div class="wn-desc">Leak risk engine, debut engineering &amp; momentum windows</div>
+                        </div>
+                    </div>
+                    <div class="whats-new-item">
+                        <div class="wn-dot"></div>
+                        <div>
+                            <div class="wn-title">Forbidden Door</div>
+                            <div class="wn-desc">Cross-promotional proposals, dream matches &amp; co-events</div>
+                        </div>
+                    </div>
+                    <div class="whats-new-item">
+                        <div class="wn-dot" style="background:var(--red-lt)"></div>
+                        <div>
+                            <div class="wn-title">Surprise Returns</div>
+                            <div class="wn-desc">Redemption arcs, tease videos &amp; pop scoring</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Universe Info -->
+            <p class="section-label" style="margin-top:1.25rem">Universe Info</p>
+            <div class="sidebar-panel">
+                <div class="sidebar-panel-body">
+                    <div class="info-row">
+                        <span class="info-key">Brands</span>
+                        <span class="info-val">Alpha · Velocity · Vanguard</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Format</span>
+                        <span class="info-val">Weekly + 8 PPV/PLE</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Roster size</span>
+                        <span class="info-val">45 superstars</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Championships</span>
+                        <span class="info-val">8 active titles</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Engine</span>
+                        <span class="info-val">Flask + SQLite</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Version</span>
+                        <span class="info-val gold">v0.1.0-alpha</span>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /sidebar -->
+    </div><!-- /main-grid -->
+
+</div><!-- /appContent -->
+
+
+<!-- ══════════════════════════ FOOTER ══════════════════════════════════════ -->
+<footer>
+    <span><span class="brand-small">AWUM</span> v0.1.0-alpha &nbsp;·&nbsp; Flask + Bootstrap 5 + Vanilla JS &nbsp;·&nbsp; Fully Offline</span>
+    <span>AI Wrestling Universe Manager</span>
+</footer>
+
+
+<!-- ══════════════════════════ SCRIPTS ════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/api.js"></script>
+<script>
+// ── View loader (preserved exactly) ─────────────────────────────────────────
+async function loadView(viewName) {
+    const content = document.getElementById('appContent');
+    if (!content) { console.error('appContent element not found'); return; }
+
+    content.innerHTML = `<div class="text-center mt-5">
+        <div class="spinner-border" role="status"></div>
+        <p style="color:#666;margin-top:.75rem;font-family:'Barlow Condensed',sans-serif;letter-spacing:.1em;text-transform:uppercase;font-size:.8rem">Loading…</p>
+    </div>`;
+
+    try {
+        if (window.viewCleanup && typeof window.viewCleanup === 'function') window.viewCleanup();
+        const response = await fetch(`/${viewName}`);
+        if (!response.ok) throw new Error(`Failed to load ${viewName}: ${response.status}`);
+        const html = await response.text();
+        content.innerHTML = html;
+        executeScripts(content);
+        checkDynamicEventPulse(`view:${viewName}`, 0.02);
+        checkStoryArcAIPulse(`view:${viewName}`, true);
+    } catch (error) {
+        console.error('Error loading view:', error);
+        content.innerHTML = `
+            <div class="alert alert-danger m-4">
+                <h4>Error Loading View</h4>
+                <p>${error.message}</p>
+                <button class="btn btn-primary" onclick="loadView('office')">Return to Office</button>
+            </div>`;
+    }
+}
+
+// ── Script executor (preserved exactly) ─────────────────────────────────────
+function executeScripts(container) {
+    const scripts = container.querySelectorAll('script');
+    scripts.forEach((oldScript, index) => {
+        try {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+            const scriptContent = oldScript.textContent;
+            if (!scriptContent.trim()) return;
+            const trimmedScript = scriptContent.trim();
+            const isWrapped = trimmedScript.startsWith('(function()') ||
+                              trimmedScript.startsWith('!function()') ||
+                              trimmedScript.startsWith('(async function()') ||
+                              trimmedScript.startsWith('!async function()');
+            const apiInjection = `
+                globalThis.fetchAPI = globalThis.fetchAPI || window.fetchAPI;
+                globalThis.getAPI = globalThis.getAPI || window.getAPI;
+                globalThis.postAPI = globalThis.postAPI || window.postAPI;
+                globalThis.putAPI = globalThis.putAPI || window.putAPI;
+                globalThis.deleteAPI = globalThis.deleteAPI || window.deleteAPI;
+            `;
+            if (!isWrapped) {
+                // Keep script in global scope so inline handlers (onclick="...") can resolve functions.
+                newScript.textContent = `${apiInjection}\n${scriptContent}`;
+            } else {
+                const wc = trimmedScript;
+                let ip = -1;
+                if (wc.startsWith('(function()') || wc.startsWith('(async function()')) ip = wc.indexOf('{') + 1;
+                else if (wc.startsWith('!function()') || wc.startsWith('!async function()')) ip = wc.indexOf('{') + 1;
+                if (ip > 0) {
+                    newScript.textContent = wc.slice(0, ip) + '\n' + apiInjection + '\n' + wc.slice(ip);
+                } else {
+                    newScript.textContent = `${apiInjection}\n${scriptContent}`;
+                }
+            }
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        } catch (error) {
+            console.error(`Failed to execute script ${index}:`, error);
+        }
+    });
+}
+
+// ── Universe status ──────────────────────────────────────────────────────────
+async function updateUniverseStatus() {
+    try {
+        const r = await fetch('/api/universe/state');
+        if (r.ok) {
+            const s = await r.json();
+            const el = document.getElementById('universeStatus');
+            if (el) el.textContent = `YR ${s.year} · WK ${s.week} · $${s.balance.toLocaleString()}`;
+            // Update hero numeral and week stat
+            document.querySelectorAll('.welcome-year').forEach(e => e.textContent = s.year);
+            document.querySelectorAll('.welcome-week').forEach(e => e.textContent  = s.week);
+        }
+    } catch(e) { console.error('Failed to update status:', e); }
+}
+
+// ── Connection ───────────────────────────────────────────────────────────────
+async function checkConnection() {
+    const el = document.getElementById('connectionStatus');
+    try {
+        const r = await fetch('/api/status');
+        if (r.ok) {
+            console.log('✅ Connected to AWUM backend');
+            if (el) { el.textContent = '● Connected'; el.style.color = '#4ade80'; }
+        } else throw new Error();
+    } catch {
+        if (el) { el.textContent = '● Offline'; el.style.color = '#f87171'; }
+        console.error('❌ Connection failed');
+    }
+}
+
+// ── Alert badge ──────────────────────────────────────────────────────────────
+async function loadAlertBadge() {
+    try {
+        if (typeof window.fetchAPI === 'function') {
+            const response = await window.fetchAPI('/api/alerts/contracts/summary');
+            const badge = document.getElementById('alertBadge');
+            if (badge && response.requires_action > 0) {
+                badge.textContent = response.requires_action;
+                badge.style.display = 'inline-block';
+            } else if (badge) {
+                badge.style.display = 'none';
+            }
+        }
+    } catch(e) { console.error('Failed to load alert badge:', e); }
+}
+
+// ── Alerts panel ─────────────────────────────────────────────────────────────
+async function loadAlertsPanel() {
+    const body = document.getElementById('alertsPanelBody');
+    if (!body) return;
+    try {
+        const r = await fetch('/api/alerts/contracts/summary');
+        if (!r.ok) throw new Error();
+        const data = await r.json();
+        const alerts = data.alerts || data.contract_alerts || [];
+        if (!alerts.length) {
+            body.innerHTML = `<div class="alert-row"><span class="alert-dot" style="background:#22c55e"></span><span class="alert-msg">All clear — no alerts.</span></div>`;
+            return;
+        }
+        const colors = { urgent:'#ef4444', warning:'#f59e0b', info:'#3b82f6' };
+        body.innerHTML = alerts.slice(0, 6).map(a => `
+            <div class="alert-row" onclick="loadView('alerts')">
+                <span class="alert-dot" style="background:${colors[a.level]||'#555'}"></span>
+                <span class="alert-msg">${a.message || a.description || 'Contract notice'}</span>
+                ${a.weeks_remaining !== undefined ? `<span class="alert-week">${a.weeks_remaining}w</span>` : ''}
+            </div>`).join('') +
+            (alerts.length > 6 ? `<div class="alert-row" style="justify-content:center;font-size:.72rem;color:#555" onclick="loadView('alerts')">+${alerts.length-6} more</div>` : '');
+    } catch {
+        body.innerHTML = `<div class="alert-row"><span class="alert-dot" style="background:#555"></span><span class="alert-msg" style="color:#555">Could not load alerts.</span></div>`;
+    }
+}
+
+// ── Homepage stats ────────────────────────────────────────────────────────────
+async function updateHomepageStats() {
+    try {
+        const r = await fetch('/api/universe/state');
+        if (r.ok) {
+            const state = await r.json();
+            document.querySelectorAll('.welcome-year').forEach(e => e.textContent = state.year);
+            document.querySelectorAll('.welcome-week').forEach(e => e.textContent = state.week);
+        }
+    } catch(_) {}
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+const dynamicEventSeenKey = 'awumDynamicEventsSeen';
+const storyArcReviewSeenKey = 'awumStoryArcReviewsSeen';
+const bookerApprovalSeenKey = 'awumBookerApprovalsSeen';
+const postShowFalloutSeenKey = 'awumPostShowFalloutSeen';
+
+function getDynamicEventSeen() {
+    try {
+        return new Set(JSON.parse(localStorage.getItem(dynamicEventSeenKey) || '[]'));
+    } catch {
+        return new Set();
+    }
+}
+
+function rememberDynamicEvent(eventId) {
+    const seen = getDynamicEventSeen();
+    seen.add(eventId);
+    localStorage.setItem(dynamicEventSeenKey, JSON.stringify(Array.from(seen).slice(-100)));
+}
+
+function getStoryArcReviewSeen() {
+    try {
+        return new Set(JSON.parse(localStorage.getItem(storyArcReviewSeenKey) || '[]'));
+    } catch {
+        return new Set();
+    }
+}
+
+function rememberStoryArcReview(reviewId) {
+    const seen = getStoryArcReviewSeen();
+    seen.add(reviewId);
+    localStorage.setItem(storyArcReviewSeenKey, JSON.stringify(Array.from(seen).slice(-100)));
+}
+
+function getBookerApprovalSeen() {
+    try {
+        return new Set(JSON.parse(localStorage.getItem(bookerApprovalSeenKey) || '[]'));
+    } catch {
+        return new Set();
+    }
+}
+
+function rememberBookerApproval(itemId) {
+    const seen = getBookerApprovalSeen();
+    seen.add(itemId);
+    localStorage.setItem(bookerApprovalSeenKey, JSON.stringify(Array.from(seen).slice(-100)));
+}
+
+function getPostShowFalloutSeen() {
+    try {
+        return new Set(JSON.parse(localStorage.getItem(postShowFalloutSeenKey) || '[]'));
+    } catch {
+        return new Set();
+    }
+}
+
+function rememberPostShowFallout(itemId) {
+    const seen = getPostShowFalloutSeen();
+    seen.add(itemId);
+    localStorage.setItem(postShowFalloutSeenKey, JSON.stringify(Array.from(seen).slice(-100)));
+}
+
+function dynamicEventHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function dynamicEventAttr(value) {
+    return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function showDynamicEventPopup(event) {
+    if (!event || !event.id) return;
+    rememberDynamicEvent(event.id);
+
+    const backdrop = document.getElementById('dynamicEventBackdrop');
+    const title = document.getElementById('dynamicEventTitle');
+    const summary = document.getElementById('dynamicEventSummary');
+    const meta = document.getElementById('dynamicEventMeta');
+    const actions = document.getElementById('dynamicEventActions');
+    const footer = document.getElementById('dynamicEventFooterText');
+    const kicker = document.getElementById('dynamicEventKicker');
+    const openButton = document.getElementById('dynamicEventOpenButton');
+    if (!backdrop || !title || !summary || !meta || !actions) return;
+
+    if (kicker) kicker.textContent = 'Dynamic Event';
+    title.textContent = event.title || 'Unexpected dynamic event';
+    summary.textContent = event.summary || 'A persistent event has interrupted the normal flow of the game.';
+    meta.innerHTML = [
+        event.category,
+        event.severity_level,
+        event.urgency,
+        event.brand,
+        `Y${event.year} W${event.week}`
+    ].filter(Boolean).map(value => `<span class="dynamic-event-pill">${dynamicEventHtml(value)}</span>`).join('');
+
+    const options = event.response_options_json || [];
+    actions.innerHTML = options.length
+        ? options.map(option => `
+            <button class="dynamic-event-action" onclick="resolveGlobalDynamicEvent('${dynamicEventAttr(event.id)}', '${dynamicEventAttr(option.key)}')">
+                ${dynamicEventHtml(option.label)}
+            </button>
+        `).join('')
+        : '<button class="dynamic-event-action" onclick="dismissDynamicEventPopup()">Acknowledge</button>';
+
+    if (footer) footer.textContent = 'This event was generated by the simulation and persisted immediately.';
+    if (openButton) {
+        openButton.textContent = 'Open Event Hub';
+        openButton.onclick = () => { loadView('simulation-expansion'); dismissDynamicEventPopup(); return false; };
+    }
+    backdrop.classList.add('active');
+}
+
+function showStoryArcReviewPopup(review) {
+    if (!review || !review.id) return;
+    rememberStoryArcReview(review.id);
+
+    const backdrop = document.getElementById('dynamicEventBackdrop');
+    const title = document.getElementById('dynamicEventTitle');
+    const summary = document.getElementById('dynamicEventSummary');
+    const meta = document.getElementById('dynamicEventMeta');
+    const actions = document.getElementById('dynamicEventActions');
+    const footer = document.getElementById('dynamicEventFooterText');
+    const kicker = document.getElementById('dynamicEventKicker');
+    const openButton = document.getElementById('dynamicEventOpenButton');
+    if (!backdrop || !title || !summary || !meta || !actions) return;
+
+    if (kicker) kicker.textContent = 'Creative AI Review';
+    title.textContent = review.title || 'Storyline review needed';
+    summary.textContent = review.summary || review.ai_recommendation || 'The creative AI has a storyline decision ready for review.';
+    meta.innerHTML = [
+        review.review_type,
+        review.severity,
+        review.source_type,
+        review.due_year && review.due_week ? `Y${review.due_year} W${review.due_week}` : ''
+    ].filter(Boolean).map(value => `<span class="dynamic-event-pill">${dynamicEventHtml(value)}</span>`).join('');
+
+    const options = Array.isArray(review.options_json) ? review.options_json : [];
+    actions.innerHTML = options.length
+        ? options.map(option => {
+            const decision = option.key === 'approve' ? 'approve' : option.key === 'reject' ? 'reject' : 'defer';
+            return `
+                <button class="dynamic-event-action" onclick="decideStoryArcReview('${dynamicEventAttr(review.id)}', '${dynamicEventAttr(decision)}', '${dynamicEventAttr(option.key)}')">
+                    ${dynamicEventHtml(option.label)}
+                </button>
+            `;
+        }).join('')
+        : `<button class="dynamic-event-action" onclick="decideStoryArcReview('${dynamicEventAttr(review.id)}', 'approve', 'approve')">Approve</button>`;
+
+    if (footer) footer.textContent = review.ai_recommendation || 'This review is stored in the story AI queue until resolved.';
+    if (openButton) {
+        openButton.textContent = 'Open Storylines';
+        openButton.onclick = () => { loadView('storylines'); dismissDynamicEventPopup(); return false; };
+    }
+    backdrop.classList.add('active');
+}
+
+function showBookerApprovalPopup(item) {
+    if (!item || !item.id) return;
+    rememberBookerApproval(item.id);
+
+    const backdrop = document.getElementById('dynamicEventBackdrop');
+    const title = document.getElementById('dynamicEventTitle');
+    const summary = document.getElementById('dynamicEventSummary');
+    const meta = document.getElementById('dynamicEventMeta');
+    const actions = document.getElementById('dynamicEventActions');
+    const footer = document.getElementById('dynamicEventFooterText');
+    const kicker = document.getElementById('dynamicEventKicker');
+    const openButton = document.getElementById('dynamicEventOpenButton');
+    if (!backdrop || !title || !summary || !meta || !actions) return;
+
+    if (kicker) kicker.textContent = 'Booker AI';
+    title.textContent = item.title || 'AI booking decision ready';
+    summary.textContent = item.summary || 'The showrunner has a booking decision ready for review.';
+    meta.innerHTML = [
+        item.category,
+        item.priority,
+        item.autonomy_policy,
+        item.deadline_year && item.deadline_week ? `Y${item.deadline_year} W${item.deadline_week}` : ''
+    ].filter(Boolean).map(value => `<span class="dynamic-event-pill">${dynamicEventHtml(value)}</span>`).join('');
+
+    actions.innerHTML = `
+        <button class="dynamic-event-action" onclick="decideBookerApprovalGlobal('${dynamicEventAttr(item.id)}', 'approve')">Approve</button>
+        <button class="dynamic-event-action" onclick="decideBookerApprovalGlobal('${dynamicEventAttr(item.id)}', 'counter')">Counter</button>
+        <button class="dynamic-event-action" onclick="decideBookerApprovalGlobal('${dynamicEventAttr(item.id)}', 'reject')">Reject</button>
+        <button class="dynamic-event-action" onclick="dismissDynamicEventPopup()">Later</button>
+    `;
+
+    if (footer) footer.textContent = item.autonomy_policy === 'auto_if_unanswered'
+        ? 'The AI may execute this if you leave it unanswered.'
+        : 'Major booking calls wait for your approval or counter-pitch.';
+    if (openButton) {
+        openButton.textContent = 'Open Booker AI';
+        openButton.onclick = () => { loadView('booker'); dismissDynamicEventPopup(); return false; };
+    }
+    backdrop.classList.add('active');
+}
+
+function showPostShowFalloutPopup(item) {
+    if (!item || !item.id) return;
+    if (getPostShowFalloutSeen().has(item.id)) return;
+    rememberPostShowFallout(item.id);
+
+    const backdrop = document.getElementById('dynamicEventBackdrop');
+    const title = document.getElementById('dynamicEventTitle');
+    const summary = document.getElementById('dynamicEventSummary');
+    const meta = document.getElementById('dynamicEventMeta');
+    const actions = document.getElementById('dynamicEventActions');
+    const footer = document.getElementById('dynamicEventFooterText');
+    const kicker = document.getElementById('dynamicEventKicker');
+    const openButton = document.getElementById('dynamicEventOpenButton');
+    if (!backdrop || !title || !summary || !meta || !actions) return;
+
+    if (kicker) kicker.textContent = 'Post-Show Fallout';
+    title.textContent = item.title || 'Urgent post-show situation';
+    summary.textContent = item.summary || 'The simulation generated a post-show consequence that needs attention.';
+    meta.innerHTML = [
+        item.item_type,
+        item.urgency,
+        item.show_name,
+        item.year && item.week ? `Y${item.year} W${item.week}` : ''
+    ].filter(Boolean).map(value => `<span class="dynamic-event-pill">${dynamicEventHtml(value)}</span>`).join('');
+
+    actions.innerHTML = `
+        <button class="dynamic-event-action" onclick="decidePostShowFalloutGlobal('${dynamicEventAttr(item.id)}', 'approve')">Approve Response</button>
+        <button class="dynamic-event-action" onclick="decidePostShowFalloutGlobal('${dynamicEventAttr(item.id)}', 'counter')">Counter</button>
+        <button class="dynamic-event-action" onclick="decidePostShowFalloutGlobal('${dynamicEventAttr(item.id)}', 'dismiss')">Later</button>
+    `;
+
+    if (footer) footer.textContent = item.auto_execute_allowed
+        ? 'The AI can move this forward if you let it breathe.'
+        : 'This one should be reviewed before it becomes canon.';
+    if (openButton) {
+        openButton.textContent = 'Open Fallout Desk';
+        openButton.onclick = () => { loadView('recap'); dismissDynamicEventPopup(); return false; };
+    }
+    backdrop.classList.add('active');
+}
+
+function dismissDynamicEventPopup() {
+    const backdrop = document.getElementById('dynamicEventBackdrop');
+    if (backdrop) backdrop.classList.remove('active');
+}
+
+async function resolveGlobalDynamicEvent(eventId, choice) {
+    try {
+        const response = await fetch(`/api/dynamic-events/${encodeURIComponent(eventId)}/resolve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ choice })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.error?.message || 'Could not resolve dynamic event');
+        dismissDynamicEventPopup();
+        checkDynamicEventPulse('post-resolution', 0, true);
+        checkStoryArcAIPulse('post-dynamic-resolution', true);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function decideStoryArcReview(reviewId, decision, selectedOption) {
+    try {
+        const response = await fetch(`/api/story-arc-ai/reviews/${encodeURIComponent(reviewId)}/decision`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ decision, selected_option: selectedOption })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.error?.message || result.error || 'Could not resolve story review');
+        dismissDynamicEventPopup();
+        checkStoryArcAIPulse('post-story-review', true);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function decideBookerApprovalGlobal(itemId, decision) {
+    try {
+        const counterPitch = decision === 'counter'
+            ? (prompt('Counter-pitch to the AI showrunner:', 'Keep the story beat, but change the finish.') || '')
+            : '';
+        const response = await fetch(`/api/booker/approval-queue/${encodeURIComponent(itemId)}/decision`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ decision, counter_pitch: counterPitch, notes: `Handled from global popup: ${decision}` })
+        });
+        const result = await response.json();
+        if (!response.ok || result.error) throw new Error(result.error || 'Could not resolve Booker AI item');
+        dismissDynamicEventPopup();
+        checkBookerAIPulse('post-booker-decision', true);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function decidePostShowFalloutGlobal(itemId, decision) {
+    try {
+        const counterPitch = decision === 'counter'
+            ? (prompt('Counter-pitch the fallout response:', 'Keep the consequence, but change how next week follows up.') || '')
+            : '';
+        const response = await fetch(`/api/booker/post-show/fallout/items/${encodeURIComponent(itemId)}/decision`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ decision, counter_pitch: counterPitch, notes: `Handled from global fallout popup: ${decision}` })
+        });
+        const result = await response.json();
+        if (!response.ok || result.error) throw new Error(result.error || 'Could not resolve post-show fallout');
+        dismissDynamicEventPopup();
+        checkBookerAIPulse('post-show-fallout-decision', true);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function checkDynamicEventPulse(context = 'global', chance = 0.025, surfaceExisting = false) {
+    try {
+        const response = await fetch('/api/dynamic-events/pulse', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ context, chance, allow_multiple_open: false })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) return;
+        const seen = getDynamicEventSeen();
+        const candidates = [
+            ...(result.data.events || []),
+            ...(surfaceExisting ? (result.data.open_events || []) : [])
+        ];
+        const event = candidates.find(item => item && item.status === 'open' && !seen.has(item.id));
+        if (event) showDynamicEventPopup(event);
+    } catch (_) {}
+}
+
+async function checkStoryArcAIPulse(context = 'global', surfaceExisting = true) {
+    try {
+        const response = await fetch('/api/story-arc-ai/pulse', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ context, run_ai: true, limit: surfaceExisting ? 5 : 1 })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) return;
+        const seen = getStoryArcReviewSeen();
+        const reviews = result.data.reviews || [];
+        const review = reviews.find(item => item && item.status === 'pending' && !seen.has(item.id));
+        if (review) showStoryArcReviewPopup(review);
+    } catch (_) {}
+}
+
+async function checkBookerAIPulse(context = 'global', surfaceExisting = true) {
+    try {
+        await fetch('/api/booker/showrunner/weekly', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ context, autonomy_level: 'balanced', force: false })
+        });
+        await fetch('/api/booker/approval-queue/auto-resolve', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ context })
+        });
+        const response = await fetch('/api/booker/showrunner/dashboard');
+        const dashboard = await response.json();
+        if (!response.ok || dashboard.error) return;
+        const seen = getBookerApprovalSeen();
+        const items = dashboard.pending_approvals || [];
+        const item = items.find(entry => entry && entry.status === 'pending' && !seen.has(entry.id));
+        if (surfaceExisting && item) showBookerApprovalPopup(item);
+    } catch (_) {}
+}
+
+function installDynamicEventFetchInterceptor() {
+    if (window.__dynamicEventFetchInstalled) return;
+    window.__dynamicEventFetchInstalled = true;
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = async (...args) => {
+        const response = await originalFetch(...args);
+        try {
+            const url = String(args[0] || '');
+            if (url.includes('/api/show/simulate') || url.includes('/api/booking/run_show')) {
+                response.clone().json().then(data => {
+                    const events = data.dynamic_events?.events || data.show_result?.dynamic_events?.events || [];
+                    const seen = getDynamicEventSeen();
+                    const event = events.find(item => item && item.status === 'open' && !seen.has(item.id));
+                    if (event) showDynamicEventPopup(event);
+                    const falloutReport = data.post_show_fallout?.report || data.show_result?.post_show_fallout || null;
+                    const falloutSeen = getPostShowFalloutSeen();
+                    const urgentFallout = [
+                        ...((falloutReport && falloutReport.urgent_items) || []),
+                        ...((falloutReport && falloutReport.items) || [])
+                    ].find(item => item && item.status === 'open' && ['critical', 'high'].includes(item.urgency) && !falloutSeen.has(item.id));
+                    if (urgentFallout) {
+                        showPostShowFalloutPopup({
+                            ...urgentFallout,
+                            report_id: falloutReport.id,
+                            show_name: falloutReport.show_name,
+                            year: falloutReport.year,
+                            week: falloutReport.week
+                        });
+                    }
+                    checkStoryArcAIPulse('show-simulated', true);
+                    checkBookerAIPulse('show-simulated', true);
+                }).catch(() => {});
+            }
+        } catch (_) {}
+        return response;
+    };
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    installDynamicEventFetchInterceptor();
+    checkConnection();
+    updateUniverseStatus();
+    updateHomepageStats();
+    loadAlertBadge();
+    loadAlertsPanel();
+    checkDynamicEventPulse('global', 0.025, true);
+    checkStoryArcAIPulse('global', true);
+    checkBookerAIPulse('global', true);
+    setInterval(updateUniverseStatus, 30000);
+    setInterval(loadAlertBadge, 30000);
+    setInterval(() => checkDynamicEventPulse('global', 0.025, true), 45000);
+    setInterval(() => checkStoryArcAIPulse('global', true), 60000);
+    setInterval(() => checkBookerAIPulse('global', true), 90000);
+});
+
+window.loadView = loadView;
+window.dismissDynamicEventPopup = dismissDynamicEventPopup;
+window.resolveGlobalDynamicEvent = resolveGlobalDynamicEvent;
+window.checkDynamicEventPulse = checkDynamicEventPulse;
+window.showStoryArcReviewPopup = showStoryArcReviewPopup;
+window.decideStoryArcReview = decideStoryArcReview;
+window.checkStoryArcAIPulse = checkStoryArcAIPulse;
+window.showBookerApprovalPopup = showBookerApprovalPopup;
+window.decideBookerApprovalGlobal = decideBookerApprovalGlobal;
+window.checkBookerAIPulse = checkBookerAIPulse;
+window.showPostShowFalloutPopup = showPostShowFalloutPopup;
+window.decidePostShowFalloutGlobal = decidePostShowFalloutGlobal;
+</script>
+</body>
+</html>

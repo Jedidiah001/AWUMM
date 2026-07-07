@@ -1,0 +1,394 @@
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="bi bi-diagram-3"></i> Factions</h2>
+        <p class="lead">Create stables, assign leaders, and manage loyalty, jealousy, and power struggles.</p>
+        <hr>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12 d-flex flex-wrap gap-2">
+        <button class="btn btn-success" data-action="open-create-faction">
+            <i class="bi bi-plus-circle"></i> Create Faction
+        </button>
+        <button class="btn btn-outline-secondary" data-action="refresh-factions">
+            <i class="bi bi-arrow-repeat"></i> Refresh
+        </button>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-dark text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="factionCount">-</h3>
+                <small>Active Factions</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="memberCount">-</h3>
+                <small>Members In Factions</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="avgLoyalty">-</h3>
+                <small>Average Loyalty</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-collection"></i> Active Factions</h5>
+            </div>
+            <div class="card-body">
+                <div id="factionsList">
+                    <p class="text-muted text-center">Loading factions...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="createFactionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Faction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Faction Name</label>
+                        <input class="form-control" id="factionName" placeholder="The Dynasty">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Brand</label>
+                        <select class="form-select" id="factionBrand" data-action="load-faction-roster">
+                            <option value="ROC Alpha">ROC Alpha</option>
+                            <option value="ROC Velocity">ROC Velocity</option>
+                            <option value="ROC Vanguard">ROC Vanguard</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Leader</label>
+                        <select class="form-select" id="factionLeader"></select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Manager (Optional)</label>
+                        <select class="form-select" id="factionManager"></select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Entrance Style</label>
+                        <select class="form-select" id="factionEntranceStyle">
+                            <option value="standard">Standard</option>
+                            <option value="ominous">Ominous</option>
+                            <option value="elite">Elite</option>
+                            <option value="chaotic">Chaotic</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Goals (comma separated)</label>
+                        <input class="form-control" id="factionGoals" placeholder="Control titles, dominate locker room">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Faction Identity</label>
+                        <textarea class="form-control" id="factionIdentity" rows="2" placeholder="Shared philosophy, aesthetic, or mission"></textarea>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Members</label>
+                        <select class="form-select" id="factionMembers" size="8" multiple></select>
+                        <div class="form-text">Choose at least 3 members, including the leader.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" id="createFactionBtn" data-action="create-faction">
+                    <i class="bi bi-check-circle"></i> Create Faction
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="dynamicsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">Adjust Faction Dynamics</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3" id="dynamicsTargetLabel"></p>
+                <input type="hidden" id="dynamicsFactionId">
+                <input type="hidden" id="dynamicsWrestlerId">
+                <div class="mb-3">
+                    <label class="form-label">Loyalty Delta</label>
+                    <input class="form-control" id="loyaltyDelta" type="number" value="0" min="-50" max="50">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Jealousy Delta</label>
+                    <input class="form-control" id="jealousyDelta" type="number" value="0" min="-50" max="50">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Power Delta</label>
+                    <input class="form-control" id="powerDelta" type="number" value="0" min="-50" max="50">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-warning" data-action="save-dynamics">Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    let rosterCache = [];
+
+    document.addEventListener('click', function (e) {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+
+        const action = target.dataset.action;
+        if (action === 'open-create-faction') openCreateModal();
+        if (action === 'refresh-factions') loadFactions();
+        if (action === 'create-faction') createFaction();
+        if (action === 'open-dynamics-modal') openDynamicsModal(target.dataset.factionId, target.dataset.wrestlerId, target.dataset.wrestlerName);
+        if (action === 'save-dynamics') saveDynamics();
+        if (action === 'disband-faction') disbandFaction(target.dataset.factionId, target.dataset.factionName);
+    });
+
+    document.addEventListener('change', function (e) {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+        if (target.dataset.action === 'load-faction-roster') {
+            loadFactionRoster();
+        }
+    });
+
+    function selectedValues(select) {
+        return Array.from(select.selectedOptions).map(option => option.value);
+    }
+
+    function renderSummary(factions) {
+        document.getElementById('factionCount').textContent = factions.length;
+        const members = factions.reduce((sum, faction) => sum + (faction.member_ids || []).length, 0);
+        document.getElementById('memberCount').textContent = members;
+
+        const allLoyalty = factions.flatMap(faction =>
+            Object.values(faction.dynamics || {}).map(metrics => Number(metrics.loyalty || 0))
+        );
+        const avgLoyalty = allLoyalty.length
+            ? (allLoyalty.reduce((sum, value) => sum + value, 0) / allLoyalty.length).toFixed(1)
+            : '0.0';
+        document.getElementById('avgLoyalty').textContent = avgLoyalty;
+    }
+
+    function metricBadge(value, tone) {
+        return `<span class="badge ${tone}">${value}</span>`;
+    }
+
+    async function loadFactions() {
+        const container = document.getElementById('factionsList');
+        container.innerHTML = '<p class="text-center"><span class="spinner-border spinner-border-sm"></span> Loading...</p>';
+
+        try {
+            const response = await fetchAPI('/api/factions');
+            const factions = response.factions || [];
+            renderSummary(factions);
+
+            if (!factions.length) {
+                container.innerHTML = '<p class="text-muted text-center">No active factions yet.</p>';
+                return;
+            }
+
+            container.innerHTML = `<div class="row">
+                ${factions.map(faction => {
+                    const hierarchy = faction.hierarchy || [];
+                    return `
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>${faction.faction_name}</strong>
+                                        <div class="small text-light">${faction.primary_brand}</div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-light" data-action="disband-faction" data-faction-id="${faction.faction_id}" data-faction-name="${faction.faction_name}">
+                                        Disband
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-2"><strong>Leader:</strong> ${faction.leader_name}</p>
+                                    <p class="mb-2"><strong>Manager:</strong> ${faction.manager_name || 'None'}</p>
+                                    <p class="mb-2"><strong>Entrance:</strong> ${faction.entrance_style || 'standard'}</p>
+                                    ${faction.identity ? `<p class="mb-2"><strong>Identity:</strong> ${faction.identity}</p>` : ''}
+                                    ${faction.goals && faction.goals.length ? `<p class="mb-3"><strong>Goals:</strong> ${faction.goals.join(', ')}</p>` : ''}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm align-middle">
+                                            <thead>
+                                                <tr>
+                                                    <th>Member</th>
+                                                    <th>Role</th>
+                                                    <th>L/J/P</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${hierarchy.map(entry => {
+                                                    const metrics = (faction.dynamics || {})[entry.wrestler_id] || {};
+                                                    return `
+                                                        <tr>
+                                                            <td>${entry.wrestler_name}</td>
+                                                            <td>${entry.role || 'member'}</td>
+                                                            <td>
+                                                                ${metricBadge(metrics.loyalty || 0, 'bg-success')}
+                                                                ${metricBadge(metrics.jealousy || 0, 'bg-danger')}
+                                                                ${metricBadge(metrics.power || 0, 'bg-primary')}
+                                                            </td>
+                                                            <td class="text-end">
+                                                                <button class="btn btn-sm btn-outline-warning" data-action="open-dynamics-modal" data-faction-id="${faction.faction_id}" data-wrestler-id="${entry.wrestler_id}" data-wrestler-name="${entry.wrestler_name}">
+                                                                    Adjust
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    `;
+                                                }).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>`;
+        } catch (error) {
+            container.innerHTML = `<div class="alert alert-danger">Failed to load factions: ${error.message}</div>`;
+        }
+    }
+
+    async function loadFactionRoster() {
+        const brand = document.getElementById('factionBrand').value;
+        const response = await fetchAPI(`/api/roster?brand=${encodeURIComponent(brand)}&active_only=true`);
+        rosterCache = response.wrestlers || [];
+
+        const memberOptions = rosterCache.map(wrestler => `<option value="${wrestler.id}">${wrestler.name} (${wrestler.role})</option>`).join('');
+        document.getElementById('factionLeader').innerHTML = memberOptions;
+        document.getElementById('factionManager').innerHTML = `<option value="">No manager</option>${memberOptions}`;
+        document.getElementById('factionMembers').innerHTML = memberOptions;
+    }
+
+    function openCreateModal() {
+        loadFactionRoster().then(() => {
+            new bootstrap.Modal(document.getElementById('createFactionModal')).show();
+        });
+    }
+
+    async function createFaction() {
+        const factionName = document.getElementById('factionName').value.trim();
+        const brand = document.getElementById('factionBrand').value;
+        const leaderId = document.getElementById('factionLeader').value;
+        const managerId = document.getElementById('factionManager').value;
+        const memberIds = selectedValues(document.getElementById('factionMembers'));
+        const managerName = managerId
+            ? document.getElementById('factionManager').selectedOptions[0].textContent.split(' (')[0]
+            : null;
+
+        if (!factionName || !leaderId || memberIds.length < 3) {
+            alert('Choose a name, a leader, and at least 3 members.');
+            return;
+        }
+        if (!memberIds.includes(leaderId)) {
+            alert('The leader must be part of the faction.');
+            return;
+        }
+
+        const response = await fetchAPI('/api/factions/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                faction_name: factionName,
+                primary_brand: brand,
+                leader_id: leaderId,
+                member_ids: memberIds,
+                manager_id: managerId || null,
+                manager_name: managerName,
+                identity: document.getElementById('factionIdentity').value.trim(),
+                goals: document.getElementById('factionGoals').value.split(',').map(goal => goal.trim()).filter(Boolean),
+                entrance_style: document.getElementById('factionEntranceStyle').value
+            })
+        });
+
+        if (!response.success) {
+            alert(`Failed to create faction: ${response.error}`);
+            return;
+        }
+
+        bootstrap.Modal.getInstance(document.getElementById('createFactionModal')).hide();
+        document.getElementById('factionName').value = '';
+        document.getElementById('factionIdentity').value = '';
+        document.getElementById('factionGoals').value = '';
+        loadFactions();
+    }
+
+    function openDynamicsModal(factionId, wrestlerId, wrestlerName) {
+        document.getElementById('dynamicsFactionId').value = factionId;
+        document.getElementById('dynamicsWrestlerId').value = wrestlerId;
+        document.getElementById('dynamicsTargetLabel').textContent = `Adjusting ${wrestlerName}`;
+        document.getElementById('loyaltyDelta').value = 0;
+        document.getElementById('jealousyDelta').value = 0;
+        document.getElementById('powerDelta').value = 0;
+        new bootstrap.Modal(document.getElementById('dynamicsModal')).show();
+    }
+
+    async function saveDynamics() {
+        const factionId = document.getElementById('dynamicsFactionId').value;
+        const wrestlerId = document.getElementById('dynamicsWrestlerId').value;
+
+        const response = await fetchAPI(`/api/factions/${factionId}/dynamics`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                wrestler_id: wrestlerId,
+                loyalty_delta: parseInt(document.getElementById('loyaltyDelta').value || '0', 10),
+                jealousy_delta: parseInt(document.getElementById('jealousyDelta').value || '0', 10),
+                power_delta: parseInt(document.getElementById('powerDelta').value || '0', 10)
+            })
+        });
+
+        if (!response.success) {
+            alert(`Failed to update dynamics: ${response.error}`);
+            return;
+        }
+
+        bootstrap.Modal.getInstance(document.getElementById('dynamicsModal')).hide();
+        loadFactions();
+    }
+
+    async function disbandFaction(factionId, factionName) {
+        if (!confirm(`Disband "${factionName}"?`)) return;
+
+        const response = await fetchAPI(`/api/factions/${factionId}/disband`, { method: 'POST' });
+        if (!response.success) {
+            alert(`Failed to disband faction: ${response.error}`);
+            return;
+        }
+        loadFactions();
+    }
+
+    loadFactions();
+})();
+</script>

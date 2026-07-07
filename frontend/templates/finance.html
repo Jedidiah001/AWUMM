@@ -1,0 +1,1642 @@
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="bi bi-bank"></i> Finance & Business Operations</h2>
+        <p class="lead">Manage revenue streams, operating costs, pricing, partnerships, merchandise, capital, and financial risk.</p>
+        <hr>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-4" id="financeTabNav">
+    <li class="nav-item">
+        <button class="nav-link active finance-tab-button" type="button" data-finance-tab="dashboard">Dashboard</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link finance-tab-button" type="button" data-finance-tab="sponsorships">Sponsorships</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link finance-tab-button" type="button" data-finance-tab="venues">Venues &amp; Tours</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link finance-tab-button" type="button" data-finance-tab="events">Event Financials</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link finance-tab-button" type="button" data-finance-tab="settlements">Settlements</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link finance-tab-button" type="button" data-finance-tab="reports">Reports</button>
+    </li>
+</ul>
+
+<div id="finance-tab-dashboard" class="finance-tab-panel">
+<div class="row g-3 mb-4">
+    <div class="col-md-2">
+        <div class="card border-primary h-100">
+            <div class="card-body">
+                <small class="text-muted d-block">Cash Balance</small>
+                <h4 id="financeBalance">$0</h4>
+                <small class="text-muted" id="financePeriod">Year 1 • Week 1</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card border-success h-100">
+            <div class="card-body">
+                <small class="text-muted d-block">Weekly P/L</small>
+                <h4 id="financeWeeklyProfit">$0</h4>
+                <small class="text-muted">Current cycle</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card border-info h-100">
+            <div class="card-body">
+                <small class="text-muted d-block">Monthly P/L</small>
+                <h4 id="financeMonthlyProfit">$0</h4>
+                <small class="text-muted">4-week rollup</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card border-warning h-100">
+            <div class="card-body">
+                <small class="text-muted d-block">Average Rating</small>
+                <h4 id="financeAverageRating">0.00</h4>
+                <small class="text-muted">Show quality leverage</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card border-danger h-100">
+            <div class="card-body">
+                <small class="text-muted d-block">Risk Level</small>
+                <h4 id="financeRiskLevel">Low</h4>
+                <small class="text-muted" id="financeRunway">Runway: 0 weeks</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card border-secondary h-100">
+            <div class="card-body">
+                <small class="text-muted d-block">Economic Outlook</small>
+                <h4 id="financeOutlook">Stable</h4>
+                <small class="text-muted" id="financeInflation">Inflation 0.0%</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Revenue Streams</h5>
+            </div>
+            <div class="card-body">
+                <div id="revenueStreamsTable"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="bi bi-receipt-cutoff"></i> Expense Categories</h5>
+            </div>
+            <div class="card-body">
+                <div id="expenseCategoriesTable"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Financial Difficulty</h5>
+            </div>
+            <div class="card-body">
+                <div id="difficultyWarnings"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-sliders"></i> Budget Allocation & Pricing</h5>
+            </div>
+            <div class="card-body">
+                <form id="financeSettingsForm" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">PPV Price</label>
+                        <input type="number" class="form-control" id="ppvPriceInput" min="10" step="0.01">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Floor Ticket</label>
+                        <input type="number" class="form-control" id="ticketFloorInput" min="10" step="1">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Premium Ticket</label>
+                        <input type="number" class="form-control" id="ticketPremiumInput" min="10" step="1">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Salary Budget</label>
+                        <input type="number" class="form-control" id="budgetSalariesInput" min="0" step="1000">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Production Budget</label>
+                        <input type="number" class="form-control" id="budgetProductionInput" min="0" step="1000">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Venue Budget</label>
+                        <input type="number" class="form-control" id="budgetVenueInput" min="0" step="1000">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Staff Budget</label>
+                        <input type="number" class="form-control" id="budgetStaffInput" min="0" step="1000">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Travel Budget</label>
+                        <input type="number" class="form-control" id="budgetTravelInput" min="0" step="1000">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Marketing Budget</label>
+                        <input type="number" class="form-control" id="budgetMarketingInput" min="0" step="1000">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Merch Budget</label>
+                        <input type="number" class="form-control" id="budgetMerchInput" min="0" step="1000">
+                    </div>
+                    <div class="col-12 d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Overspending warnings are calculated against the current weekly P&amp;L.</small>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Settings
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-3" id="budgetStatusTable"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-globe2"></i> Economic Simulation</h5>
+            </div>
+            <div class="card-body" id="economicIndicators"></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-broadcast"></i> TV Rights Negotiations</h5>
+            </div>
+            <div class="card-body">
+                <form id="tvRightsForm" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Network Name</label>
+                        <input type="text" class="form-control" id="tvNetworkInput" value="Global Sports One">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Market Size</label>
+                        <input type="number" class="form-control" id="tvMarketSizeInput" value="70" min="1" max="100">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Content Quality</label>
+                        <input type="number" class="form-control" id="tvContentQualityInput" value="75" min="1" max="100">
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label">Requirement</label>
+                        <input type="text" class="form-control" id="tvRequirementInput" value="Prime-time consistency">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Duration (weeks)</label>
+                        <input type="number" class="form-control" id="tvDurationInput" value="26" min="4" step="1">
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-dark">
+                            <i class="bi bi-handshake"></i> Negotiate Deal
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-3" id="tvDealsTable"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-megaphone"></i> Sponsorship Deals</h5>
+            </div>
+            <div class="card-body">
+                <form id="sponsorshipForm" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Sponsor</label>
+                        <input type="text" class="form-control" id="sponsorNameInput" value="Northstar Energy">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Category</label>
+                        <input type="text" class="form-control" id="sponsorCategoryInput" value="Consumer Brand">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Content Restriction</label>
+                        <input type="text" class="form-control" id="sponsorRestrictionInput" value="Avoid excessive gore">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Promo Obligation</label>
+                        <input type="text" class="form-control" id="sponsorObligationInput" value="Two mentions per weekly show">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Duration (weeks)</label>
+                        <input type="number" class="form-control" id="sponsorDurationInput" value="16" min="4" step="1">
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-building"></i> Secure Sponsor
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-3" id="sponsorshipDealsTable"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-bag"></i> Merchandise Production</h5>
+            </div>
+            <div class="card-body">
+                <form id="merchForm" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Wrestler ID (optional)</label>
+                        <input type="text" class="form-control" id="merchWrestlerIdInput" placeholder="Leave blank for company merch">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Item Name</label>
+                        <input type="text" class="form-control" id="merchItemNameInput" value="ROC Signature Tee">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Category</label>
+                        <input type="text" class="form-control" id="merchCategoryInput" value="Apparel">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Unit Cost</label>
+                        <input type="number" class="form-control" id="merchUnitCostInput" value="12" min="1" step="0.01">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Unit Price</label>
+                        <input type="number" class="form-control" id="merchUnitPriceInput" value="30" min="1" step="0.01">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Inventory</label>
+                        <input type="number" class="form-control" id="merchInventoryInput" value="100" min="10" step="10">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Hype Score</label>
+                        <input type="number" class="form-control" id="merchHypeInput" value="65" min="1" max="100">
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-box-seam"></i> Produce Merch
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-3" id="merchandiseTable"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Loan & Investment System</h5>
+            </div>
+            <div class="card-body">
+                <form id="capitalForm" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Instrument</label>
+                        <select class="form-select" id="capitalTypeInput">
+                            <option value="loan">Loan</option>
+                            <option value="investment">Investment</option>
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label">Counterparty</label>
+                        <input type="text" class="form-control" id="capitalCounterpartyInput" value="Commonwealth Bank">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Principal</label>
+                        <input type="number" class="form-control" id="capitalPrincipalInput" value="100000" min="10000" step="10000">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Duration (weeks)</label>
+                        <input type="number" class="form-control" id="capitalDurationInput" value="26" min="4" step="1">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Rate / Equity %</label>
+                        <input type="number" class="form-control" id="capitalRateInput" value="7.5" min="0" step="0.1">
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-wallet2"></i> Add Capital
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-3" id="capitalTable"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="bi bi-calendar-week"></i> Weekly Profit/Loss Statements</h5>
+            </div>
+            <div class="card-body" id="weeklyReportsTable"></div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-calendar-month"></i> Monthly Profit/Loss Statements</h5>
+            </div>
+            <div class="card-body" id="monthlyReportsTable"></div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<div id="finance-tab-sponsorships" class="finance-tab-panel d-none">
+    <div class="row g-3 mb-4">
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-building-add"></i> Sponsor Profile</h5>
+                </div>
+                <div class="card-body">
+                    <form id="enterpriseSponsorForm" class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label" for="enterpriseSponsorCompany">Company Name</label>
+                            <input type="text" class="form-control" id="enterpriseSponsorCompany" value="Acme Corporation" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="enterpriseSponsorIndustry">Industry</label>
+                            <input type="text" class="form-control" id="enterpriseSponsorIndustry" value="Technology" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="enterpriseSponsorTier">Tier</label>
+                            <select class="form-select" id="enterpriseSponsorTier">
+                                <option>Title Sponsor</option>
+                                <option selected>Major Sponsor</option>
+                                <option>Official Partner</option>
+                                <option>Supplier</option>
+                            </select>
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label" for="enterpriseSponsorEmail">Contact Email</label>
+                            <input type="email" class="form-control" id="enterpriseSponsorEmail" value="contact@acme.com" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label" for="enterpriseSponsorPhone">Phone</label>
+                            <input type="text" class="form-control" id="enterpriseSponsorPhone" value="+1-555-1234">
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Save Sponsor
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-briefcase"></i> Contract Builder</h5>
+                </div>
+                <div class="card-body">
+                    <form id="enterpriseContractForm" class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label" for="enterpriseContractSponsor">Sponsor</label>
+                            <select class="form-select" id="enterpriseContractSponsor" required></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="enterpriseContractType">Contract Type</label>
+                            <select class="form-select" id="enterpriseContractType">
+                                <option>Title Sponsorship</option>
+                                <option selected>Presenting Sponsorship</option>
+                                <option>Official Product Category</option>
+                                <option>Digital Sponsorship</option>
+                                <option>Talent Endorsement</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="enterpriseContractSchedule">Schedule</label>
+                            <select class="form-select" id="enterpriseContractSchedule">
+                                <option>Upfront</option>
+                                <option selected>Quarterly</option>
+                                <option>Annual</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="enterpriseContractDuration">Duration Months</label>
+                            <input type="number" class="form-control" id="enterpriseContractDuration" value="24" min="1">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="enterpriseContractValue">Total Value</label>
+                            <input type="number" class="form-control" id="enterpriseContractValue" value="5000000" min="1">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="enterpriseContractBonus">Bonus Pool</label>
+                            <input type="number" class="form-control" id="enterpriseContractBonus" value="250000" min="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="enterpriseContractPenalty">Termination Penalty</label>
+                            <input type="number" class="form-control" id="enterpriseContractPenalty" value="500000" min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="enterpriseRequirementExposure">TV Exposure Seconds</label>
+                            <input type="number" class="form-control" id="enterpriseRequirementExposure" value="10" min="1">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="enterpriseRequirementSocial">Social Mentions Weekly</label>
+                            <input type="number" class="form-control" id="enterpriseRequirementSocial" value="5" min="1">
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-dark">
+                                <i class="bi bi-file-earmark-plus"></i> Save Contract
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-3">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-list-check"></i> Sponsor Directory</h5>
+                </div>
+                <div class="card-body" id="enterpriseSponsorDirectory"></div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-shield-exclamation"></i> Controversy Response</h5>
+                </div>
+                <div class="card-body">
+                    <form id="enterpriseControversyForm" class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label" for="enterpriseControversySponsor">Sponsor</label>
+                            <select class="form-select" id="enterpriseControversySponsor" required></select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="enterpriseControversyType">Incident</label>
+                            <input type="text" class="form-control" id="enterpriseControversyType" value="Social Media Controversy">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="enterpriseControversySeverity">Severity</label>
+                            <select class="form-select" id="enterpriseControversySeverity">
+                                <option>Low</option>
+                                <option>Medium</option>
+                                <option selected>High</option>
+                                <option>Critical</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="enterpriseControversyDescription">Description</label>
+                            <textarea class="form-control" id="enterpriseControversyDescription" rows="3">Offensive tweet posted</textarea>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-broadcast-pin"></i> Record Incident
+                            </button>
+                        </div>
+                    </form>
+                    <div class="mt-3" id="enterpriseControversyAlerts"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="finance-tab-venues" class="finance-tab-panel d-none">
+    <div class="row g-3 mb-4">
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Venue Database</h5>
+                </div>
+                <div class="card-body" id="enterpriseVenueList"></div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-tools"></i> Venue Upgrade</h5>
+                </div>
+                <div class="card-body">
+                    <form id="enterpriseUpgradeForm" class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label" for="enterpriseUpgradeVenue">Venue</label>
+                            <select class="form-select" id="enterpriseUpgradeVenue" required></select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="enterpriseUpgradeName">Upgrade</label>
+                            <input type="text" class="form-control" id="enterpriseUpgradeName" value="LED Video Wall Installation">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="enterpriseUpgradeCost">Cost</label>
+                            <input type="number" class="form-control" id="enterpriseUpgradeCost" value="500000" min="1">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="enterpriseUpgradeLift">Revenue Lift</label>
+                            <input type="number" class="form-control" id="enterpriseUpgradeLift" value="50000" min="1">
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-info text-white">
+                                <i class="bi bi-cart-check"></i> Purchase Upgrade
+                            </button>
+                        </div>
+                    </form>
+                    <div class="mt-3" id="enterpriseUpgradeResult"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-signpost-split"></i> Create Tour</h5>
+                </div>
+                <div class="card-body">
+                    <form id="enterpriseTourForm" class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="enterpriseTourName">Tour Name</label>
+                            <input type="text" class="form-control" id="enterpriseTourName" value="Summer Tour 2024" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="enterpriseTourType">Tour Type</label>
+                            <select class="form-select" id="enterpriseTourType">
+                                <option>Weekly TV Show</option>
+                                <option selected>House Shows</option>
+                                <option>PPV Tour</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="enterpriseTourStart">Start Date</label>
+                            <input type="date" class="form-control" id="enterpriseTourStart" value="2024-06-01">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="enterpriseTourEnd">End Date</label>
+                            <input type="date" class="form-control" id="enterpriseTourEnd" value="2024-08-31">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="enterpriseTourVenue1">Venue 1</label>
+                            <select class="form-select enterprise-tour-venue" id="enterpriseTourVenue1"></select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="enterpriseTourVenue2">Venue 2</label>
+                            <select class="form-select enterprise-tour-venue" id="enterpriseTourVenue2"></select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="enterpriseTourVenue3">Venue 3</label>
+                            <select class="form-select enterprise-tour-venue" id="enterpriseTourVenue3"></select>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-dark">
+                                <i class="bi bi-map"></i> Create Tour
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-calendar-event"></i> Tours &amp; Routing</h5>
+                    <button type="button" class="btn btn-sm btn-light" id="enterpriseOptimizeLatestTour">
+                        <i class="bi bi-magic"></i> Optimize Latest
+                    </button>
+                </div>
+                <div class="card-body" id="enterpriseTourList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="finance-tab-events" class="finance-tab-panel d-none">
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-check2-square"></i> Event Settlement Entry</h5>
+                </div>
+                <div class="card-body">
+                    <form id="enterpriseEventSettlementForm" class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label" for="enterpriseSettlementEvent">Event</label>
+                            <select class="form-select" id="enterpriseSettlementEvent" required></select>
+                        </div>
+                        <div class="col-md-6"><label class="form-label">Ticket Sales</label><input type="number" class="form-control settlement-revenue" id="settleTicketSales" value="750000"></div>
+                        <div class="col-md-6"><label class="form-label">Merchandise Sales</label><input type="number" class="form-control settlement-revenue" id="settleMerchSales" value="125000"></div>
+                        <div class="col-md-6"><label class="form-label">Concessions</label><input type="number" class="form-control settlement-revenue" id="settleConcessions" value="25000"></div>
+                        <div class="col-md-6"><label class="form-label">Local Sponsorship</label><input type="number" class="form-control settlement-revenue" id="settleLocalSponsor" value="0"></div>
+                        <div class="col-md-6"><label class="form-label">Venue Rental</label><input type="number" class="form-control settlement-expense" id="settleVenueRental" value="150000"></div>
+                        <div class="col-md-6"><label class="form-label">Production</label><input type="number" class="form-control settlement-expense" id="settleProduction" value="75000"></div>
+                        <div class="col-md-6"><label class="form-label">Talent</label><input type="number" class="form-control settlement-expense" id="settleTalent" value="200000"></div>
+                        <div class="col-md-6"><label class="form-label">Travel</label><input type="number" class="form-control settlement-expense" id="settleTravel" value="30000"></div>
+                        <div class="col-md-6"><label class="form-label">Marketing</label><input type="number" class="form-control settlement-expense" id="settleMarketing" value="20000"></div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="w-100">
+                                <small class="text-muted d-block">Projected Profit</small>
+                                <strong id="enterpriseSettlementPreview">$0</strong>
+                            </div>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-journal-check"></i> Settle Event
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Event Financials</h5>
+                </div>
+                <div class="card-body" id="enterpriseEventFinancials"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="finance-tab-settlements" class="finance-tab-panel d-none">
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-trophy"></i> Profitability Scoreboard</h5>
+                </div>
+                <div class="card-body" id="enterpriseProfitabilityScoreboard"></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-receipt"></i> Finance Transactions</h5>
+                </div>
+                <div class="card-body" id="enterpriseTransactionsTable"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="finance-tab-reports" class="finance-tab-panel d-none">
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-table"></i> Budget Variance</h5>
+                    <button type="button" class="btn btn-sm btn-light" id="enterpriseExportVariance">
+                        <i class="bi bi-download"></i> CSV
+                    </button>
+                </div>
+                <div class="card-body" id="enterpriseBudgetVarianceTable"></div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-binoculars"></i> Forecasts</h5>
+                </div>
+                <div class="card-body" id="enterpriseForecastCards"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    let financeDashboard = null;
+    let enterpriseSponsorships = {sponsors: [], summary: {}};
+    let enterpriseVenuesTours = {venues: [], tours: [], summary: {}};
+
+    function currency(value) {
+        const amount = Number(value || 0);
+        const sign = amount < 0 ? '-' : '';
+        return `${sign}$${Math.abs(Math.round(amount)).toLocaleString()}`;
+    }
+
+    function pct(value) {
+        return `${Number(value || 0).toFixed(1)}%`;
+    }
+
+    function badge(text, type) {
+        return `<span class="badge bg-${type} me-1">${text}</span>`;
+    }
+
+    async function apiRequest(url, options) {
+        const response = await fetch(url, options);
+        const data = await response.json();
+        if (!response.ok || data.success === false) {
+            throw new Error(data.error || 'Request failed');
+        }
+        return data;
+    }
+
+    async function loadFinanceDashboard() {
+        financeDashboard = await apiRequest('/api/finance/dashboard');
+        renderOverview(financeDashboard);
+        renderTables(financeDashboard);
+        hydrateForms(financeDashboard.settings);
+        await loadEnterpriseFinance();
+    }
+
+    function renderOverview(data) {
+        const overview = data.overview;
+        const difficulty = data.difficulty;
+        const economy = data.economy;
+
+        document.getElementById('financeBalance').textContent = currency(overview.balance);
+        document.getElementById('financePeriod').textContent = `Year ${overview.year} • Week ${overview.week}`;
+        document.getElementById('financeWeeklyProfit').textContent = currency(overview.weekly_profit);
+        document.getElementById('financeMonthlyProfit').textContent = currency(overview.monthly_profit);
+        document.getElementById('financeAverageRating').textContent = Number(overview.average_show_rating || 0).toFixed(2);
+        document.getElementById('financeRiskLevel').textContent = difficulty.risk_level;
+        document.getElementById('financeRunway').textContent = `Runway: ${difficulty.projected_runway_weeks} weeks`;
+        document.getElementById('financeOutlook').textContent = economy.outlook;
+        document.getElementById('financeInflation').textContent = `Inflation ${economy.inflation_rate}%`;
+    }
+
+    function renderBreakdownTable(targetId, rows, label) {
+        const target = document.getElementById(targetId);
+        if (!rows || !rows.length) {
+            target.innerHTML = `<div class="text-muted">No ${label.toLowerCase()} available yet.</div>`;
+            return;
+        }
+        target.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr><th>${label}</th><th class="text-end">Amount</th></tr>
+                    </thead>
+                    <tbody>
+                        ${rows.map(row => `
+                        <tr>
+                            <td>${String(row.category).replace(/_/g, ' ')}</td>
+                            <td class="text-end fw-semibold">${currency(row.amount)}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    function renderBudgetStatus(rows) {
+        const target = document.getElementById('budgetStatusTable');
+        target.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th class="text-end">Budget</th>
+                            <th class="text-end">Actual</th>
+                            <th class="text-end">Variance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows.map(row => `
+                        <tr class="${row.over_budget ? 'table-warning' : ''}">
+                            <td>${String(row.category).replace(/_/g, ' ')}</td>
+                            <td class="text-end">${currency(row.limit)}</td>
+                            <td class="text-end">${currency(row.actual)}</td>
+                            <td class="text-end ${row.variance > 0 ? 'text-danger' : 'text-success'}">${currency(row.variance)}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    function renderEconomicIndicators(economy) {
+        document.getElementById('economicIndicators').innerHTML = `
+            <div class="row g-3">
+                <div class="col-md-6">${renderIndicator('Consumer Confidence', economy.consumer_confidence)}</div>
+                <div class="col-md-6">${renderIndicator('Media Rights Market', economy.media_rights_index)}</div>
+                <div class="col-md-6">${renderIndicator('Sponsorship Demand', economy.sponsorship_market)}</div>
+                <div class="col-md-6">${renderIndicator('Merch Demand', economy.merchandise_demand)}</div>
+            </div>
+            <div class="alert alert-info mt-3 mb-0">
+                <strong>External economy:</strong> ${economy.outlook} conditions with ${economy.inflation_rate}% inflation.
+            </div>`;
+    }
+
+    function renderIndicator(label, value) {
+        const tone = value >= 75 ? 'success' : value >= 55 ? 'warning' : 'danger';
+        return `
+            <div class="border rounded p-3 h-100">
+                <small class="text-muted d-block">${label}</small>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>${pct(value)}</strong>
+                    <span class="badge bg-${tone}">${value >= 75 ? 'Hot' : value >= 55 ? 'Mixed' : 'Soft'}</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-${tone}" style="width:${Math.max(0, Math.min(100, value))}%"></div>
+                </div>
+            </div>`;
+    }
+
+    function renderWarnings(difficulty) {
+        const warnings = difficulty.warnings || [];
+        const consequences = difficulty.consequences || [];
+        document.getElementById('difficultyWarnings').innerHTML = `
+            <div class="mb-3">${badge(`Risk: ${difficulty.risk_level}`, difficulty.risk_level === 'High' ? 'danger' : difficulty.risk_level === 'Medium' ? 'warning' : 'success')}</div>
+            <div class="mb-3">
+                <strong class="d-block mb-1">Warnings</strong>
+                ${warnings.length ? `<ul class="mb-0">${warnings.map(item => `<li>${item}</li>`).join('')}</ul>` : '<div class="text-muted">No active financial warnings.</div>'}
+            </div>
+            <div>
+                <strong class="d-block mb-1">Consequences</strong>
+                ${consequences.length ? `<ul class="mb-0">${consequences.map(item => `<li>${item}</li>`).join('')}</ul>` : '<div class="text-muted">No immediate hardship consequences.</div>'}
+            </div>`;
+    }
+
+    function renderDeals(targetId, rows, primaryName) {
+        const target = document.getElementById(targetId);
+        if (!rows || !rows.length) {
+            target.innerHTML = '<div class="text-muted">No active deals.</div>';
+            return;
+        }
+        target.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>${primaryName}</th>
+                            <th class="text-end">Weekly Fee</th>
+                            <th class="text-end">Weeks Left</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows.map(row => `
+                        <tr>
+                            <td>
+                                <strong>${row.network_name || row.sponsor_name}</strong>
+                                <div class="small text-muted">${row.content_requirement || row.content_restriction || row.promo_obligation || ''}</div>
+                            </td>
+                            <td class="text-end">${currency(row.weekly_fee)}</td>
+                            <td class="text-end">${row.weeks_remaining}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    function renderMerchandise(merchandise) {
+        const target = document.getElementById('merchandiseTable');
+        const items = merchandise.items || [];
+        if (!items.length) {
+            target.innerHTML = '<div class="text-muted">No merchandise lines yet.</div>';
+            return;
+        }
+        target.innerHTML = `
+            <div class="mb-2">
+                ${badge(`Projected weekly merch revenue ${currency(merchandise.projected_weekly_revenue)}`, 'success')}
+                ${badge(`Projected units ${merchandise.projected_weekly_units}`, 'secondary')}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th class="text-end">Inventory</th>
+                            <th class="text-end">Projected Units</th>
+                            <th class="text-end">Projected Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${items.map(item => `
+                        <tr>
+                            <td>
+                                <strong>${item.item_name}</strong>
+                                <div class="small text-muted">${item.wrestler_name || 'Company line'} • ${item.category}</div>
+                            </td>
+                            <td class="text-end">${item.inventory}</td>
+                            <td class="text-end">${item.projected_units}</td>
+                            <td class="text-end">${currency(item.projected_revenue)}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    function renderCapital(rows) {
+        const target = document.getElementById('capitalTable');
+        if (!rows || !rows.length) {
+            target.innerHTML = '<div class="text-muted">No active loans or investors.</div>';
+            return;
+        }
+        target.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Counterparty</th>
+                            <th>Instrument</th>
+                            <th class="text-end">Principal</th>
+                            <th class="text-end">Weekly Obligation</th>
+                            <th class="text-end">Weeks Left</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows.map(row => `
+                        <tr>
+                            <td>${row.counterparty}</td>
+                            <td>${String(row.instrument_type).replace(/_/g, ' ')}</td>
+                            <td class="text-end">${currency(row.principal)}</td>
+                            <td class="text-end">${row.instrument_type === 'investment' ? `${row.equity_pct}% equity` : currency(row.weekly_payment)}</td>
+                            <td class="text-end">${row.weeks_remaining}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    function renderReports(targetId, rows) {
+        const target = document.getElementById(targetId);
+        if (!rows || !rows.length) {
+            target.innerHTML = '<div class="text-muted">No reports yet.</div>';
+            return;
+        }
+        target.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th class="text-end">Revenue</th>
+                            <th class="text-end">Expenses</th>
+                            <th class="text-end">Profit</th>
+                            <th class="text-end">Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows.map(row => `
+                        <tr>
+                            <td>${row.period}</td>
+                            <td class="text-end">${currency(row.revenue_total)}</td>
+                            <td class="text-end">${currency(row.expense_total)}</td>
+                            <td class="text-end ${row.profit >= 0 ? 'text-success' : 'text-danger'}">${currency(row.profit)}</td>
+                            <td class="text-end ${row.trend_delta >= 0 ? 'text-success' : 'text-danger'}">${currency(row.trend_delta)}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    function renderTables(data) {
+        renderBreakdownTable('revenueStreamsTable', data.revenue_streams, 'Revenue');
+        renderBreakdownTable('expenseCategoriesTable', data.expense_categories, 'Expense');
+        renderWarnings(data.difficulty);
+        renderBudgetStatus(data.budget_allocations);
+        renderEconomicIndicators(data.economy);
+        renderDeals('tvDealsTable', data.tv_rights, 'Network');
+        renderDeals('sponsorshipDealsTable', data.sponsorships, 'Sponsor');
+        renderMerchandise(data.merchandise);
+        renderCapital(data.capital);
+        renderReports('weeklyReportsTable', data.reports.weekly);
+        renderReports('monthlyReportsTable', data.reports.monthly);
+    }
+
+    async function loadEnterpriseFinance() {
+        const results = await Promise.allSettled([
+            apiRequest('/api/finance/sponsorships'),
+            apiRequest('/api/finance/venues-tours'),
+            apiRequest('/api/finance/reports/profitability'),
+            apiRequest('/api/finance/reports/budget-variance'),
+            apiRequest('/api/finance/forecasts'),
+            apiRequest('/api/finance/transactions')
+        ]);
+        const sponsorships = settledValue(results[0], {sponsors: [], summary: {}});
+        const venuesTours = settledValue(results[1], {venues: [], tours: [], summary: {}});
+        const profitability = settledValue(results[2], {report: {events: [], average_profit: 0, profitable_events: 0, loss_events: 0}});
+        const budgetVariance = settledValue(results[3], {report: {rows: []}});
+        const forecasts = settledValue(results[4], {forecasts: {next_30_days: 0, next_60_days: 0, next_90_days: 0}});
+        const transactions = settledValue(results[5], {transactions: []});
+        enterpriseSponsorships = sponsorships;
+        enterpriseVenuesTours = venuesTours;
+        renderEnterpriseSummary(financeDashboard.enterprise || {});
+        renderSponsorDirectory(sponsorships.sponsors || []);
+        hydrateSponsorSelects(sponsorships.sponsors || []);
+        renderVenueList(venuesTours.venues || []);
+        renderTourList(venuesTours.tours || []);
+        hydrateVenueSelects(venuesTours.venues || []);
+        hydrateEventSelects(venuesTours.tours || []);
+        renderProfitability(profitability.report || {});
+        renderTransactions(transactions.transactions || []);
+        renderBudgetVariance(budgetVariance.report || {});
+        renderForecasts(forecasts.forecasts || {});
+        updateSettlementPreview();
+        logFinanceFailures(results);
+    }
+
+    function settledValue(result, fallback) {
+        return result.status === 'fulfilled' ? result.value : fallback;
+    }
+
+    function logFinanceFailures(results) {
+        results.filter(result => result.status === 'rejected').forEach(result => {
+            console.warn('Finance panel request failed:', result.reason);
+        });
+    }
+
+    function renderEnterpriseSummary(summary) {
+        const sponsorship = summary.sponsorship || {};
+        const venuesTours = summary.venues_tours || {};
+        document.getElementById('enterpriseControversyAlerts').innerHTML = `
+            <div class="d-grid gap-2">
+                ${badge(`Active value ${currency(sponsorship.active_contract_value)}`, 'success')}
+                ${badge(`Recognized ${currency(sponsorship.revenue_recognized)}`, 'primary')}
+                ${badge(`At risk ${sponsorship.at_risk_contracts || 0}`, sponsorship.at_risk_contracts ? 'danger' : 'secondary')}
+                ${badge(`Upcoming event profit ${currency(venuesTours.upcoming_event_profit)}`, 'info')}
+            </div>`;
+    }
+
+    function hydrateSponsorSelects(sponsors) {
+        const options = sponsors.map(sponsor => `<option value="${sponsor.sponsor_id}">${sponsor.company_name}</option>`).join('');
+        ['enterpriseContractSponsor', 'enterpriseControversySponsor'].forEach(id => {
+            document.getElementById(id).innerHTML = options || '<option value="">Create a sponsor first</option>';
+        });
+    }
+
+    function renderSponsorDirectory(sponsors) {
+        const target = document.getElementById('enterpriseSponsorDirectory');
+        if (!sponsors.length) {
+            target.innerHTML = '<div class="text-muted">No sponsor profiles yet.</div>';
+            return;
+        }
+        target.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead><tr><th>Sponsor</th><th>Tier</th><th class="text-end">Satisfaction</th><th class="text-end">Contracts</th><th></th></tr></thead>
+                    <tbody>
+                    ${sponsors.map(sponsor => `
+                        <tr>
+                            <td>
+                                <strong>${sponsor.company_name}</strong>
+                                <div class="small text-muted">${sponsor.industry_category} &bull; ${sponsor.contact_email || 'No email'}</div>
+                                ${renderSponsorRequirements(sponsor)}
+                            </td>
+                            <td>${sponsor.tier_level}</td>
+                            <td class="text-end">${satisfactionBadge(sponsor.satisfaction_score)}</td>
+                            <td class="text-end">${(sponsor.contracts || []).length}</td>
+                            <td class="text-end">${renderSponsorActions(sponsor)}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    function renderSponsorRequirements(sponsor) {
+        const contract = (sponsor.contracts || [])[0];
+        if (!contract || !(contract.requirements || []).length) {
+            return '';
+        }
+        return `<div class="small mt-2">${contract.requirements.map(req => `
+            <div class="d-flex justify-content-between gap-2">
+                <span>${req.description}</span>
+                <button type="button" class="btn btn-sm btn-outline-success py-0 enterprise-deliverable-btn"
+                    data-requirement-id="${req.requirement_id}">Track ${req.compliance_pct || 0}%</button>
+            </div>`).join('')}</div>`;
+    }
+
+    function renderSponsorActions(sponsor) {
+        const contract = (sponsor.contracts || [])[0];
+        if (!contract) {
+            return '<span class="text-muted small">No contract</span>';
+        }
+        return `<button type="button" class="btn btn-sm btn-outline-primary enterprise-payment-btn" data-contract-id="${contract.contract_id}">Process Payment</button>`;
+    }
+
+    function satisfactionBadge(score) {
+        const tone = score >= 70 ? 'success' : score >= 55 ? 'warning' : 'danger';
+        return `<span class="badge bg-${tone}">${score}</span>`;
+    }
+
+    function hydrateVenueSelects(venues) {
+        const options = venues.map(venue => `<option value="${venue.venue_id}">${venue.name} (${venue.city || venue.country})</option>`).join('');
+        document.getElementById('enterpriseUpgradeVenue').innerHTML = options;
+        document.querySelectorAll('.enterprise-tour-venue').forEach((select, index) => {
+            select.innerHTML = options;
+            if (venues[index]) select.value = venues[index].venue_id;
+        });
+    }
+
+    function renderVenueList(venues) {
+        const target = document.getElementById('enterpriseVenueList');
+        if (!venues.length) {
+            target.innerHTML = '<div class="text-muted">No venues available.</div>';
+            return;
+        }
+        target.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead><tr><th>Venue</th><th>Market</th><th class="text-end">Capacity</th><th class="text-end">Rental</th><th class="text-end">Prestige</th></tr></thead>
+                    <tbody>
+                    ${venues.slice(0, 20).map(venue => `
+                        <tr>
+                            <td>
+                                <strong>${venue.name}</strong>
+                                <div class="small text-muted">${venue.venue_type || venue.venue_tier} &bull; ${(venue.upgrades || []).length} upgrades</div>
+                            </td>
+                            <td>${[venue.city, venue.state, venue.country].filter(Boolean).join(', ')}</td>
+                            <td class="text-end">${Number(venue.wrestling_capacity || venue.capacity || 0).toLocaleString()}</td>
+                            <td class="text-end">${currency(venue.cost)}</td>
+                            <td class="text-end">${venue.prestige_score || 70}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    function renderTourList(tours) {
+        const target = document.getElementById('enterpriseTourList');
+        if (!tours.length) {
+            target.innerHTML = '<div class="text-muted">No tours planned yet.</div>';
+            return;
+        }
+        target.innerHTML = tours.map(tour => `
+            <div class="border rounded p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <strong>${tour.tour_name}</strong>
+                        <div class="small text-muted">${tour.tour_type} &bull; ${tour.start_date} to ${tour.end_date}</div>
+                    </div>
+                    ${badge(tour.status, tour.status === 'Settled' ? 'success' : 'secondary')}
+                </div>
+                <div class="table-responsive mt-2">
+                    <table class="table table-sm mb-0">
+                        <tbody>
+                            ${(tour.events || []).map(event => `
+                            <tr>
+                                <td>${event.sequence_no}. ${event.event_name}<div class="small text-muted">${event.event_date} &bull; ${event.event_type}</div></td>
+                                <td class="text-end">${currency(event.projected_revenue)}</td>
+                                <td class="text-end ${event.projected_profit >= 0 ? 'text-success' : 'text-danger'}">${currency(event.projected_profit)}</td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`).join('');
+    }
+
+    function hydrateEventSelects(tours) {
+        const events = tours.flatMap(tour => (tour.events || []).map(event => ({...event, tour_name: tour.tour_name})));
+        const options = events.map(event => `<option value="${event.event_id}">${event.event_name} - ${event.event_date}</option>`).join('');
+        document.getElementById('enterpriseSettlementEvent').innerHTML = options || '<option value="">Create a tour first</option>';
+        renderEventFinancials(events);
+    }
+
+    function renderEventFinancials(events) {
+        const target = document.getElementById('enterpriseEventFinancials');
+        if (!events.length) {
+            target.innerHTML = '<div class="text-muted">Create a tour to generate event projections.</div>';
+            return;
+        }
+        target.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead><tr><th>Event</th><th class="text-end">Projected Revenue</th><th class="text-end">Projected Profit</th><th class="text-end">Status</th></tr></thead>
+                    <tbody>
+                    ${events.map(event => `
+                        <tr>
+                            <td><strong>${event.event_name}</strong><div class="small text-muted">${event.event_type}</div></td>
+                            <td class="text-end">${currency(event.projected_revenue)}</td>
+                            <td class="text-end ${event.projected_profit >= 0 ? 'text-success' : 'text-danger'}">${currency(event.projected_profit)}</td>
+                            <td class="text-end">${event.status}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    function renderProfitability(report) {
+        const target = document.getElementById('enterpriseProfitabilityScoreboard');
+        const events = report.events || [];
+        if (!events.length) {
+            target.innerHTML = '<div class="text-muted">No settled event data yet.</div>';
+            return;
+        }
+        target.innerHTML = `
+            <div class="mb-3">
+                ${badge(`Average profit ${currency(report.average_profit)}`, 'success')}
+                ${badge(`${report.profitable_events || 0} profitable`, 'primary')}
+                ${badge(`${report.loss_events || 0} losses`, report.loss_events ? 'danger' : 'secondary')}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <tbody>
+                    ${events.map(event => `
+                        <tr class="${event.profit >= 0 ? '' : 'table-danger'}">
+                            <td><strong>${event.event_name}</strong><div class="small text-muted">${event.event_type}</div></td>
+                            <td class="text-end">${currency(event.total_revenue)}</td>
+                            <td class="text-end ${event.profit >= 0 ? 'text-success' : 'text-danger'}">${currency(event.profit)}</td>
+                            <td class="text-end">${pct(event.margin_pct)}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    function renderTransactions(transactions) {
+        const target = document.getElementById('enterpriseTransactionsTable');
+        if (!transactions.length) {
+            target.innerHTML = '<div class="text-muted">No enterprise transactions posted yet.</div>';
+            return;
+        }
+        target.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead><tr><th>Transaction</th><th>Category</th><th class="text-end">Amount</th><th>Status</th></tr></thead>
+                    <tbody>
+                    ${transactions.map(tx => `
+                        <tr>
+                            <td><strong>${tx.description}</strong><div class="small text-muted">${tx.source_module} &bull; ${tx.posting_date}</div></td>
+                            <td>${tx.category}</td>
+                            <td class="text-end ${tx.amount >= 0 ? 'text-success' : 'text-danger'}">${currency(tx.amount)}</td>
+                            <td>${tx.status}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    function renderBudgetVariance(report) {
+        const rows = report.rows || [];
+        document.getElementById('enterpriseBudgetVarianceTable').innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead><tr><th>Category</th><th class="text-end">Budget</th><th class="text-end">Actual</th><th class="text-end">Variance</th></tr></thead>
+                    <tbody>
+                    ${rows.map(row => `
+                        <tr>
+                            <td>${row.category}</td>
+                            <td class="text-end">${currency(row.budget)}</td>
+                            <td class="text-end">${currency(row.actual)}</td>
+                            <td class="text-end ${row.variance >= 0 ? 'text-success' : 'text-danger'}">${currency(row.variance)}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    function renderForecasts(forecasts) {
+        document.getElementById('enterpriseForecastCards').innerHTML = `
+            <div class="row g-3">
+                ${[
+                    ['30 Days', forecasts.next_30_days],
+                    ['60 Days', forecasts.next_60_days],
+                    ['90 Days', forecasts.next_90_days]
+                ].map(item => `
+                    <div class="col-md-4 col-lg-12">
+                        <div class="border rounded p-3">
+                            <small class="text-muted d-block">${item[0]}</small>
+                            <strong>${currency(item[1])}</strong>
+                        </div>
+                    </div>`).join('')}
+            </div>`;
+    }
+
+    function updateSettlementPreview() {
+        const revenue = Array.from(document.querySelectorAll('.settlement-revenue')).reduce((sum, input) => sum + Number(input.value || 0), 0);
+        const expenses = Array.from(document.querySelectorAll('.settlement-expense')).reduce((sum, input) => sum + Number(input.value || 0), 0);
+        document.getElementById('enterpriseSettlementPreview').textContent = currency(revenue - expenses);
+    }
+
+    function hydrateForms(settings) {
+        const budgets = settings.budget_allocations;
+        const tickets = settings.ticket_tiers;
+        document.getElementById('ppvPriceInput').value = settings.ppv_price;
+        document.getElementById('ticketFloorInput').value = tickets.floor;
+        document.getElementById('ticketPremiumInput').value = tickets.premium;
+        document.getElementById('budgetSalariesInput').value = budgets.wrestler_salaries;
+        document.getElementById('budgetProductionInput').value = budgets.production_expenses;
+        document.getElementById('budgetVenueInput').value = budgets.venue_rentals;
+        document.getElementById('budgetStaffInput').value = budgets.staff_payroll;
+        document.getElementById('budgetTravelInput').value = budgets.travel;
+        document.getElementById('budgetMarketingInput').value = budgets.marketing;
+        document.getElementById('budgetMerchInput').value = budgets.merchandise_production;
+    }
+
+    document.getElementById('financeSettingsForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        await apiRequest('/api/finance/settings', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                ppv_price: Number(document.getElementById('ppvPriceInput').value),
+                ticket_tiers: {
+                    floor: Number(document.getElementById('ticketFloorInput').value),
+                    premium: Number(document.getElementById('ticketPremiumInput').value),
+                    lower_bowl: financeDashboard.settings.ticket_tiers.lower_bowl,
+                    upper_bowl: financeDashboard.settings.ticket_tiers.upper_bowl
+                },
+                budget_allocations: {
+                    wrestler_salaries: Number(document.getElementById('budgetSalariesInput').value),
+                    production_expenses: Number(document.getElementById('budgetProductionInput').value),
+                    venue_rentals: Number(document.getElementById('budgetVenueInput').value),
+                    staff_payroll: Number(document.getElementById('budgetStaffInput').value),
+                    travel: Number(document.getElementById('budgetTravelInput').value),
+                    marketing: Number(document.getElementById('budgetMarketingInput').value),
+                    merchandise_production: Number(document.getElementById('budgetMerchInput').value)
+                }
+            })
+        });
+        await loadFinanceDashboard();
+    });
+
+    document.getElementById('tvRightsForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        await apiRequest('/api/finance/tv-rights/negotiate', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                network_name: document.getElementById('tvNetworkInput').value,
+                market_size: Number(document.getElementById('tvMarketSizeInput').value),
+                content_quality: Number(document.getElementById('tvContentQualityInput').value),
+                duration_weeks: Number(document.getElementById('tvDurationInput').value),
+                content_requirement: document.getElementById('tvRequirementInput').value
+            })
+        });
+        await loadFinanceDashboard();
+    });
+
+    document.getElementById('sponsorshipForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        await apiRequest('/api/finance/sponsorships', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                sponsor_name: document.getElementById('sponsorNameInput').value,
+                category: document.getElementById('sponsorCategoryInput').value,
+                duration_weeks: Number(document.getElementById('sponsorDurationInput').value),
+                content_restriction: document.getElementById('sponsorRestrictionInput').value,
+                promo_obligation: document.getElementById('sponsorObligationInput').value
+            })
+        });
+        await loadFinanceDashboard();
+    });
+
+    document.getElementById('merchForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        await apiRequest('/api/finance/merchandise', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                wrestler_id: document.getElementById('merchWrestlerIdInput').value || null,
+                item_name: document.getElementById('merchItemNameInput').value,
+                category: document.getElementById('merchCategoryInput').value,
+                unit_cost: Number(document.getElementById('merchUnitCostInput').value),
+                unit_price: Number(document.getElementById('merchUnitPriceInput').value),
+                inventory: Number(document.getElementById('merchInventoryInput').value),
+                hype_score: Number(document.getElementById('merchHypeInput').value)
+            })
+        });
+        await loadFinanceDashboard();
+    });
+
+    document.getElementById('capitalForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        await apiRequest('/api/finance/capital', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                instrument_type: document.getElementById('capitalTypeInput').value,
+                counterparty: document.getElementById('capitalCounterpartyInput').value,
+                principal: Number(document.getElementById('capitalPrincipalInput').value),
+                duration_weeks: Number(document.getElementById('capitalDurationInput').value),
+                interest_rate: Number(document.getElementById('capitalRateInput').value),
+                equity_pct: Number(document.getElementById('capitalRateInput').value)
+            })
+        });
+        await loadFinanceDashboard();
+    });
+
+    document.querySelectorAll('.finance-tab-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const tab = button.dataset.financeTab;
+            document.querySelectorAll('.finance-tab-button').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.finance-tab-panel').forEach(panel => panel.classList.add('d-none'));
+            button.classList.add('active');
+            document.getElementById(`finance-tab-${tab}`).classList.remove('d-none');
+        });
+    });
+
+    document.getElementById('enterpriseSponsorForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        await apiRequest('/api/finance/sponsors', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                company_name: document.getElementById('enterpriseSponsorCompany').value,
+                industry_category: document.getElementById('enterpriseSponsorIndustry').value,
+                tier_level: document.getElementById('enterpriseSponsorTier').value,
+                contact_email: document.getElementById('enterpriseSponsorEmail').value,
+                contact_phone: document.getElementById('enterpriseSponsorPhone').value
+            })
+        });
+        await loadFinanceDashboard();
+    });
+
+    document.getElementById('enterpriseContractForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const sponsorId = document.getElementById('enterpriseContractSponsor').value;
+        if (!sponsorId) return;
+        await apiRequest(`/api/finance/sponsorships/${sponsorId}/contracts`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                contract_type: document.getElementById('enterpriseContractType').value,
+                duration_months: Number(document.getElementById('enterpriseContractDuration').value),
+                total_value: Number(document.getElementById('enterpriseContractValue').value),
+                payment_schedule: document.getElementById('enterpriseContractSchedule').value,
+                performance_bonus: Number(document.getElementById('enterpriseContractBonus').value),
+                termination_penalty: Number(document.getElementById('enterpriseContractPenalty').value),
+                requirements: [
+                    {
+                        requirement_type: 'TV Exposure',
+                        description: `Logo on ring apron - ${document.getElementById('enterpriseRequirementExposure').value} seconds per episode`,
+                        target_value: Number(document.getElementById('enterpriseRequirementExposure').value),
+                        unit: 'seconds',
+                        cadence: 'episode'
+                    },
+                    {
+                        requirement_type: 'Social Media',
+                        description: `Social media mentions - ${document.getElementById('enterpriseRequirementSocial').value} per week`,
+                        target_value: Number(document.getElementById('enterpriseRequirementSocial').value),
+                        unit: 'mentions',
+                        cadence: 'weekly'
+                    }
+                ]
+            })
+        });
+        await loadFinanceDashboard();
+    });
+
+    document.getElementById('enterpriseControversyForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const sponsorId = document.getElementById('enterpriseControversySponsor').value;
+        if (!sponsorId) return;
+        await apiRequest(`/api/finance/sponsorships/${sponsorId}/controversies`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                incident_type: document.getElementById('enterpriseControversyType').value,
+                severity: document.getElementById('enterpriseControversySeverity').value,
+                description: document.getElementById('enterpriseControversyDescription').value
+            })
+        });
+        await loadFinanceDashboard();
+    });
+
+    document.getElementById('enterpriseSponsorDirectory').addEventListener('click', async function(event) {
+        const paymentButton = event.target.closest('.enterprise-payment-btn');
+        const deliverableButton = event.target.closest('.enterprise-deliverable-btn');
+        if (paymentButton) {
+            await apiRequest(`/api/finance/sponsorship-contracts/${paymentButton.dataset.contractId}/payments`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({label: 'Quarterly Payment'})
+            });
+            await loadFinanceDashboard();
+        }
+        if (deliverableButton) {
+            await apiRequest(`/api/finance/sponsorship-requirements/${deliverableButton.dataset.requirementId}/deliverables`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    event_name: 'Monday Night Show',
+                    delivered_value: 12,
+                    notes: 'Ring apron and broadcast bug exposure'
+                })
+            });
+            await loadFinanceDashboard();
+        }
+    });
+
+    document.getElementById('enterpriseUpgradeForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const data = await apiRequest('/api/finance/venue-upgrades', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                venue_id: document.getElementById('enterpriseUpgradeVenue').value,
+                upgrade_name: document.getElementById('enterpriseUpgradeName').value,
+                upfront_cost: Number(document.getElementById('enterpriseUpgradeCost').value),
+                expected_revenue_increase: Number(document.getElementById('enterpriseUpgradeLift').value)
+            })
+        });
+        document.getElementById('enterpriseUpgradeResult').innerHTML = `<div class="alert alert-success mb-0">Upgrade purchased. ROI: ${data.upgrade.roi_events} events.</div>`;
+        await loadFinanceDashboard();
+    });
+
+    document.getElementById('enterpriseTourForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const selectedVenues = Array.from(document.querySelectorAll('.enterprise-tour-venue')).map(select => select.value).filter(Boolean);
+        const eventType = normalizeEventType(document.getElementById('enterpriseTourType').value);
+        await apiRequest('/api/finance/tours', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                tour_name: document.getElementById('enterpriseTourName').value,
+                tour_type: document.getElementById('enterpriseTourType').value,
+                start_date: document.getElementById('enterpriseTourStart').value,
+                end_date: document.getElementById('enterpriseTourEnd').value,
+                events: selectedVenues.map((venueId, index) => ({
+                    venue_id: venueId,
+                    event_name: `${document.getElementById('enterpriseTourName').value} Stop ${index + 1}`,
+                    event_type: eventType,
+                    event_date: tourEventDate(index)
+                }))
+            })
+        });
+        await loadFinanceDashboard();
+    });
+
+    document.getElementById('enterpriseOptimizeLatestTour').addEventListener('click', async function() {
+        const latestTour = (enterpriseVenuesTours.tours || [])[0];
+        if (!latestTour) return;
+        await apiRequest(`/api/finance/tours/${latestTour.tour_id}/optimize`, {method: 'POST'});
+        await loadFinanceDashboard();
+    });
+
+    document.querySelectorAll('.settlement-revenue, .settlement-expense').forEach(input => {
+        input.addEventListener('input', updateSettlementPreview);
+    });
+
+    document.getElementById('enterpriseEventSettlementForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const eventId = document.getElementById('enterpriseSettlementEvent').value;
+        if (!eventId) return;
+        await apiRequest(`/api/finance/settlements/event/${eventId}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                ticket_sales: Number(document.getElementById('settleTicketSales').value),
+                merchandise_sales: Number(document.getElementById('settleMerchSales').value),
+                concession_revenue: Number(document.getElementById('settleConcessions').value),
+                local_sponsorship_revenue: Number(document.getElementById('settleLocalSponsor').value),
+                venue_rental: Number(document.getElementById('settleVenueRental').value),
+                production_costs: Number(document.getElementById('settleProduction').value),
+                talent_costs: Number(document.getElementById('settleTalent').value),
+                travel_costs: Number(document.getElementById('settleTravel').value),
+                marketing_costs: Number(document.getElementById('settleMarketing').value)
+            })
+        });
+        await loadFinanceDashboard();
+    });
+
+    document.getElementById('enterpriseExportVariance').addEventListener('click', function() {
+        const rows = financeDashboard.enterprise?.budget_variance?.rows || [];
+        const csv = ['Category,Budget,Actual,Variance'].concat(rows.map(row => `${row.category},${row.budget},${row.actual},${row.variance}`)).join('\n');
+        const url = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'budget-variance.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+    });
+
+    function normalizeEventType(value) {
+        if (value === 'Weekly TV Show') return 'weekly_tv';
+        if (value === 'PPV Tour') return 'major_ppv';
+        return 'house_show';
+    }
+
+    function tourEventDate(index) {
+        const start = new Date(document.getElementById('enterpriseTourStart').value || Date.now());
+        start.setDate(start.getDate() + (index * 3) + 4);
+        return start.toISOString().slice(0, 10);
+    }
+
+    loadFinanceDashboard().catch(function(error) {
+        console.error('Failed to load finance dashboard:', error);
+        document.querySelector('.row').insertAdjacentHTML(
+            'beforebegin',
+            `<div class="alert alert-danger">Failed to load finance dashboard: ${error.message}</div>`
+        );
+    });
+})();
+</script>

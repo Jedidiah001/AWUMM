@@ -1,0 +1,1309 @@
+<!-- Injuries & Rehabilitation Management View -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="bi bi-bandaid"></i> Injuries &amp; Rehabilitation</h2>
+        <p class="lead">Monitor injured wrestlers, manage rehab progress, and track medical staff.</p>
+        <hr>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SUMMARY CARDS
+═══════════════════════════════════════════════════════════════ -->
+<div class="row mb-4">
+    <div class="col-md-2">
+        <div class="card text-white bg-danger h-100">
+            <div class="card-body text-center py-3">
+                <h3 class="mb-0" id="totalInjuredCount">—</h3>
+                <small>Currently Injured</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-white bg-warning h-100">
+            <div class="card-body text-center py-3">
+                <h3 class="mb-0" id="criticalInjuredCount">—</h3>
+                <small>Critical / Severe</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-white bg-success h-100">
+            <div class="card-body text-center py-3">
+                <h3 class="mb-0" id="returningThisWeek">—</h3>
+                <small>Returning Soon</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-white h-100" style="background:#c0392b;">
+            <div class="card-body text-center py-3">
+                <h3 class="mb-0" id="atRiskCount">—</h3>
+                <small>At-Risk Wrestlers</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-white bg-info h-100">
+            <div class="card-body text-center py-3">
+                <h3 class="mb-0" id="medicalStaffTier">—</h3>
+                <small>Medical Staff Tier</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-white bg-secondary h-100">
+            <div class="card-body text-center py-3">
+                <h3 class="mb-0" id="weeklyMedicalCost">—</h3>
+                <small>Weekly Cost</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-diagram-3"></i> Injury Type Variety</h5>
+            </div>
+            <div class="card-body" id="injuryTypeBreakdown">
+                <p class="text-muted mb-0">Loading injury type breakdown...</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-person-walking"></i> Work Through Candidates</h5>
+            </div>
+            <div class="card-body" id="workThroughCandidates">
+                <p class="text-muted mb-0">Loading candidates...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ACTION BUTTONS
+═══════════════════════════════════════════════════════════════ -->
+<div class="row mb-4">
+    <div class="col-md-12 d-flex flex-wrap gap-2">
+        <button class="btn btn-primary" data-action="process-weekly-recovery">
+            <i class="bi bi-arrow-clockwise"></i> Process Weekly Recovery
+        </button>
+        <button class="btn btn-outline-danger" data-action="show-apply-injury-modal">
+            <i class="bi bi-bandaid"></i> Apply Injury
+        </button>
+        <button class="btn btn-outline-warning" data-action="show-risk-warnings-modal">
+            <i class="bi bi-exclamation-triangle"></i> Injury Risk Warnings
+        </button>
+        <button class="btn btn-outline-secondary" data-action="show-angle-generator-modal"
+                style="color:#6f42c1;border-color:#6f42c1;">
+            <i class="bi bi-stars"></i> Angle Generator
+        </button>
+        <button class="btn btn-outline-info" data-action="show-medical-staff-modal">
+            <i class="bi bi-hospital"></i> Medical Staff
+        </button>
+        <button class="btn btn-outline-secondary" data-action="refresh-injuries">
+            <i class="bi bi-arrow-repeat"></i> Refresh
+        </button>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TABBED SECTIONS
+═══════════════════════════════════════════════════════════════ -->
+<ul class="nav nav-tabs mb-3" id="injuryTabs">
+    <li class="nav-item">
+        <a class="nav-link active" data-tab="active" href="#" data-action="switch-tab">
+            <i class="bi bi-bandaid-fill"></i> Active Injuries
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-tab="timeline" href="#" data-action="switch-tab">
+            <i class="bi bi-calendar3"></i> Return Timeline
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-tab="history" href="#" data-action="switch-tab">
+            <i class="bi bi-clock-history"></i> Injury History
+        </a>
+    </li>
+</ul>
+
+<!-- Tab: Active Injuries -->
+<div id="tab-active" class="tab-panel">
+    <div class="card">
+        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-bandaid-fill"></i> Active Injuries</h5>
+            <div class="d-flex gap-2 align-items-center">
+                <select class="form-select form-select-sm w-auto" id="severityFilter" data-action="filter-injuries">
+                    <option value="all">All Severities</option>
+                    <option value="critical">Critical</option>
+                    <option value="severe">Severe</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="minor">Minor</option>
+                </select>
+                <select class="form-select form-select-sm w-auto" id="brandFilter" data-action="filter-injuries">
+                    <option value="all">All Brands</option>
+                    <option value="ROC Alpha">Alpha</option>
+                    <option value="ROC Velocity">Velocity</option>
+                    <option value="ROC Vanguard">Vanguard</option>
+                </select>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="injuriesList">
+                <p class="text-center text-muted">
+                    <span class="spinner-border spinner-border-sm"></span> Loading injuries...
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab: Return Timeline -->
+<div id="tab-timeline" class="tab-panel d-none">
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="bi bi-calendar3"></i> Return Timeline</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-3">
+                Sorted by earliest expected return.
+                <span class="badge bg-success">1–2 weeks</span>
+                <span class="badge bg-warning text-dark">3–4 weeks</span>
+                <span class="badge bg-danger">5+ weeks</span>
+            </p>
+            <div id="timelineContainer">
+                <p class="text-center text-muted">
+                    <span class="spinner-border spinner-border-sm"></span> Loading...
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab: Injury History -->
+<div id="tab-history" class="tab-panel d-none">
+    <div class="card">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-clock-history"></i> Injury History Log</h5>
+            <input type="text" class="form-control form-control-sm w-auto"
+                   id="historySearch" placeholder="Search wrestler...">
+        </div>
+        <div class="card-body p-0">
+            <div id="historyContainer">
+                <p class="text-center text-muted p-3">
+                    <span class="spinner-border spinner-border-sm"></span> Loading history...
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════════════════════════ -->
+
+<!-- Heal Modal -->
+<div class="modal fade" id="healModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-heart-pulse"></i> Heal Wrestler</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Healing: <strong id="healWrestlerName"></strong></p>
+                <div class="mb-3">
+                    <label class="form-label">Weeks to Heal</label>
+                    <input type="number" class="form-control" id="healWeeks" min="1" max="52" value="1">
+                    <div class="form-text">Weeks remaining: <span id="healWeeksRemaining"></span></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmHealBtn" data-action="confirm-heal">
+                    <i class="bi bi-check-circle"></i> Heal
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rush Return Modal -->
+<div class="modal fade" id="rushReturnModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title"><i class="bi bi-lightning-charge"></i> Rush Return</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning mb-3">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <strong>Warning:</strong> Rushing a return risks re-injury or worsening the current condition.
+                </div>
+                <p>Attempt rushed return for: <strong id="rushWrestlerName"></strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" id="confirmRushBtn" data-action="confirm-rush-return">
+                    <i class="bi bi-lightning-charge"></i> Attempt Rush Return
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Apply Injury Modal -->
+<div class="modal fade" id="applyInjuryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-bandaid"></i> Apply Injury</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Brand</label>
+                    <select class="form-select" id="applyInjuryBrand" data-action="load-wrestlers-for-injury">
+                        <option value="ROC Alpha">ROC Alpha</option>
+                        <option value="ROC Velocity">ROC Velocity</option>
+                        <option value="ROC Vanguard">ROC Vanguard</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Wrestler</label>
+                    <select class="form-select" id="applyInjuryWrestler">
+                        <option value="">Select wrestler...</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Severity</label>
+                    <select class="form-select" id="applyInjurySeverity">
+                        <option value="Minor">Minor</option>
+                        <option value="Moderate" selected>Moderate</option>
+                        <option value="Severe">Severe</option>
+                        <option value="Critical">Critical</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <input type="text" class="form-control" id="applyInjuryDesc" placeholder="e.g. Torn ACL">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Weeks Out</label>
+                    <input type="number" class="form-control" id="applyInjuryWeeks" min="1" max="52" value="4">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmApplyInjuryBtn" data-action="confirm-apply-injury">
+                    <i class="bi bi-bandaid"></i> Apply Injury
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Injury Risk Warnings Modal -->
+<div class="modal fade" id="riskWarningsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Injury Risk Warnings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="riskWarningsBody">
+                <p class="text-center">
+                    <span class="spinner-border spinner-border-sm"></span> Analysing roster...
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Angle Generator Modal -->
+<div class="modal fade" id="angleGeneratorModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#6f42c1;color:white;">
+                <h5 class="modal-title"><i class="bi bi-stars"></i> Injury Angle Generator</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-pills mb-3" id="angleTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-angle-tab="writeoff" data-action="switch-angle-tab">
+                            <i class="bi bi-bandaid"></i> Injury Write-Off
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-angle-tab="return" data-action="switch-angle-tab">
+                            <i class="bi bi-person-walking"></i> Return Angle
+                        </a>
+                    </li>
+                </ul>
+
+                <div id="angleTab-writeoff">
+                    <div class="mb-3">
+                        <label class="form-label">Injured Wrestler</label>
+                        <select class="form-select" id="angleInjuredWrestler">
+                            <option value="">Select injured wrestler...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Attacker (optional)</label>
+                        <select class="form-select" id="angleAttacker">
+                            <option value="">None / Unknown</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-danger" data-action="generate-writeoff-angle">
+                        <i class="bi bi-stars"></i> Generate Write-Off Angle
+                    </button>
+                </div>
+
+                <div id="angleTab-return" class="d-none">
+                    <div class="mb-3">
+                        <label class="form-label">Returning Wrestler</label>
+                        <select class="form-select" id="angleReturnWrestler">
+                            <option value="">Select returning wrestler...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Target (optional)</label>
+                        <select class="form-select" id="angleTarget">
+                            <option value="">None</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="angleSurprise" checked>
+                            <label class="form-check-label">Surprise Return</label>
+                        </div>
+                    </div>
+                    <button class="btn" style="background:#6f42c1;color:white;" data-action="generate-return-angle">
+                        <i class="bi bi-stars"></i> Generate Return Angle
+                    </button>
+                </div>
+
+                <div id="angleResult" class="mt-4 d-none">
+                    <hr>
+                    <h6 class="text-muted text-uppercase small mb-3">Generated Angle</h6>
+                    <div id="angleResultBody"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Medical Staff Modal -->
+<div class="modal fade" id="medicalStaffModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="bi bi-hospital"></i> Medical Staff</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="medicalStaffBody">
+                <p class="text-center">
+                    <span class="spinner-border spinner-border-sm"></span> Loading...
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Wrestler Detail Modal -->
+<div class="modal fade" id="wrestlerDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalTitle"><i class="bi bi-person"></i> Injury Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="wrestlerDetailBody">
+                <p class="text-center"><span class="spinner-border spinner-border-sm"></span> Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SCRIPT
+═══════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+
+    // ─── State ────────────────────────────────────────────────────────────────
+    let _activeWrestlerId = null;
+    let _allInjuries      = [];   // cache for filtering + timeline + history
+    let _allWrestlers     = [];   // cache for angle generator dropdowns
+    let _historyData      = [];   // cache for history tab
+
+    // ─── Delegated Click Events ───────────────────────────────────────────────
+    document.addEventListener('click', function (e) {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+        const action = target.dataset.action;
+
+        if (action === 'process-weekly-recovery')    processWeeklyRecovery(target);
+        if (action === 'refresh-injuries')           init();
+        if (action === 'show-medical-staff-modal')   showMedicalStaffModal();
+        if (action === 'show-apply-injury-modal')    showApplyInjuryModal();
+        if (action === 'show-risk-warnings-modal')   showRiskWarningsModal();
+        if (action === 'show-angle-generator-modal') showAngleGeneratorModal();
+        if (action === 'show-heal-modal')            showHealModal(target.dataset.wrestlerId, target.dataset.wrestlerName, target.dataset.weeksRemaining);
+        if (action === 'show-rush-modal')            showRushReturnModal(target.dataset.wrestlerId, target.dataset.wrestlerName);
+        if (action === 'show-detail-modal')          showDetailModal(target.dataset.wrestlerId, target.dataset.wrestlerName);
+        if (action === 'confirm-heal')               confirmHeal();
+        if (action === 'confirm-rush-return')        confirmRushReturn();
+        if (action === 'confirm-apply-injury')       confirmApplyInjury();
+        if (action === 'work-through-injury')        workThroughInjury(target.dataset.wrestlerId, target.dataset.wrestlerName);
+        if (action === 'upgrade-medical-staff')      upgradeStaff(target.dataset.tier, target);
+        if (action === 'generate-writeoff-angle')    generateWriteoffAngle(target);
+        if (action === 'generate-return-angle')      generateReturnAngle(target);
+        if (action === 'filter-injuries')            renderInjuryCards(_allInjuries);
+        if (action === 'switch-tab')                { e.preventDefault(); switchTab(target.dataset.tab, target); }
+        if (action === 'switch-angle-tab')          { e.preventDefault(); switchAngleTab(target.dataset.angleTab, target); }
+    });
+
+    // ─── Delegated Change Events ──────────────────────────────────────────────
+    document.addEventListener('change', function (e) {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+        if (target.dataset.action === 'load-wrestlers-for-injury') loadWrestlersForBrand(target.value);
+        if (target.dataset.action === 'filter-injuries')           renderInjuryCards(_allInjuries);
+    });
+
+    // History live search (no data-action needed — element ID is unique)
+    document.addEventListener('input', function (e) {
+        if (e.target.id === 'historySearch') filterHistory(e.target.value);
+    });
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+
+    function getSeverityClass(severity) {
+        const s = (severity || '').toLowerCase();
+        if (s === 'critical' || s === 'severe') return 'danger';
+        if (s === 'moderate')                   return 'warning';
+        return 'info';
+    }
+
+    function getReturnBadgeClass(weeks) {
+        if (weeks <= 2)  return 'bg-success';
+        if (weeks <= 4)  return 'bg-warning text-dark';
+        return 'bg-danger';
+    }
+
+    function setButtonLoading(btn, isLoading, originalHTML) {
+        btn.disabled  = isLoading;
+        btn.innerHTML = isLoading
+            ? '<span class="spinner-border spinner-border-sm me-1"></span> Working...'
+            : originalHTML;
+    }
+
+    // ─── Tab Switching ────────────────────────────────────────────────────────
+
+    function switchTab(tab, linkEl) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('d-none'));
+        document.querySelectorAll('#injuryTabs .nav-link').forEach(l => l.classList.remove('active'));
+        document.getElementById(`tab-${tab}`).classList.remove('d-none');
+        linkEl.classList.add('active');
+        if (tab === 'timeline') renderTimeline(_allInjuries);
+        if (tab === 'history')  loadInjuryHistory();
+    }
+
+    function switchAngleTab(tab, linkEl) {
+        document.querySelectorAll('#angleTabs .nav-link').forEach(l => l.classList.remove('active'));
+        linkEl.classList.add('active');
+        ['writeoff', 'return'].forEach(t => document.getElementById(`angleTab-${t}`).classList.add('d-none'));
+        document.getElementById(`angleTab-${tab}`).classList.remove('d-none');
+        document.getElementById('angleResult').classList.add('d-none');
+    }
+
+    // ─── Summary Cards ────────────────────────────────────────────────────────
+
+    function updateSummaryCards(injuries) {
+        const critical     = injuries.filter(i => ['critical','severe'].includes((i.injury.severity || '').toLowerCase()));
+        const returningSoon = injuries.filter(i => (i.injury.weeks_remaining ?? 99) <= 2);
+        document.getElementById('totalInjuredCount').textContent    = injuries.length;
+        document.getElementById('criticalInjuredCount').textContent = critical.length;
+        document.getElementById('returningThisWeek').textContent    = returningSoon.length;
+    }
+
+    function renderCompactCards(containerId, items, formatter, emptyMessage) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (!items || !items.length) {
+            container.innerHTML = `<p class="text-muted mb-0">${emptyMessage}</p>`;
+            return;
+        }
+        container.innerHTML = items.map(formatter).join('');
+    }
+
+    async function loadInjuryDashboard() {
+        try {
+            const response = await fetchAPI('/api/injuries/dashboard');
+            const summary = response.summary || {};
+            document.getElementById('atRiskCount').textContent = summary.at_risk_count || 0;
+
+            renderCompactCards(
+                'injuryTypeBreakdown',
+                response.body_part_breakdown || [],
+                item => `
+                    <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
+                        <strong>${item.body_part}</strong>
+                        <span class="badge bg-secondary">${item.count}</span>
+                    </div>
+                `,
+                'No injury distribution data yet.'
+            );
+
+            renderCompactCards(
+                'workThroughCandidates',
+                response.work_through_candidates || [],
+                item => `
+                    <div class="border rounded p-2 mb-2">
+                        <div class="d-flex justify-content-between">
+                            <strong>${item.name}</strong>
+                            <span class="badge bg-warning text-dark">${item.severity}</span>
+                        </div>
+                        <div class="small text-muted">${item.description} • ${item.weeks_remaining} week(s) left</div>
+                        <button class="btn btn-sm btn-outline-warning mt-2" data-action="work-through-injury" data-wrestler-id="${item.wrestler_id}" data-wrestler-name="${item.name}">
+                            <i class="bi bi-activity"></i> Work Through Injury
+                        </button>
+                    </div>
+                `,
+                'No safe work-through candidates right now.'
+            );
+        } catch (err) {
+            renderCompactCards('injuryTypeBreakdown', [], () => '', `Failed to load injury breakdown: ${err.message}`);
+            renderCompactCards('workThroughCandidates', [], () => '', `Failed to load work-through candidates: ${err.message}`);
+        }
+    }
+
+    async function loadMedicalStaffSummary() {
+        try {
+            const r = await fetchAPI('/api/injuries/medical-staff');
+            document.getElementById('medicalStaffTier').textContent  = r.current_tier || '—';
+            const cost = r.current_config?.cost_per_week;
+            document.getElementById('weeklyMedicalCost').textContent = cost != null ? `$${cost.toLocaleString()}` : '—';
+        } catch (err) {
+            console.error('Medical staff summary failed:', err);
+        }
+    }
+
+    // ─── Active Injuries ─────────────────────────────────────────────────────
+
+    async function loadActiveInjuries() {
+        const container = document.getElementById('injuriesList');
+        container.innerHTML = '<p class="text-center"><span class="spinner-border spinner-border-sm"></span> Loading...</p>';
+        try {
+            const response = await fetchAPI('/api/injuries/active');
+            _allInjuries = response.injuries || [];
+            updateSummaryCards(_allInjuries);
+            renderInjuryCards(_allInjuries);
+        } catch (error) {
+            console.error('Failed to load injuries:', error);
+            container.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Failed to load injuries: ${error.message}</div>`;
+        }
+    }
+
+    function renderInjuryCards(injuries) {
+        const container      = document.getElementById('injuriesList');
+        const severityFilter = document.getElementById('severityFilter').value;
+        const brandFilter    = document.getElementById('brandFilter').value;
+
+        let filtered = injuries;
+        if (severityFilter !== 'all') {
+            filtered = filtered.filter(i => (i.injury.severity || '').toLowerCase() === severityFilter);
+        }
+        if (brandFilter !== 'all') {
+            filtered = filtered.filter(i => i.wrestler.primary_brand === brandFilter);
+        }
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<p class="text-muted text-center p-3"><i class="bi bi-check-circle text-success"></i> No injuries match this filter.</p>';
+            return;
+        }
+
+        let html = '<div class="row">';
+
+        filtered.forEach(item => {
+            const w   = item.wrestler;
+            const inj = item.injury;
+            const cls = getSeverityClass(inj.severity);
+
+            const progressHtml = inj.rehab_progress != null ? `
+                <div class="mb-2">
+                    <small class="text-muted d-flex justify-content-between">
+                        <span>Rehab Progress</span><span>${inj.rehab_progress}%</span>
+                    </small>
+                    <div class="progress mt-1" style="height:14px;">
+                        <div class="progress-bar bg-success" style="width:${inj.rehab_progress}%"></div>
+                    </div>
+                </div>` : '';
+
+            const milestones = Array.isArray(inj.milestones) && inj.milestones.length ? `
+                <div class="mb-2">
+                    <small class="text-muted">Milestones: </small>
+                    ${inj.milestones.map(m => `<span class="badge bg-light text-dark border me-1">${m}</span>`).join('')}
+                </div>` : '';
+
+            html += `
+                <div class="col-md-6 mb-3">
+                    <div class="card border-${cls}">
+                        <div class="card-header bg-${cls} ${cls === 'warning' ? 'text-dark' : 'text-white'} d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0"><i class="bi bi-person-fill"></i> ${w.name}</h6>
+                            <div>
+                                <span class="badge bg-light text-dark me-1">${inj.severity || 'Unknown'}</span>
+                                <span class="badge bg-secondary">${(w.primary_brand || '').replace('ROC ','')}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2 fst-italic text-muted small">"${inj.description || 'No description'}"</p>
+
+                            <div class="mb-2">
+                                ${inj.body_part        ? `<span class="badge bg-secondary me-1">${inj.body_part}</span>` : ''}
+                                ${inj.requires_surgery ? `<span class="badge bg-danger me-1"><i class="bi bi-scissors"></i> Surgery</span>` : ''}
+                                ${inj.can_appear_limited ? `<span class="badge bg-warning text-dark"><i class="bi bi-activity"></i> Limited OK</span>` : ''}
+                            </div>
+
+                            <p class="mb-2">
+                                <strong>Weeks Remaining:</strong>
+                                <span class="badge ${getReturnBadgeClass(inj.weeks_remaining)}">${inj.weeks_remaining ?? '?'}</span>
+                                ${inj.estimated_return ? `<small class="text-muted ms-2">Est. return: Week ${inj.estimated_return}</small>` : ''}
+                            </p>
+
+                            ${progressHtml}
+                            ${milestones}
+
+                            ${inj.medical_costs != null
+                                ? `<p class="mb-2 small text-muted"><i class="bi bi-currency-dollar"></i> Medical costs: $${inj.medical_costs.toLocaleString()}</p>`
+                                : ''}
+
+                            <div class="mt-3 d-flex flex-wrap gap-2">
+                                <button class="btn btn-sm btn-outline-primary"
+                                        data-action="show-detail-modal"
+                                        data-wrestler-id="${w.id}"
+                                        data-wrestler-name="${w.name}">
+                                    <i class="bi bi-info-circle"></i> Details
+                                </button>
+                                <button class="btn btn-sm btn-success"
+                                        data-action="show-heal-modal"
+                                        data-wrestler-id="${w.id}"
+                                        data-wrestler-name="${w.name}"
+                                        data-weeks-remaining="${inj.weeks_remaining ?? 1}">
+                                    <i class="bi bi-heart-pulse"></i> Heal
+                                </button>
+                                <button class="btn btn-sm btn-warning"
+                                        data-action="show-rush-modal"
+                                        data-wrestler-id="${w.id}"
+                                        data-wrestler-name="${w.name}">
+                                    <i class="bi bi-lightning-charge"></i> Rush
+                                </button>
+                                ${['minor', 'moderate'].includes((inj.severity || '').toLowerCase()) ? `
+                                    <button class="btn btn-sm btn-outline-warning"
+                                            data-action="work-through-injury"
+                                            data-wrestler-id="${w.id}"
+                                            data-wrestler-name="${w.name}">
+                                        <i class="bi bi-activity"></i> Work Through
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    // ─── Return Timeline ──────────────────────────────────────────────────────
+
+    function renderTimeline(injuries) {
+        const container = document.getElementById('timelineContainer');
+
+        if (!injuries.length) {
+            container.innerHTML = '<p class="text-muted text-center">No active injuries to display.</p>';
+            return;
+        }
+
+        const sorted   = [...injuries].sort((a, b) => (a.injury.weeks_remaining ?? 99) - (b.injury.weeks_remaining ?? 99));
+        const maxWeeks = Math.max(...sorted.map(i => i.injury.weeks_remaining ?? 1), 1);
+
+        let html = '<div class="table-responsive"><table class="table table-sm align-middle">';
+        html += `<thead class="table-dark"><tr>
+            <th style="width:180px">Wrestler</th>
+            <th>Return Timeline</th>
+            <th style="width:110px" class="text-center">Weeks Out</th>
+        </tr></thead><tbody>`;
+
+        sorted.forEach(item => {
+            const w   = item.wrestler;
+            const inj = item.injury;
+            const wks = inj.weeks_remaining ?? 0;
+            const pct = Math.min((wks / (maxWeeks + 1)) * 100, 100);
+            const cls = getSeverityClass(inj.severity);
+
+            html += `<tr>
+                <td>
+                    <strong>${w.name}</strong><br>
+                    <small class="text-muted">${inj.description || inj.severity || ''}</small>
+                </td>
+                <td>
+                    <div class="progress" style="height:22px; background:#e9ecef;">
+                        <div class="progress-bar bg-${cls} ${cls === 'warning' ? 'text-dark' : ''}"
+                             role="progressbar"
+                             style="width:${pct}%; min-width:2px;">
+                        </div>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <span class="badge ${getReturnBadgeClass(wks)}">${wks} wk${wks !== 1 ? 's' : ''}</span>
+                </td>
+            </tr>`;
+        });
+
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+    }
+
+    // ─── Injury History ───────────────────────────────────────────────────────
+
+    async function loadInjuryHistory() {
+        if (_historyData.length) { renderHistory(_historyData); return; } // use cache
+
+        const container = document.getElementById('historyContainer');
+        container.innerHTML = '<p class="text-center p-3"><span class="spinner-border spinner-border-sm"></span> Loading history...</p>';
+
+        try {
+            const response = await fetchAPI('/api/injuries/report');
+
+            // Use dedicated history array if available, otherwise fall back to active injuries
+            _historyData = response.report?.history
+                || response.report?.injured_wrestlers
+                || _allInjuries.map(i => ({
+                    wrestler_name:  i.wrestler.name,
+                    severity:       i.injury.severity,
+                    description:    i.injury.description,
+                    body_part:      i.injury.body_part,
+                    weeks_out:      i.injury.weeks_remaining,
+                    occurred_date:  i.injury.occurred_date || '—',
+                    status:         'Active'
+                }));
+
+            renderHistory(_historyData);
+        } catch (error) {
+            container.innerHTML = `<div class="alert alert-danger m-3">Failed to load history: ${error.message}</div>`;
+        }
+    }
+
+    function renderHistory(data) {
+        const container = document.getElementById('historyContainer');
+
+        if (!data.length) {
+            container.innerHTML = '<p class="text-muted p-3">No injury history available.</p>';
+            return;
+        }
+
+        let html = `<div class="table-responsive">
+            <table class="table table-hover table-sm mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Wrestler</th>
+                    <th>Injury</th>
+                    <th>Body Part</th>
+                    <th>Severity</th>
+                    <th>Weeks Out</th>
+                    <th>Occurred</th>
+                    <th>Status</th>
+                </tr>
+            </thead><tbody>`;
+
+        data.forEach(h => {
+            const cls = getSeverityClass(h.severity);
+            html += `<tr>
+                <td><strong>${h.wrestler_name || '—'}</strong></td>
+                <td class="text-muted small">${h.description || '—'}</td>
+                <td>${h.body_part || '—'}</td>
+                <td><span class="badge bg-${cls}">${h.severity || '—'}</span></td>
+                <td>${h.weeks_out ?? '—'}</td>
+                <td class="small">${h.occurred_date || '—'}</td>
+                <td><span class="badge ${h.status === 'Active' ? 'bg-danger' : 'bg-success'}">${h.status || '—'}</span></td>
+            </tr>`;
+        });
+
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+    }
+
+    function filterHistory(query) {
+        const q        = query.toLowerCase();
+        const filtered = _historyData.filter(h =>
+            (h.wrestler_name || '').toLowerCase().includes(q) ||
+            (h.description   || '').toLowerCase().includes(q) ||
+            (h.body_part     || '').toLowerCase().includes(q)
+        );
+        renderHistory(filtered);
+    }
+
+    // ─── Heal Modal ───────────────────────────────────────────────────────────
+
+    function showHealModal(wrestlerId, wrestlerName, weeksRemaining) {
+        _activeWrestlerId = wrestlerId;
+        document.getElementById('healWrestlerName').textContent   = wrestlerName;
+        document.getElementById('healWeeksRemaining').textContent = weeksRemaining;
+        document.getElementById('healWeeks').value = weeksRemaining;
+        document.getElementById('healWeeks').max   = weeksRemaining;
+        new bootstrap.Modal(document.getElementById('healModal')).show();
+    }
+
+    async function confirmHeal() {
+        if (!_activeWrestlerId) return;
+        const weeks = parseInt(document.getElementById('healWeeks').value, 10);
+        const btn   = document.getElementById('confirmHealBtn');
+        const orig  = btn.innerHTML;
+        setButtonLoading(btn, true, orig);
+        try {
+            const r = await fetchAPI(`/api/injuries/${_activeWrestlerId}/heal`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ weeks })
+            });
+            bootstrap.Modal.getInstance(document.getElementById('healModal')).hide();
+            alert(r.success ? `✅ ${r.message}` : `❌ Failed: ${r.error}`);
+            if (r.success) init();
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        } finally {
+            setButtonLoading(btn, false, orig);
+            _activeWrestlerId = null;
+        }
+    }
+
+    // ─── Rush Return Modal ────────────────────────────────────────────────────
+
+    function showRushReturnModal(wrestlerId, wrestlerName) {
+        _activeWrestlerId = wrestlerId;
+        document.getElementById('rushWrestlerName').textContent = wrestlerName;
+        new bootstrap.Modal(document.getElementById('rushReturnModal')).show();
+    }
+
+    async function confirmRushReturn() {
+        if (!_activeWrestlerId) return;
+        const btn  = document.getElementById('confirmRushBtn');
+        const orig = btn.innerHTML;
+        setButtonLoading(btn, true, orig);
+        try {
+            const r = await fetchAPI(`/api/injuries/${_activeWrestlerId}/rush-return`, { method: 'POST' });
+            bootstrap.Modal.getInstance(document.getElementById('rushReturnModal')).hide();
+            alert(r.success ? `✅ ${r.message}` : `⚠️ ${r.message}`);
+            init();
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        } finally {
+            setButtonLoading(btn, false, orig);
+            _activeWrestlerId = null;
+        }
+    }
+
+    // ─── Apply Injury Modal ───────────────────────────────────────────────────
+
+    async function showApplyInjuryModal() {
+        await loadWrestlersForBrand('ROC Alpha');
+        new bootstrap.Modal(document.getElementById('applyInjuryModal')).show();
+    }
+
+    async function loadWrestlersForBrand(brand) {
+        try {
+            const r    = await fetchAPI(`/api/roster?brand=${encodeURIComponent(brand)}&active_only=true`);
+            const opts = r.wrestlers
+                .map(w => `<option value="${w.id}">${w.name} (${w.role})</option>`)
+                .join('');
+            document.getElementById('applyInjuryWrestler').innerHTML =
+                '<option value="">Select wrestler...</option>' + opts;
+        } catch (err) {
+            console.error('Failed to load wrestlers:', err);
+        }
+    }
+
+    async function confirmApplyInjury() {
+        const wrestlerId  = document.getElementById('applyInjuryWrestler').value;
+        const severity    = document.getElementById('applyInjurySeverity').value;
+        const description = document.getElementById('applyInjuryDesc').value.trim();
+        const weeksOut    = parseInt(document.getElementById('applyInjuryWeeks').value, 10);
+
+        if (!wrestlerId) { alert('Please select a wrestler.'); return; }
+
+        const btn  = document.getElementById('confirmApplyInjuryBtn');
+        const orig = btn.innerHTML;
+        setButtonLoading(btn, true, orig);
+
+        try {
+            const r = await fetchAPI(`/api/injuries/${wrestlerId}/apply`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    severity,
+                    description: description || `${severity} injury`,
+                    weeks_out:   weeksOut
+                })
+            });
+            bootstrap.Modal.getInstance(document.getElementById('applyInjuryModal')).hide();
+            alert(r.success ? `✅ Injury applied to ${r.wrestler?.name}.` : `❌ ${r.error}`);
+            if (r.success) init();
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        } finally {
+            setButtonLoading(btn, false, orig);
+        }
+    }
+
+    // ─── Wrestler Detail Modal ────────────────────────────────────────────────
+
+    async function showDetailModal(wrestlerId, wrestlerName) {
+        document.getElementById('detailModalTitle').innerHTML =
+            `<i class="bi bi-person"></i> ${wrestlerName} — Injury Details`;
+        const body = document.getElementById('wrestlerDetailBody');
+        body.innerHTML = '<p class="text-center"><span class="spinner-border spinner-border-sm"></span> Loading...</p>';
+        new bootstrap.Modal(document.getElementById('wrestlerDetailModal')).show();
+
+        try {
+            const r   = await fetchAPI(`/api/injuries/${wrestlerId}`);
+            const inj = r.injury;
+            const w   = r.wrestler;
+            const cls = getSeverityClass(inj.severity);
+
+            body.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted text-uppercase small">Wrestler</h6>
+                        <table class="table table-sm">
+                            <tr><th>Name</th><td>${w.name}</td></tr>
+                            <tr><th>Brand</th><td>${w.primary_brand || '—'}</td></tr>
+                            <tr><th>Role</th><td>${w.role || '—'}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted text-uppercase small">Injury</h6>
+                        <table class="table table-sm">
+                            <tr><th>Severity</th>      <td><span class="badge bg-${cls}">${inj.severity}</span></td></tr>
+                            <tr><th>Body Part</th>     <td>${inj.body_part || '—'}</td></tr>
+                            <tr><th>Description</th>   <td>${inj.description || '—'}</td></tr>
+                            <tr><th>Weeks Left</th>    <td>${inj.weeks_remaining ?? '—'}</td></tr>
+                            <tr><th>Occurred</th>      <td>${inj.occurred_date || '—'}</td></tr>
+                            <tr><th>Est. Return</th>   <td>${inj.estimated_return ? `Week ${inj.estimated_return}` : '—'}</td></tr>
+                            <tr><th>Surgery</th>       <td>${inj.requires_surgery ? '⚠️ Yes' : 'No'}</td></tr>
+                            <tr><th>Limited OK</th>    <td>${inj.can_appear_limited ? '✅ Yes' : 'No'}</td></tr>
+                            <tr><th>Medical Costs</th> <td>${inj.medical_costs != null ? `$${inj.medical_costs.toLocaleString()}` : '—'}</td></tr>
+                        </table>
+                    </div>
+                </div>
+                ${inj.rehab_progress != null ? `
+                    <h6 class="text-muted text-uppercase small mt-2">Rehab Progress</h6>
+                    <div class="progress mb-3" style="height:24px;">
+                        <div class="progress-bar bg-success" style="width:${inj.rehab_progress}%">
+                            ${inj.rehab_progress}%
+                        </div>
+                    </div>` : ''}
+                ${Array.isArray(inj.milestones) && inj.milestones.length ? `
+                    <h6 class="text-muted text-uppercase small">Milestones</h6>
+                    <div>${inj.milestones.map(m => `<span class="badge bg-secondary me-1 mb-1">${m}</span>`).join('')}</div>` : ''}`;
+
+        } catch (err) {
+            body.innerHTML = `<div class="alert alert-danger">Failed to load details: ${err.message}</div>`;
+        }
+    }
+
+    // ─── Injury Risk Warnings ─────────────────────────────────────────────────
+
+    async function showRiskWarningsModal() {
+        const body = document.getElementById('riskWarningsBody');
+        body.innerHTML = '<p class="text-center"><span class="spinner-border spinner-border-sm"></span> Analysing roster...</p>';
+        new bootstrap.Modal(document.getElementById('riskWarningsModal')).show();
+
+        try {
+            const rosterRes = await fetchAPI('/api/roster?active_only=true');
+            const wrestlers = rosterRes.wrestlers || [];
+
+            // Score risk factors from available wrestler stats
+            const risks = wrestlers
+                .filter(w => !w.is_injured)
+                .map(w => {
+                    let score = 0;
+                    const reasons = [];
+
+                    if ((w.stamina || 100) < 40)            { score += 30; reasons.push('Very low stamina'); }
+                    else if ((w.stamina || 100) < 60)       { score += 15; reasons.push('Low stamina'); }
+                    if ((w.health || 100) < 50)             { score += 25; reasons.push('Poor health'); }
+                    if ((w.injury_history_count || 0) > 3)  { score += 20; reasons.push('Multiple past injuries'); }
+                    if ((w.momentum || 50) > 85)            { score += 10; reasons.push('Overbooked / high momentum'); }
+
+                    return { ...w, riskScore: score, reasons };
+                })
+                .filter(w => w.riskScore > 0)
+                .sort((a, b) => b.riskScore - a.riskScore)
+                .slice(0, 10);
+
+            // Update at-risk summary card
+            document.getElementById('atRiskCount').textContent = risks.length;
+
+            if (!risks.length) {
+                body.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle"></i> No high-risk wrestlers detected at this time.</div>';
+                return;
+            }
+
+            let html = `
+                <p class="text-muted small mb-3">
+                    Wrestlers most likely to sustain an injury based on current stats.
+                    Consider resting them before booking matches.
+                </p>
+                <div class="list-group">`;
+
+            risks.forEach(w => {
+                const lvl = w.riskScore >= 40 ? 'danger' : w.riskScore >= 20 ? 'warning' : 'secondary';
+                html += `
+                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>${w.name}</strong>
+                            <span class="badge bg-secondary ms-2">${(w.primary_brand || '').replace('ROC ','')}</span>
+                            <br>
+                            <small class="text-muted">${w.reasons.join(' · ')}</small>
+                        </div>
+                        <span class="badge bg-${lvl} ms-3">Risk: ${w.riskScore}</span>
+                    </div>`;
+            });
+
+            html += '</div>';
+            body.innerHTML = html;
+
+        } catch (err) {
+            body.innerHTML = `<div class="alert alert-danger">Failed to load risk data: ${err.message}</div>`;
+        }
+    }
+
+    // ─── Angle Generator ─────────────────────────────────────────────────────
+
+    async function showAngleGeneratorModal() {
+        new bootstrap.Modal(document.getElementById('angleGeneratorModal')).show();
+        document.getElementById('angleResult').classList.add('d-none');
+
+        try {
+            const r       = await fetchAPI('/api/roster?active_only=true');
+            _allWrestlers = r.wrestlers || [];
+            const allOpts = _allWrestlers.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+            const injOpts = _allInjuries.map(i => `<option value="${i.wrestler.id}">${i.wrestler.name}</option>`).join('');
+
+            document.getElementById('angleInjuredWrestler').innerHTML = '<option value="">Select injured wrestler...</option>' + (injOpts || allOpts);
+            document.getElementById('angleAttacker').innerHTML        = '<option value="">None / Unknown</option>' + allOpts;
+            document.getElementById('angleReturnWrestler').innerHTML  = '<option value="">Select returning wrestler...</option>' + (injOpts || allOpts);
+            document.getElementById('angleTarget').innerHTML          = '<option value="">None</option>' + allOpts;
+        } catch (err) {
+            console.error('Failed to load angle wrestlers:', err);
+        }
+    }
+
+    async function generateWriteoffAngle(btn) {
+        const wrestlerId = document.getElementById('angleInjuredWrestler').value;
+        const attackerId = document.getElementById('angleAttacker').value;
+        if (!wrestlerId) { alert('Please select an injured wrestler.'); return; }
+
+        const orig = btn.innerHTML;
+        setButtonLoading(btn, true, orig);
+        try {
+            const r = await fetchAPI('/api/injuries/create-angle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ wrestler_id: wrestlerId, attacker_id: attackerId || null })
+            });
+            renderAngleResult(r.angle, 'write-off');
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        } finally {
+            setButtonLoading(btn, false, orig);
+        }
+    }
+
+    async function generateReturnAngle(btn) {
+        const wrestlerId = document.getElementById('angleReturnWrestler').value;
+        const targetId   = document.getElementById('angleTarget').value;
+        const isSurprise = document.getElementById('angleSurprise').checked;
+        if (!wrestlerId) { alert('Please select a returning wrestler.'); return; }
+
+        const orig = btn.innerHTML;
+        setButtonLoading(btn, true, orig);
+        try {
+            const r = await fetchAPI('/api/injuries/return-angle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ wrestler_id: wrestlerId, target_id: targetId || null, is_surprise: isSurprise })
+            });
+            renderAngleResult(r.angle, 'return');
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        } finally {
+            setButtonLoading(btn, false, orig);
+        }
+    }
+
+    function renderAngleResult(angle, type) {
+        if (!angle) return;
+        const result = document.getElementById('angleResult');
+        const body   = document.getElementById('angleResultBody');
+        const color  = type === 'return' ? '#6f42c1' : '#dc3545';
+
+        let html = `
+            <div class="card border-0" style="background:#f8f9fa;">
+                <div class="card-body">
+                    <h6 style="color:${color};">${angle.angle_type || (type === 'return' ? 'Return Angle' : 'Injury Write-Off')}</h6>
+                    <p class="mb-3">${angle.description || angle.narrative || 'Angle generated successfully.'}</p>`;
+
+        if (angle.creates_feud)     html += `<span class="badge bg-danger me-2"><i class="bi bi-fire"></i> Creates Feud</span>`;
+        if (angle.feud_created)     html += `<span class="badge bg-success me-2"><i class="bi bi-check"></i> Feud Created</span>`;
+        if (angle.momentum_boost)   html += `<span class="badge bg-primary me-2"><i class="bi bi-graph-up"></i> +${angle.momentum_boost} Momentum</span>`;
+        if (angle.popularity_boost) html += `<span class="badge bg-warning text-dark"><i class="bi bi-star"></i> +${angle.popularity_boost} Popularity</span>`;
+
+        html += '</div></div>';
+        body.innerHTML = html;
+        result.classList.remove('d-none');
+    }
+
+    // ─── Process Weekly Recovery ──────────────────────────────────────────────
+
+    async function processWeeklyRecovery(btn) {
+        if (!confirm('Process weekly recovery for all injured wrestlers?\n\nThis will advance rehab progress and deduct medical costs.')) return;
+
+        const orig = btn.innerHTML;
+        setButtonLoading(btn, true, orig);
+        try {
+            const r = await fetchAPI('/api/injuries/weekly-recovery', { method: 'POST' });
+            if (r.success) {
+                const lines = (r.updates || []).map(u => `• ${u.message || u.type}`).join('\n') || 'No changes this week.';
+                alert(`✅ Weekly recovery processed:\n\n${lines}`);
+                init();
+                loadMedicalStaffSummary();
+            } else {
+                alert(`❌ Failed: ${r.error}`);
+            }
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        } finally {
+            setButtonLoading(btn, false, orig);
+        }
+    }
+
+    // ─── Medical Staff Modal ──────────────────────────────────────────────────
+
+    async function showMedicalStaffModal() {
+        const body = document.getElementById('medicalStaffBody');
+        body.innerHTML = '<p class="text-center"><span class="spinner-border spinner-border-sm"></span> Loading...</p>';
+        new bootstrap.Modal(document.getElementById('medicalStaffModal')).show();
+
+        try {
+            const r       = await fetchAPI('/api/injuries/medical-staff');
+            const tiers   = r.available_tiers || {};
+            const current = r.current_tier;
+            const config  = r.current_config || {};
+
+            let html = `
+                <div class="alert alert-info mb-3">
+                    <strong>Current Tier:</strong> ${current} &mdash;
+                    $${(config.cost_per_week || 0).toLocaleString()}/week
+                    ${config.injury_reduction ? `&mdash; ${config.injury_reduction}% injury reduction` : ''}
+                </div>
+                <h6 class="mb-3">Available Tiers</h6>
+                <div class="list-group">`;
+
+            Object.entries(tiers).forEach(([tier, cfg]) => {
+                const isActive = tier === current;
+                html += `
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${tier}</strong>
+                            ${isActive ? '<span class="badge bg-success ms-2">Current</span>' : ''}
+                            <br>
+                            <small class="text-muted">
+                                $${(cfg.cost_per_week || 0).toLocaleString()}/week
+                                ${cfg.injury_reduction ? `&mdash; ${cfg.injury_reduction}% fewer injuries` : ''}
+                            </small>
+                        </div>
+                        ${!isActive ? `
+                            <button class="btn btn-sm btn-outline-primary"
+                                    data-action="upgrade-medical-staff"
+                                    data-tier="${tier}">
+                                Upgrade
+                            </button>` : ''}
+                    </div>`;
+            });
+
+            html += '</div>';
+            body.innerHTML = html;
+
+        } catch (err) {
+            body.innerHTML = `<div class="alert alert-danger">Failed to load staff info: ${err.message}</div>`;
+        }
+    }
+
+    async function upgradeStaff(tier, btn) {
+        if (!confirm(`Upgrade medical staff to "${tier}"?\n\nAn upgrade fee will be deducted from your balance.`)) return;
+
+        const orig = btn.innerHTML;
+        setButtonLoading(btn, true, orig);
+        try {
+            const r = await fetchAPI('/api/injuries/medical-staff/upgrade', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tier })
+            });
+            if (r.success) {
+                alert(`✅ ${r.message}\nCost: $${r.upgrade_cost.toLocaleString()}\nNew Balance: $${r.new_balance.toLocaleString()}`);
+                bootstrap.Modal.getInstance(document.getElementById('medicalStaffModal')).hide();
+                loadMedicalStaffSummary();
+            } else {
+                alert(`❌ ${r.error}`);
+            }
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        } finally {
+            setButtonLoading(btn, false, orig);
+        }
+    }
+
+    async function workThroughInjury(wrestlerId, wrestlerName) {
+        if (!confirm(`Use ${wrestlerName} while injured?\n\nThis reduces performance and increases aggravation risk.`)) return;
+
+        try {
+            const response = await fetchAPI(`/api/injuries/${wrestlerId}/work-through`, { method: 'POST' });
+            if (!response.success) {
+                alert(`Failed to work through injury: ${response.error || response.message}`);
+                return;
+            }
+            alert(response.message || `${wrestlerName} will work through the injury.`);
+            await loadActiveInjuries();
+            await loadInjuryDashboard();
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        }
+    }
+
+    // ─── Init ─────────────────────────────────────────────────────────────────
+
+    async function init() {
+        _historyData = []; // invalidate history cache on full refresh
+        await loadActiveInjuries();
+        await loadInjuryDashboard();
+        await loadMedicalStaffSummary();
+    }
+
+    init();
+
+})();
+</script>

@@ -1,0 +1,751 @@
+<!-- Feuds Tracking View -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="bi bi-lightning-fill"></i> Active Feuds & Rivalries</h2>
+        <p class="lead">Track ongoing storylines and rivalries across all brands.</p>
+        <hr>
+    </div>
+</div>
+
+<!-- Feud Stats Summary -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3 id="statTotalFeuds">0</h3>
+                <p class="mb-0">Total Feuds</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h3 id="statActiveFeuds">0</h3>
+                <p class="mb-0">Active Feuds</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center">
+                <h3 id="statHotFeuds">0</h3>
+                <p class="mb-0">White Hot 🔥</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h3 id="statReadyForPayoff">0</h3>
+                <p class="mb-0">Ready for Payoff</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Advanced Story Engine Dashboard -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-info">
+            <div class="card-header bg-info-subtle d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-diagram-3"></i> Story Engine Heat Dashboard</h5>
+                <button class="btn btn-sm btn-outline-primary" onclick="window.loadAdvancedStoryDashboard()">Refresh</button>
+            </div>
+            <div class="card-body" id="advancedStoryDashboard">
+                <div class="text-muted small">Loading advanced storyline metrics...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create New Feud Button -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createFeudModal">
+            <i class="bi bi-plus-circle"></i> Create New Feud
+        </button>
+    </div>
+</div>
+
+<!-- Active Feuds List -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-fire"></i> 
+                    Active Feuds 
+                    <span class="badge bg-secondary" id="feudCount">0</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="feudsList">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status"></div>
+                        <p>Loading feuds...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Feud Modal -->
+<div class="modal fade" id="createFeudModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Create New Feud</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createFeudForm">
+                    <div class="mb-3">
+                        <label class="form-label">Feud Type</label>
+                        <select class="form-select" id="feudType" required>
+                            <option value="personal">Personal Rivalry</option>
+                            <option value="title">Title Feud</option>
+                            <option value="faction">Faction War</option>
+                            <option value="mentor_vs_protege">Mentor vs Protégé</option>
+                            <option value="tag_team_breakup">Tag Team Breakup</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Wrestler 1</label>
+                        <select class="form-select" id="wrestler1" required>
+                            <option value="">Select Wrestler...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Wrestler 2</label>
+                        <select class="form-select" id="wrestler2" required>
+                            <option value="">Select Wrestler...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="titleSelectDiv" style="display:none;">
+                        <label class="form-label">Championship (for Title Feuds)</label>
+                        <select class="form-select" id="titleSelect">
+                            <option value="">Select Title...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Initial Intensity</label>
+                        <input type="range" class="form-range" id="initialIntensity" min="10" max="80" value="30">
+                        <div class="text-center">
+                            <span id="intensityValue">30</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="window.createFeud()">Create Feud</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feud Detail Modal -->
+<div class="modal fade" id="feudDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="feudDetailTitle">Feud Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="feudDetailBody">
+                <!-- Filled dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" id="resolveFeudBtn">Resolve Feud</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // Wrap everything in an IIFE to avoid polluting global scope unnecessarily
+    
+    let currentFeuds = [];
+    let allWrestlers = [];
+    let allTitles = [];
+
+    // Load feud statistics
+    async function loadFeudStats() {
+        try {
+            const response = await fetch('/api/feuds/stats');
+            const stats = await response.json();
+            
+            document.getElementById('statTotalFeuds').textContent = stats.total_feuds || 0;
+            document.getElementById('statActiveFeuds').textContent = stats.active_feuds || 0;
+            document.getElementById('statHotFeuds').textContent = stats.hot_feuds || 0;
+            
+            // Count feuds ready for payoff
+            const readyCount = currentFeuds.filter(f => f.is_ready_for_payoff).length;
+            document.getElementById('statReadyForPayoff').textContent = readyCount;
+            
+        } catch (error) {
+            console.error('Failed to load feud stats:', error);
+        }
+    }
+
+    // Load active feuds
+    async function loadFeuds() {
+        console.log('Loading feuds...');
+        
+        try {
+            const response = await fetch('/api/feuds/active');
+            const data = await response.json();
+            
+            currentFeuds = data.feuds || [];
+            
+            renderFeuds(currentFeuds);
+            loadFeudStats();
+            
+        } catch (error) {
+            console.error('Failed to load feuds:', error);
+            document.getElementById('feudsList').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Failed to load feuds: ${error.message}
+                </div>
+            `;
+        }
+    }
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    async function loadAdvancedStoryDashboard() {
+        const container = document.getElementById('advancedStoryDashboard');
+        container.innerHTML = '<div class="text-muted small">Loading advanced storyline metrics...</div>';
+
+        try {
+            const response = await fetch('/api/story-engine/dashboard');
+            const payload = await response.json();
+
+            if (!payload.success) {
+                throw new Error(payload.error || 'Story engine dashboard unavailable');
+            }
+
+            const data = payload.data || {};
+            const feuds = data.feuds || [];
+            const hotCount = feuds.filter(f => Number(f.heat || 0) >= 51).length;
+            const decliningCount = feuds.filter(f => f.trajectory === 'declining').length;
+            const topFeuds = feuds.slice(0, 5);
+
+            container.innerHTML = `
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">Tracked Story Feuds</div>
+                            <div class="h4 mb-0">${feuds.length}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">Hot or Better</div>
+                            <div class="h4 mb-0">${hotCount}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">Declining</div>
+                            <div class="h4 mb-0">${decliningCount}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">Booking Credibility</div>
+                            <div class="h4 mb-0">${Number((data.business_metrics || {}).booking_credibility || 0).toFixed(1)}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive mt-3">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Feud</th>
+                                <th>Heat</th>
+                                <th>State</th>
+                                <th>Trajectory</th>
+                                <th>Last Advanced</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${topFeuds.map(feud => `
+                                <tr>
+                                    <td>${escapeHtml(feud.name)}</td>
+                                    <td><strong>${Number(feud.heat || 0).toFixed(1)}</strong></td>
+                                    <td>${escapeHtml(feud.heat_label)}</td>
+                                    <td>${escapeHtml(feud.trajectory)}</td>
+                                    <td>${feud.days_since_last_action == null ? 'Never' : escapeHtml(feud.days_since_last_action + ' days')}</td>
+                                </tr>
+                            `).join('') || '<tr><td colspan="5" class="text-muted">No story-engine feuds have been created yet.</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } catch (error) {
+            container.innerHTML = `
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    ${escapeHtml(error.message)}
+                </div>
+            `;
+        }
+    }
+
+    // Render feuds list
+    function renderFeuds(feuds) {
+        const container = document.getElementById('feudsList');
+        document.getElementById('feudCount').textContent = feuds.length;
+        
+        if (feuds.length === 0) {
+            container.innerHTML = `
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle"></i>
+                    <h5>No Active Feuds</h5>
+                    <p>Create a feud to get started, or simulate matches with upsets to auto-generate rivalries!</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Sort by intensity (highest first)
+        feuds.sort((a, b) => b.intensity - a.intensity);
+        
+        let html = '';
+        
+        feuds.forEach(feud => {
+            const participants = feud.participant_names.join(' vs ');
+            const intensityPercent = feud.intensity;
+            const intensityClass = getIntensityClass(feud.intensity);
+            const typeIcon = getFeudTypeIcon(feud.feud_type);
+            
+            html += `
+                <div class="card mb-3 border-${intensityClass}">
+                    <div class="card-header bg-${intensityClass} text-white">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="mb-0">
+                                    ${typeIcon} ${participants}
+                                </h5>
+                                ${feud.title_name ? `<small>🏆 ${feud.title_name}</small>` : ''}
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="badge bg-light text-dark">${feud.intensity_level}</span>
+                                ${feud.is_ready_for_payoff ? '<span class="badge bg-warning text-dark ms-1">💥 Ready for Payoff</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Intensity</span>
+                                <span><strong>${intensityPercent}/100</strong></span>
+                            </div>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar bg-${intensityClass}" 
+                                     role="progressbar" 
+                                     style="width: ${intensityPercent}%"
+                                     aria-valuenow="${intensityPercent}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    ${intensityPercent}%
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <small class="text-muted">Match Count:</small><br>
+                                <strong>${feud.match_count}</strong>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Started:</small><br>
+                                <strong>Year ${feud.start_year}, Week ${feud.start_week}</strong>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Last Segment:</small><br>
+                                <strong>${feud.last_segment_week ? `Week ${feud.last_segment_week}` : 'None'}</strong>
+                            </div>
+                        </div>
+                        
+                        ${feud.planned_payoff_event ? `
+                            <div class="alert alert-warning mt-3 mb-0">
+                                <i class="bi bi-calendar-event"></i>
+                                <strong>Planned Payoff:</strong> ${feud.planned_payoff_event}
+                            </div>
+                        ` : ''}
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-sm btn-primary" onclick="window.showFeudDetail('${feud.id}')">
+                                <i class="bi bi-eye"></i> View Details
+                            </button>
+                            <button class="btn btn-sm btn-success" onclick="window.simulateFeudMatch('${feud.id}')">
+                                <i class="bi bi-play-circle"></i> Simulate Match
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+    }
+
+    // Helper functions
+    function getIntensityClass(intensity) {
+        if (intensity >= 80) return 'danger';
+        if (intensity >= 60) return 'warning';
+        if (intensity >= 40) return 'info';
+        return 'secondary';
+    }
+
+    function getFeudTypeIcon(type) {
+        const icons = {
+            'personal': '🥊',
+            'title': '🏆',
+            'faction': '👥',
+            'mentor_vs_protege': '👨‍🏫',
+            'tag_team_breakup': '💔'
+        };
+        return icons[type] || '⚔️';
+    }
+
+    // Show feud detail modal
+    async function showFeudDetail(feudId) {
+        try {
+            const response = await fetch(`/api/feuds/${feudId}`);
+            const feud = await response.json();
+            
+            const modalTitle = document.getElementById('feudDetailTitle');
+            const modalBody = document.getElementById('feudDetailBody');
+            
+            modalTitle.textContent = feud.participant_names.join(' vs ');
+            
+            // Build series record
+            let seriesRecord = '<h6>Series Record:</h6><ul>';
+            for (const pid of feud.participant_ids) {
+                const name = feud.participant_names[feud.participant_ids.indexOf(pid)];
+                const wins = feud.wins_by_participant[pid] || 0;
+                const losses = feud.match_count - wins;
+                seriesRecord += `<li><strong>${name}:</strong> ${wins}-${losses}</li>`;
+            }
+            seriesRecord += '</ul>';
+            
+            // Build segment history
+            let segmentHistory = '<h6 class="mt-3">Segment History:</h6>';
+            if (feud.segments.length === 0) {
+                segmentHistory += '<p class="text-muted">No segments yet.</p>';
+            } else {
+                segmentHistory += '<div class="table-responsive"><table class="table table-sm table-striped">';
+                segmentHistory += '<thead><tr><th>Week</th><th>Type</th><th>Description</th><th>Intensity +/-</th></tr></thead><tbody>';
+                
+                feud.segments.slice().reverse().forEach(seg => {
+                    const changeClass = seg.intensity_change > 0 ? 'text-success' : seg.intensity_change < 0 ? 'text-danger' : 'text-muted';
+                    segmentHistory += `
+                        <tr>
+                            <td>Week ${seg.week}</td>
+                            <td><span class="badge bg-secondary">${seg.segment_type}</span></td>
+                            <td>${seg.description}</td>
+                            <td class="${changeClass}">${seg.intensity_change > 0 ? '+' : ''}${seg.intensity_change}</td>
+                        </tr>
+                    `;
+                });
+                
+                segmentHistory += '</tbody></table></div>';
+            }
+            
+            modalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Feud Information</h6>
+                        <table class="table table-sm table-borderless">
+                            <tr><th>Type:</th><td><span class="badge bg-primary">${feud.feud_type}</span></td></tr>
+                            <tr><th>Status:</th><td><span class="badge bg-success">${feud.status}</span></td></tr>
+                            <tr><th>Intensity:</th><td><strong>${feud.intensity}/100</strong> (${feud.intensity_level})</td></tr>
+                            <tr><th>Match Count:</th><td>${feud.match_count}</td></tr>
+                            <tr><th>Started:</th><td>Year ${feud.start_year}, Week ${feud.start_week}</td></tr>
+                            ${feud.title_name ? `<tr><th>Title:</th><td>🏆 ${feud.title_name}</td></tr>` : ''}
+                            ${feud.planned_payoff_event ? `<tr><th>Planned Payoff:</th><td>${feud.planned_payoff_event}</td></tr>` : ''}
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        ${seriesRecord}
+                        ${feud.is_ready_for_payoff ? 
+                            '<div class="alert alert-warning mt-3"><strong>💥 This feud is ready for a major payoff match!</strong></div>' : 
+                            '<div class="alert alert-info mt-3">Continue building intensity with more segments and matches.</div>'
+                        }
+                    </div>
+                </div>
+                ${segmentHistory}
+            `;
+            
+            // Set up resolve button
+            document.getElementById('resolveFeudBtn').onclick = () => resolveFeud(feudId);
+            
+            const modal = new bootstrap.Modal(document.getElementById('feudDetailModal'));
+            modal.show();
+            
+        } catch (error) {
+            alert('Failed to load feud details: ' + error.message);
+        }
+    }
+
+    // Simulate a match in a feud - NOW WITH SEGMENT TRACKING
+    async function simulateFeudMatch(feudId) {
+        try {
+            const response = await fetch(`/api/feuds/${feudId}`);
+            const feud = await response.json();
+            
+            if (feud.participant_ids.length !== 2) {
+                alert('Can only simulate singles matches for now');
+                return;
+            }
+            
+            const [w1, w2] = feud.participant_ids;
+            
+            // Simulate the match
+            const matchResponse = await fetch('/api/test/simulate-match', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    wrestler_a_id: w1,
+                    wrestler_b_id: w2,
+                    booking_bias: 'even',
+                    importance: feud.intensity >= 70 ? 'high_drama' : 'normal',
+                    is_title_match: feud.title_id ? true : false,
+                    title_id: feud.title_id
+                })
+            });
+            const result = await matchResponse.json();
+            
+            if (result.success) {
+                const match = result.match_result;
+                
+                // NOW ADD THE SEGMENT TO THE FEUD MANUALLY
+                const winner_id = match.winner === 'side_a' ? w1 : w2;
+                const winner_name = match.winner_names[0];
+                const loser_name = match.loser_names[0];
+                
+                // Calculate intensity change based on match quality
+                const intensityChange = Math.round(match.star_rating * 2); // 0-10 points based on star rating
+                
+                // Get current universe state for year/week
+                const universeResponse = await fetch('/api/universe/state');
+                const universeState = await universeResponse.json();
+                
+                // Add segment to feud via API
+                await fetch(`/api/feuds/${feudId}/add-segment`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        segment_type: 'match',
+                        description: `${winner_name} defeated ${loser_name} (${match.star_rating}⭐ - ${match.finish_type})`,
+                        intensity_change: intensityChange,
+                        winner_id: winner_id
+                    })
+                });
+                
+                alert(`Match Simulated!\n\n${match.match_summary}\n\nStar Rating: ${match.star_rating} ⭐\nDuration: ${match.duration_minutes} minutes\n\nFeud intensity increased by ${intensityChange} points!`);
+                
+                // Reload feuds to see updated intensity and segment
+                loadFeuds();
+            } else {
+                alert('Match simulation failed: ' + (result.error || 'Unknown error'));
+            }
+            
+        } catch (error) {
+            alert('Simulation failed: ' + error.message);
+            console.error(error);
+        }
+    }
+
+    // Resolve a feud
+    async function resolveFeud(feudId) {
+        if (!confirm('Are you sure you want to resolve this feud? It will be marked as concluded.')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/feuds/${feudId}/resolve`, {
+                method: 'POST'
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('Feud resolved!');
+                bootstrap.Modal.getInstance(document.getElementById('feudDetailModal')).hide();
+                loadFeuds();
+            } else {
+                alert('Failed to resolve feud: ' + (result.error || 'Unknown error'));
+            }
+            
+        } catch (error) {
+            alert('Failed to resolve feud: ' + error.message);
+        }
+    }
+
+    // Load wrestlers for dropdown
+    async function loadWrestlersForDropdown() {
+        try {
+            const response = await fetch('/api/roster?active_only=true');
+            const data = await response.json();
+            
+            if (!data.wrestlers) {
+                console.warn('No wrestlers data received');
+                return;
+            }
+            
+            allWrestlers = data.wrestlers;
+            
+            const w1Select = document.getElementById('wrestler1');
+            const w2Select = document.getElementById('wrestler2');
+            
+            allWrestlers.forEach(w => {
+                const option1 = document.createElement('option');
+                option1.value = w.id;
+                option1.textContent = `${w.name} (${w.primary_brand}, ${w.role})`;
+                w1Select.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.value = w.id;
+                option2.textContent = `${w.name} (${w.primary_brand}, ${w.role})`;
+                w2Select.appendChild(option2);
+            });
+            
+        } catch (error) {
+            console.error('Failed to load wrestlers:', error);
+        }
+    }
+
+    // Load titles for dropdown
+    async function loadTitlesForDropdown() {
+        try {
+            const response = await fetch('/api/championships');
+            const data = await response.json();
+            
+            // Safety check
+            if (!data.success || !data.championships) {
+                console.warn('No championships data received');
+                return;
+            }
+            
+            allTitles = data.championships;
+            
+            const titleSelect = document.getElementById('titleSelect');
+            
+            allTitles.forEach(t => {
+                const option = document.createElement('option');
+                option.value = t.id;
+                option.textContent = `${t.name} (${t.assigned_brand})`;
+                titleSelect.appendChild(option);
+            });
+            
+        } catch (error) {
+            console.error('Failed to load titles:', error);
+        }
+    }
+
+    // Create new feud
+    async function createFeud() {
+        const feudType = document.getElementById('feudType').value;
+        const wrestler1 = document.getElementById('wrestler1').value;
+        const wrestler2 = document.getElementById('wrestler2').value;
+        const titleId = document.getElementById('titleSelect').value || null;
+        const intensity = parseInt(document.getElementById('initialIntensity').value);
+        
+        if (!wrestler1 || !wrestler2) {
+            alert('Please select both wrestlers');
+            return;
+        }
+        
+        if (wrestler1 === wrestler2) {
+            alert('Please select two different wrestlers');
+            return;
+        }
+        
+        if (feudType === 'title' && !titleId) {
+            alert('Please select a championship for title feuds');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/feuds/create', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    feud_type: feudType,
+                    participant_ids: [wrestler1, wrestler2],
+                    title_id: titleId,
+                    initial_intensity: intensity
+                })
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('Feud created successfully!');
+                bootstrap.Modal.getInstance(document.getElementById('createFeudModal')).hide();
+                
+                // Reset form
+                document.getElementById('createFeudForm').reset();
+                document.getElementById('intensityValue').textContent = '30';
+                
+                // Reload feuds
+                loadFeuds();
+            } else {
+                alert('Failed to create feud: ' + (result.error || 'Unknown error'));
+            }
+            
+        } catch (error) {
+            alert('Failed to create feud: ' + error.message);
+        }
+    }
+
+    // Set up event listeners
+    document.getElementById('feudType').addEventListener('change', (e) => {
+        const titleDiv = document.getElementById('titleSelectDiv');
+        if (e.target.value === 'title') {
+            titleDiv.style.display = 'block';
+        } else {
+            titleDiv.style.display = 'none';
+        }
+    });
+
+    document.getElementById('initialIntensity').addEventListener('input', (e) => {
+        document.getElementById('intensityValue').textContent = e.target.value;
+    });
+
+    // ============================================================
+    // EXPOSE FUNCTIONS TO GLOBAL WINDOW OBJECT
+    // This is required for onclick handlers in dynamically generated HTML
+    // ============================================================
+    window.showFeudDetail = showFeudDetail;
+    window.simulateFeudMatch = simulateFeudMatch;
+    window.resolveFeud = resolveFeud;
+    window.createFeud = createFeud;
+    window.loadFeuds = loadFeuds;
+    window.loadAdvancedStoryDashboard = loadAdvancedStoryDashboard;
+
+    // Initialize on page load
+    loadFeuds();
+    loadAdvancedStoryDashboard();
+    loadWrestlersForDropdown();
+    loadTitlesForDropdown();
+
+})();
+</script>

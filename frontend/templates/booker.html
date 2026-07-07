@@ -1,0 +1,353 @@
+<div class="container-fluid py-3 booker-command">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+    <div>
+      <h2 class="mb-1"><i class="bi bi-magic"></i> AI Showrunner</h2>
+      <p class="text-muted mb-0">Auto-book weekly TV, shape PLE roads, and manage the approval queue.</p>
+    </div>
+    <div class="d-flex gap-2 align-items-end">
+      <div>
+        <label class="form-label mb-1">Autonomy</label>
+        <select id="showrunnerAutonomy" class="form-select form-select-sm">
+          <option value="balanced">Balanced</option>
+          <option value="cautious">Cautious</option>
+          <option value="aggressive">Aggressive</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="window.runShowrunnerWeek(false)">
+        <i class="bi bi-play-fill"></i> Run AI Week
+      </button>
+      <button class="btn btn-outline-danger btn-sm" onclick="window.runShowrunnerWeek(true)">
+        <i class="bi bi-arrow-repeat"></i> Force Rebook
+      </button>
+      <button class="btn btn-outline-success btn-sm" onclick="window.openLatestAIDraftInBooking()">
+        <i class="bi bi-clipboard-check"></i> Open in Booking
+      </button>
+      <button class="btn btn-outline-info btn-sm" onclick="window.runDarkHouseAutopilot()">
+        <i class="bi bi-moon-stars"></i> Dark/House Auto
+      </button>
+      <button class="btn btn-outline-warning btn-sm" onclick="window.generateShowrunnerPromoBeats()">
+        <i class="bi bi-chat-quote"></i> Promo Beats
+      </button>
+    </div>
+  </div>
+
+  <div id="bookerRunStatus" class="alert py-2 mb-3" style="display:none;"></div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-header">Command Pulse</div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between mb-2"><span>Pending approvals</span><strong id="bookerPendingCount">0</strong></div>
+          <div class="d-flex justify-content-between mb-2"><span>Active PLE roads</span><strong id="bookerRoadmapCount">0</strong></div>
+          <div class="d-flex justify-content-between"><span>Last run</span><strong id="bookerLastRun">Not run</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Last AI Card Draft</span>
+          <button class="btn btn-sm btn-outline-secondary" onclick="window.loadShowrunnerDashboard()"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
+        <div class="card-body" id="bookerLastCard">
+          <p class="text-muted mb-0">Run the AI week to generate a persistent show draft.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-xl-7">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Booker Inbox</span>
+          <button class="btn btn-sm btn-outline-primary" onclick="window.autoResolveBookerQueue()">Auto-resolve due items</button>
+        </div>
+        <div class="card-body" id="bookerInbox"></div>
+      </div>
+    </div>
+    <div class="col-xl-5">
+      <div class="card mb-3">
+        <div class="card-header">PLE Roadmap Manager</div>
+        <div class="card-body" id="bookerRoadmaps"></div>
+      </div>
+      <div class="card mb-3">
+        <div class="card-header">Special Systems</div>
+        <div class="card-body" id="bookerSpecialSystems"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">Recent Decisions</div>
+        <div class="card-body" id="bookerRecent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.booker-command .card { border-radius: 8px; }
+.booker-command .decision-card { border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: .8rem; margin-bottom: .75rem; background: rgba(255,255,255,.025); }
+.booker-command .decision-title { font-weight: 800; }
+.booker-command .decision-meta { font-size: .78rem; color: var(--txt-dim, #888); }
+.booker-command .segment-row { display: grid; grid-template-columns: 32px 1fr auto; gap: .6rem; align-items: start; padding: .45rem 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+.booker-command .segment-row:last-child { border-bottom: 0; }
+.booker-command .roadmap-card { border-left: 3px solid #d4af37; padding-left: .75rem; margin-bottom: .85rem; }
+.booker-command .system-chip { border: 1px solid rgba(255,255,255,.12); border-radius: 6px; padding: .55rem; margin-bottom: .55rem; background: rgba(255,255,255,.025); }
+</style>
+
+<script>
+(() => {
+  function unwrap(response) {
+    return response && response.success && response.data !== undefined ? response.data : response;
+  }
+
+  function esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  function badge(priority) {
+    var cls = priority === 'critical' ? 'danger' : priority === 'high' ? 'warning text-dark' : 'secondary';
+    return `<span class="badge bg-${cls}">${esc(priority)}</span>`;
+  }
+
+  function setRunStatus(message, type) {
+    var el = document.getElementById('bookerRunStatus');
+    if (!el) return;
+    el.className = 'alert alert-' + (type || 'secondary') + ' py-2 mb-3';
+    el.innerHTML = message;
+    el.style.display = 'block';
+  }
+
+  function setRunButtonsDisabled(disabled) {
+    document.querySelectorAll('button[onclick^="window.runShowrunnerWeek"]').forEach(button => {
+      button.disabled = !!disabled;
+    });
+  }
+
+  function renderCard(card) {
+    if (!card || !card.segments) {
+      return '<p class="text-muted mb-0">No AI card draft yet.</p>';
+    }
+    return `
+      <div class="mb-2"><strong>${esc(card.show_name)}</strong> <span class="text-muted">${esc(card.creative_goal)}</span></div>
+      ${card.segments.map(s => `
+        <div class="segment-row">
+          <strong>${s.position}</strong>
+          <div>
+            <div><strong>${esc(s.segment_type)}</strong> - ${esc(s.description)}</div>
+            <div class="decision-meta">${(s.participants || []).map(p => esc(p.name)).join(' vs ')}${s.winner ? ` | Winner: ${esc(s.winner.name)}` : ''}</div>
+          </div>
+          <span class="badge bg-dark">${s.duration}m</span>
+        </div>`).join('')}
+    `;
+  }
+
+  function renderInbox(items) {
+    var el = document.getElementById('bookerInbox');
+    if (!items || !items.length) {
+      el.innerHTML = '<p class="text-muted mb-0">No pending approvals. The AI has room to breathe.</p>';
+      return;
+    }
+    el.innerHTML = items.map(item => `
+      <div class="decision-card">
+        <div class="d-flex justify-content-between gap-2">
+          <div class="decision-title">${esc(item.title)}</div>
+          ${badge(item.priority)}
+        </div>
+        <div class="decision-meta mb-2">${esc(item.category)} | ${esc(item.autonomy_policy)} | due Y${item.deadline_year || '-'} W${item.deadline_week || '-'}</div>
+        <p class="mb-2">${esc(item.summary)}</p>
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-success" onclick="window.decideBookerApproval('${item.id}','approve')">Approve</button>
+          <button class="btn btn-warning" onclick="window.decideBookerApproval('${item.id}','counter')">Counter</button>
+          <button class="btn btn-danger" onclick="window.decideBookerApproval('${item.id}','reject')">Reject</button>
+          <button class="btn btn-outline-secondary" onclick="window.decideBookerApproval('${item.id}','dismiss')">Dismiss</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderRoadmaps(roadmaps) {
+    var el = document.getElementById('bookerRoadmaps');
+    if (!roadmaps || !roadmaps.length) {
+      el.innerHTML = '<p class="text-muted mb-0">No PLE roadmaps yet. Run the AI week.</p>';
+      return;
+    }
+    el.innerHTML = roadmaps.map(r => {
+      var main = r.main_event_json || {};
+      var bets = r.risk_bets_json || [];
+      return `
+        <div class="roadmap-card">
+          <div class="d-flex justify-content-between">
+            <strong>${esc(r.event_name)}</strong>
+            <span class="badge bg-dark">Y${r.target_year} W${r.target_week}</span>
+          </div>
+          <p class="mb-1">${esc(r.headline_plan)}</p>
+          <div class="decision-meta">Main: ${esc(main.challenger)} vs ${esc(main.recommended_winner)} | Finish: ${esc(main.finish)}</div>
+          <div class="decision-meta">Risk bets: ${bets.map(b => esc(b.name)).join(', ') || 'None'}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderSpecialSystems(special) {
+    var el = document.getElementById('bookerSpecialSystems');
+    if (!el) return;
+    special = special || {};
+    var mitb = special.mitb_briefcases || [];
+    var war = special.war_games || [];
+    var crown = special.crown_payoffs || [];
+    var angles = special.recent_angles || [];
+    var darkHouse = special.dark_house_runs || [];
+    var interruptions = special.live_interruptions || [];
+    var promoBeats = special.promo_beats || [];
+    el.innerHTML = `
+      <div class="system-chip">
+        <strong>Angle Library</strong>
+        <div class="decision-meta">${special.angle_templates_count || 0} templates | Latest: ${angles[0] ? esc(angles[0].template_name) : 'None'}</div>
+      </div>
+      <div class="system-chip">
+        <strong>Money in the Bank</strong>
+        <div class="decision-meta">${mitb.length ? mitb.map(b => `${esc(b.holder_name)} (${esc(b.division)})`).join(', ') : 'No briefcase plans yet'}</div>
+      </div>
+      <div class="system-chip">
+        <strong>War Games</strong>
+        <div class="decision-meta">${war[0] ? `${esc(war[0].target_event_name)} Y${war[0].target_year} W${war[0].target_week}` : 'No faction war planned yet'}</div>
+      </div>
+      <div class="system-chip">
+        <strong>King / Queen Payoffs</strong>
+        <div class="decision-meta">${crown.length ? crown.map(c => `${esc(c.winner_name)} (${esc(c.tournament_type)})`).join(', ') : 'No crown payoffs yet'}</div>
+      </div>
+      <div class="system-chip">
+        <strong>Dark / House Autopilot</strong>
+        <div class="decision-meta">${darkHouse.length ? darkHouse.slice(0, 2).map(s => `${esc(s.show_name)}: ${esc(s.attendance)} fans`).join(' | ') : 'No auxiliary shows logged yet'}</div>
+      </div>
+      <div class="system-chip">
+        <strong>Live Interruptions</strong>
+        <div class="decision-meta">${interruptions.length ? interruptions.slice(0, 2).map(i => `${esc(i.interruption_type)} on ${esc(i.show_name)}`).join(' | ') : 'No live shocks yet'}</div>
+      </div>
+      <div class="system-chip">
+        <strong>Promo / Dialogue Beats</strong>
+        <div class="decision-meta">${promoBeats.length ? promoBeats.slice(0, 2).map(b => `${esc(b.beat_type)}: ${esc(b.hook_text).slice(0, 70)}`).join(' | ') : 'No dialogue beats generated yet'}</div>
+      </div>
+    `;
+  }
+
+  function renderRecent(items) {
+    var el = document.getElementById('bookerRecent');
+    if (!items || !items.length) {
+      el.innerHTML = '<p class="text-muted mb-0">No decisions recorded yet.</p>';
+      return;
+    }
+    el.innerHTML = items.slice(0, 8).map(item => `
+      <div class="mb-2">
+        <strong>${esc(item.title)}</strong>
+        <div class="decision-meta">${esc(item.status)} | ${esc(item.created_at)}</div>
+      </div>`).join('');
+  }
+
+  window.loadShowrunnerDashboard = async function() {
+    try {
+      var dashboard = unwrap(await fetchAPI('/api/booker/showrunner/dashboard'));
+      document.getElementById('bookerPendingCount').textContent = dashboard.summary.pending_approvals;
+      document.getElementById('bookerRoadmapCount').textContent = dashboard.summary.active_roadmaps;
+      document.getElementById('bookerLastRun').textContent = dashboard.summary.last_run_status;
+      document.getElementById('bookerLastCard').innerHTML = renderCard(dashboard.last_run && dashboard.last_run.generated_card_json);
+      renderInbox(dashboard.pending_approvals);
+      renderRoadmaps(dashboard.roadmaps);
+      renderSpecialSystems(dashboard.special_systems);
+      renderRecent(dashboard.recent_decisions);
+    } catch (err) {
+      document.getElementById('bookerInbox').innerHTML = `<div class="alert alert-danger">${esc(err.message)}</div>`;
+    }
+  };
+
+  window.runShowrunnerWeek = async function(force) {
+    var autonomy = document.getElementById('showrunnerAutonomy').value;
+    setRunButtonsDisabled(true);
+    setRunStatus('<span class="spinner-border spinner-border-sm me-2"></span>AI Showrunner is drafting this week...', 'info');
+    try {
+      var result = unwrap(await fetchAPI('/api/booker/showrunner/weekly', {
+        method: 'POST',
+        body: JSON.stringify({ autonomy_level: autonomy, force: !!force })
+      }));
+      if (result.already_ran) {
+        setRunStatus('AI already has a draft for this show week. Use <strong>Force Rebook</strong> to replace it.', 'warning');
+        if (window.showToast) showToast('AI week already ran', 'warning');
+      } else {
+        var drafted = ((result.card || {}).segments || []).length;
+        var approvals = (result.approvals_created || []).length;
+        var executed = (result.auto_executed || []).length;
+        setRunStatus(`AI drafted <strong>${drafted}</strong> card item(s), created <strong>${approvals}</strong> approval(s), and auto-executed <strong>${executed}</strong> decision(s).`, 'success');
+        if (window.showToast) showToast('AI showrunner drafted the week', 'success');
+      }
+      await window.loadShowrunnerDashboard();
+    } catch (err) {
+      setRunStatus(`<strong>AI week failed:</strong> ${esc(err.message || err)}`, 'danger');
+      if (window.showToast) showToast('AI week failed: ' + (err.message || err), 'danger');
+    } finally {
+      setRunButtonsDisabled(false);
+    }
+  };
+
+  window.openLatestAIDraftInBooking = function() {
+    try {
+      sessionStorage.setItem('awumUseShowrunnerDraft', '1');
+    } catch (err) {}
+    if (typeof loadView === 'function') {
+      loadView('booking');
+    } else {
+      window.location.hash = '#booking';
+    }
+  };
+
+  window.decideBookerApproval = async function(id, decision) {
+    var counter = '';
+    if (decision === 'counter') {
+      counter = prompt('Counter-pitch to the AI showrunner:', 'Change the winner, but keep the story beat alive.') || '';
+    }
+    await fetchAPI(`/api/booker/approval-queue/${id}/decision`, {
+      method: 'POST',
+      body: JSON.stringify({ decision, counter_pitch: counter, notes: `Handled from Booker page: ${decision}` })
+    });
+    await window.loadShowrunnerDashboard();
+  };
+
+  window.autoResolveBookerQueue = async function() {
+    var result = unwrap(await fetchAPI('/api/booker/approval-queue/auto-resolve', { method: 'POST', body: JSON.stringify({}) }));
+    if (window.showToast) showToast(`Auto-resolved ${result.resolved || 0} due item(s)`, 'success');
+    await window.loadShowrunnerDashboard();
+  };
+
+  window.runDarkHouseAutopilot = async function() {
+    try {
+      var autonomy = document.getElementById('showrunnerAutonomy').value;
+      setRunStatus('<span class="spinner-border spinner-border-sm me-2"></span>Running dark/house autopilot...', 'info');
+      var result = unwrap(await fetchAPI('/api/booker/showrunner/dark-house-week', {
+        method: 'POST',
+        body: JSON.stringify({ autonomy_level: autonomy, force: true })
+      }));
+      setRunStatus(`Dark/house autopilot logged <strong>${(result.created || []).length}</strong> auxiliary show(s).`, 'success');
+      if (window.showToast) showToast('Dark/house autopilot completed', 'success');
+      await window.loadShowrunnerDashboard();
+    } catch (err) {
+      setRunStatus(`<strong>Dark/house autopilot failed:</strong> ${esc(err.message || err)}`, 'danger');
+    }
+  };
+
+  window.generateShowrunnerPromoBeats = async function() {
+    try {
+      setRunStatus('<span class="spinner-border spinner-border-sm me-2"></span>Generating promo beats...', 'info');
+      var latest = unwrap(await fetchAPI('/api/booker/showrunner/latest-booking-draft'));
+      var result = unwrap(await fetchAPI('/api/booker/showrunner/promo-beats', {
+        method: 'POST',
+        body: JSON.stringify({ show_draft: latest.show_draft || null, force: true })
+      }));
+      setRunStatus(`Generated <strong>${result.total || 0}</strong> promo/dialogue beat(s).`, 'success');
+      if (window.showToast) showToast('Promo beats generated', 'success');
+      await window.loadShowrunnerDashboard();
+    } catch (err) {
+      setRunStatus(`<strong>Promo beat generation failed:</strong> ${esc(err.message || err)}`, 'danger');
+    }
+  };
+
+  window.loadShowrunnerDashboard();
+})();
+</script>

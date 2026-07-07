@@ -1,0 +1,280 @@
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-0"><i class="bi bi-calendar-week"></i> Calendar</h2>
+      <div class="text-muted small">Weekly shows, PPVs/PLEs, and House Show tours (persistent)</div>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <button class="btn btn-outline-secondary btn-sm" onclick="calPrev()"><i class="bi bi-chevron-left"></i></button>
+      <button class="btn btn-outline-secondary btn-sm" onclick="calNext()"><i class="bi bi-chevron-right"></i></button>
+      <button class="btn btn-primary btn-sm" onclick="loadCalendarSchedule(true)"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+    </div>
+  </div>
+
+  <div class="row g-2 mb-3">
+    <div class="col-md-3">
+      <label class="form-label small text-muted">Start Index</label>
+      <input class="form-control form-control-sm" id="calStart" type="number" min="0" value="0" onchange="loadCalendarSchedule(true)">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small text-muted">Limit</label>
+      <input class="form-control form-control-sm" id="calLimit" type="number" min="1" max="250" value="80" onchange="loadCalendarSchedule(true)">
+    </div>
+    <div class="col-md-6 d-flex align-items-end justify-content-end">
+      <div class="small text-muted" id="calMeta"></div>
+    </div>
+  </div>
+
+  <div id="calendarSchedule" class="card">
+    <div class="card-body text-muted">Loading schedule…</div>
+  </div>
+</div>
+
+<!-- Edit Venue Modal -->
+<div class="modal fade" id="venueEditModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title"><i class="bi bi-geo-alt-fill"></i> Edit Show Location</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2">
+          <div class="fw-bold" id="vemShowTitle">—</div>
+          <div class="small text-muted" id="vemShowSub">—</div>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-md-6">
+            <label class="form-label">City</label>
+            <select class="form-select" id="vemCity" onchange="vemLoadVenues()"></select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Venue</label>
+            <select class="form-select" id="vemVenue"></select>
+          </div>
+        </div>
+
+        <div class="form-text mt-2">
+          Saving creates a persistent `show_venue_assignments` record (and also updates House Shows directly).
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" onclick="vemSave()"><i class="bi bi-check2-circle"></i> Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  let current = { show: null, cities: null };
+
+  function dayBadge(day) {
+    const map = { Monday:'primary', Friday:'info', Saturday:'secondary', Sunday:'warning' };
+    return map[day] || 'light';
+  }
+
+  function typeBadge(t) {
+    if (t === 'major_ppv') return 'danger';
+    if (t === 'minor_ppv') return 'warning';
+    if (t === 'house_show') return 'secondary';
+    return 'light';
+  }
+
+  window.calPrev = function() {
+    const start = Math.max(0, parseInt(document.getElementById('calStart').value || '0') - parseInt(document.getElementById('calLimit').value || '80'));
+    document.getElementById('calStart').value = start;
+    loadCalendarSchedule(true);
+  }
+
+  window.calNext = function() {
+    const start = Math.max(0, parseInt(document.getElementById('calStart').value || '0') + parseInt(document.getElementById('calLimit').value || '80'));
+    document.getElementById('calStart').value = start;
+    loadCalendarSchedule(true);
+  }
+
+  async function ensureCitiesLoaded() {
+    if (current.cities) return current.cities;
+    const r = await fetch('/api/venues/cities?limit=500');
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error || 'Failed to load cities');
+    current.cities = d.cities || [];
+    return current.cities;
+  }
+
+  function cityOptions(cities) {
+    return cities.map(c => `<option value="${c.city_id}">${c.name} — ${c.country} (${c.continent})</option>`).join('');
+  }
+
+  window.vemLoadVenues = async function(preselectVenueId) {
+    const cityId = document.getElementById('vemCity').value;
+    const venueSel = document.getElementById('vemVenue');
+    venueSel.innerHTML = '<option value="">Loading…</option>';
+    const r = await fetch(`/api/venues/venues?city_id=${encodeURIComponent(cityId)}`);
+    const d = await r.json();
+    if (!d.success) {
+      venueSel.innerHTML = '<option value="">—</option>';
+      return;
+    }
+    const venues = d.venues || [];
+    venueSel.innerHTML = venues.map(v => `<option value="${v.venue_id}">${v.name} — ${v.venue_tier.toUpperCase()} (${(v.capacity||0).toLocaleString()} cap)</option>`).join('');
+    if (preselectVenueId) venueSel.value = preselectVenueId;
+  }
+
+  window.vemOpen = async function(showId) {
+    const schedule = window.__calendarSchedule || [];
+    const show = schedule.find(s => s.show_id === showId);
+    if (!show) return;
+    current.show = show;
+
+    document.getElementById('vemShowTitle').textContent = show.name || show.show_id;
+    document.getElementById('vemShowSub').textContent = `Year ${show.year}, Week ${show.week} • ${show.brand} • ${show.show_type}`;
+
+    const cities = await ensureCitiesLoaded();
+    const citySel = document.getElementById('vemCity');
+    citySel.innerHTML = cityOptions(cities);
+
+    let preCityId = (show.venue_assignment && show.venue_assignment.city_id) || null;
+    let preVenueId = (show.venue_assignment && show.venue_assignment.venue_id) || null;
+
+    if (!preCityId && show.city) {
+      const match = cities.find(c => (c.name || '').toLowerCase() === (show.city || '').toLowerCase());
+      if (match) preCityId = match.city_id;
+    }
+
+    if (preCityId) citySel.value = preCityId;
+    await window.vemLoadVenues(preVenueId);
+
+    new bootstrap.Modal(document.getElementById('venueEditModal')).show();
+  }
+
+  window.vemSave = async function() {
+    const show = current.show;
+    if (!show) return;
+
+    const cityId = document.getElementById('vemCity').value;
+    const venueId = document.getElementById('vemVenue').value;
+    if (!cityId || !venueId) {
+      alert('Select both a city and venue.');
+      return;
+    }
+
+    const cities = await ensureCitiesLoaded();
+    const city = cities.find(c => c.city_id === cityId);
+
+    const venuesResp = await fetch(`/api/venues/venues?city_id=${encodeURIComponent(cityId)}`);
+    const venuesData = await venuesResp.json();
+    const venue = (venuesData.venues || []).find(v => v.venue_id === venueId);
+
+    const r = await fetch(`/api/venues/shows/${encodeURIComponent(show.show_id)}`, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        show_name: show.name,
+        brand: show.brand,
+        show_type: show.show_type,
+        year: show.year,
+        week: show.week,
+        city_id: cityId,
+        venue_id: venueId
+      })
+    });
+    const d = await r.json();
+    if (!d.success) {
+      alert(d.error || 'Failed to save assignment');
+      return;
+    }
+
+    // Keep house_shows table in sync for tour views/revenue logic.
+    if ((show.show_id || '').startsWith('hs_') && city && venue) {
+      await fetch(`/api/show-production/house-show/${encodeURIComponent(show.show_id)}/location`, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ city: city.name, venue: venue.name })
+      });
+    }
+
+    bootstrap.Modal.getInstance(document.getElementById('venueEditModal')).hide();
+    await loadCalendarSchedule(true);
+  }
+
+  window.loadCalendarSchedule = async function(resetStartFromCurrent) {
+    const container = document.getElementById('calendarSchedule');
+    container.innerHTML = '<div class="card-body text-muted">Loading schedule…</div>';
+
+    try {
+      const cal = await (await fetch('/api/calendar/current')).json();
+      const currentIndex = cal.current_show_index || 0;
+
+      if (resetStartFromCurrent) {
+        const startInput = document.getElementById('calStart');
+        if (!startInput.dataset.userSet) {
+          startInput.value = Math.max(0, currentIndex - 10);
+        }
+      }
+
+      const start = parseInt(document.getElementById('calStart').value || '0');
+      const limit = parseInt(document.getElementById('calLimit').value || '80');
+      document.getElementById('calMeta').textContent = `Current index: ${currentIndex} • Total generated: ${cal.total_shows_generated || 0}`;
+
+      const r = await fetch(`/api/calendar/schedule?start=${encodeURIComponent(start)}&limit=${encodeURIComponent(limit)}`);
+      const d = await r.json();
+      if (!d.success) throw new Error(d.error || 'Failed to load schedule');
+
+      window.__calendarSchedule = d.shows || [];
+
+      const rows = window.__calendarSchedule.map(s => {
+        const city = s.city || (s.venue_assignment && s.venue_assignment.city_name) || '—';
+        const venue = s.venue || (s.venue_assignment && s.venue_assignment.venue_name) || '—';
+        return `
+          <tr>
+            <td class="text-nowrap">Y${s.year} W${s.week}</td>
+            <td><span class="badge bg-${dayBadge(s.day_of_week)}">${s.day_of_week || '—'}</span></td>
+            <td>${s.brand || '—'}</td>
+            <td class="fw-semibold">${s.name || s.show_id}</td>
+            <td><span class="badge bg-${typeBadge(s.show_type)} ${s.show_type==='minor_ppv' ? 'text-dark' : ''}">${(s.show_type||'weekly_tv').replace(/_/g,' ')}</span></td>
+            <td>${city}</td>
+            <td>${venue}</td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-primary" onclick="vemOpen('${s.show_id}')"><i class="bi bi-pencil"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover table-sm mb-0 align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Week</th>
+                  <th>Day</th>
+                  <th>Brand</th>
+                  <th>Show</th>
+                  <th>Type</th>
+                  <th>City</th>
+                  <th>Venue</th>
+                  <th class="text-end">Edit</th>
+                </tr>
+              </thead>
+              <tbody>${rows || `<tr><td colspan="8" class="text-muted p-3">No shows found.</td></tr>`}</tbody>
+            </table>
+          </div>
+        </div>`;
+
+    } catch (e) {
+      container.innerHTML = `<div class="card-body"><div class="alert alert-danger mb-0">${e.message}</div></div>`;
+    }
+  }
+
+  // Mark start as user-set once edited
+  const startEl = document.getElementById('calStart');
+  startEl.addEventListener('input', function(){ this.dataset.userSet = 'true'; });
+
+  loadCalendarSchedule(true);
+})();
+</script>
+

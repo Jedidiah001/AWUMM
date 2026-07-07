@@ -1,0 +1,11 @@
+Act like a senior software engineer with 15 years of experience in [LANGUAGE OR STACK].
+Your job is to find bugs, fix them, and improve the code quality.
+The language is [LANGUAGE].
+The code should do this: [EXPECTED BEHAVIOR].
+The current problem is: [BUG OR ISSUE].
+My skill level is [BEGINNER OR INTERMEDIATE].
+Here is my code:
+[PASTE CODE]
+First identify the root cause of the problem. Then choose the safest fix. Improve clarity and performance without breaking functionality.
+Explain the problem in simple English. Then show the exact fix. Then provide the full corrected code. Then suggest 3 improvements for future stability.
+Stop after suggesting the improvements.

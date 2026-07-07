@@ -1,0 +1,3835 @@
+# AWUM – AI Wrestling Universe Manager — React Native Production-Grade Prompt
+
+---
+
+You are my senior game engineer + architect.
+
+I want you to help me implement a **PRODUCTION-GRADE, OFFLINE** mobile game — a text-based wrestling management sim called **AWUM – AI Wrestling Universe Manager**.
+
+This is a **fully polished, production-ready mobile app** I will build and deploy to my Android phone (and optionally iOS) using **React Native**. It must be architected for maintainability, performance, extensibility, and a professional user experience.
+
+---
+
+## Constraints & Stack (Non-Negotiable)
+
+- **Target Platforms:** Android (primary), iOS (secondary/optional).
+- **Framework:** **React Native** with **Expo** (managed workflow preferred for faster iteration, but eject-ready if native modules needed).
+  - *Justification:* Expo provides a streamlined development experience, over-the-air updates (optional), and easy access to device APIs. Managed workflow reduces native build complexity while still allowing ejection if we need custom native modules later.
+- **Language:** **TypeScript** (strict mode enabled, no `any` types unless absolutely necessary and documented).
+- **State Management:** **Zustand** with **persist middleware** (using AsyncStorage or MMKV as the storage engine).
+  - *Justification:* Zustand is lightweight, TypeScript-friendly, and has excellent persist middleware for seamless save/load. Less boilerplate than Redux Toolkit while still being predictable and scalable.
+- **Storage:**
+  - **MMKV** (via `react-native-mmkv`) for fast key-value persistence of universe state and settings.
+    - *Justification:* MMKV is ~30x faster than AsyncStorage, synchronous, and handles large JSON blobs efficiently — critical for a game with complex state.
+  - **expo-sqlite** (or `react-native-sqlite-storage` if ejected) for relational data if needed (historical stats, match logs, title lineages).
+    - *Justification:* SQLite provides efficient querying for large historical datasets without loading everything into memory.
+- **Navigation:** **React Navigation v6** (native stack + bottom tabs).
+  - *Justification:* Industry standard, performant, well-documented, and supports deep linking for future extensibility.
+- **UI Framework:** **React Native Paper** (Material Design 3) with custom theming.
+  - *Justification:* Production-quality components, accessibility support, dark mode theming, and consistent design language out of the box.
+- **Animation:** **React Native Reanimated v3** + **Moti** for micro-interactions and transitions.
+  - *Justification:* Smooth 60fps animations on the UI thread, critical for polished game feel.
+- **Forms & Validation:** **React Hook Form** + **Zod** for type-safe form handling (Create-A-Wrestler, contract negotiations, settings).
+- **Testing:**
+  - **Jest** for unit tests (game engine logic).
+  - **React Native Testing Library** for component tests.
+  - **Detox** (optional) for E2E tests.
+- **Code Quality:**
+  - **ESLint** (with React Native and TypeScript configs).
+  - **Prettier** for formatting.
+  - **Husky** + **lint-staged** for pre-commit hooks.
+- **Error Handling:** **React Error Boundaries** + custom error logging (local only, no external services).
+- **Performance Monitoring:** **React Native Performance** monitoring hooks (local profiling only).
+
+**Hard Constraints:**
+- Game must run **fully offline** once installed. Zero network calls at runtime.
+- No LLM/AI API calls. All "AI Creative Director" logic is deterministic/probabilistic rules implemented locally.
+- No analytics, telemetry, or crash reporting requiring internet.
+- No backend server. All game logic runs on-device.
+- Single-player only.
+- One promotion with multiple brands (not multiple companies).
+
+---
+
+## High-Level Game Design (All Features Mandatory)
+
+### Player Fantasy
+
+> I am the **Booker/Owner** of a multi-brand wrestling promotion called **"Ring of Champions" (ROC)**. I oversee ROC Alpha, ROC Velocity, and ROC Vanguard. An AI "Creative Director" proposes show cards for each brand and PPV/PLE event. I tweak the cards, simulate matches, track finances and contracts, handle retirements and surprise returns, manage feuds and factions, and advance the universe through in-game years — building my wrestling empire.
+
+### Core Pillars
+
+1. **Deep Roster Management** — 40–50+ wrestlers with rich attributes, contracts, morale, injuries, aging, and retirement.
+2. **Multi-Brand Ecosystem** — 3 distinct brands with unique identities, weekly shows, and shared PPV/PLE events.
+3. **Engaging Booking System** — AI-generated show cards the player refines, with meaningful match outcome decisions.
+4. **Dynamic Storytelling** — Feuds, factions, surprise returns, alignment turns, and scripted Year One storylines.
+5. **Realistic Business Simulation** — Attendance, revenue, expenses, sponsorships, merchandise, TV ratings, and rival promotions.
+6. **Long-Term Progression** — Careers evolve over years, legends retire and return, the universe has living history.
+7. **Rich Immersion** — Social media simulation, dirt sheet leaks, press conferences, locker room politics, and fan sentiment tracking.
+
+---
+
+## 1. Universe & Brands
+
+### Promotion: Ring of Champions (ROC)
+
+Three brands under one promotion:
+
+| Brand | Identity | Weekly Show Day | Focus |
+|-------|----------|-----------------|-------|
+| **ROC Alpha** | Flagship | Monday | Main storylines, biggest stars, ROC World Championship |
+| **ROC Velocity** | Flagship | Friday | Fast-paced action, ROC United Championship |
+| **ROC Vanguard** | Developmental | Saturday | Rising stars, experimental match types, call-up pipeline |
+
+### Scheduling Model
+
+- **In-game time unit:** Week (1 week = 1 simulation step per show).
+- **Each in-game week contains up to 3 shows:**
+  - Monday: ROC Alpha
+  - Friday: ROC Velocity
+  - Saturday: ROC Vanguard
+- **Player advances one show at a time** (not one week at a time).
+- **PPV/PLE events** occur at designated weeks and may:
+  - Replace a brand's weekly show, OR
+  - Be an additional 4th show that week (configurable, document the chosen model).
+- **Calendar auto-generates infinitely** — no hard end date. Years roll over seamlessly.
+
+### Brand Data Model
+
+```typescript
+interface Brand {
+  id: 'alpha' | 'velocity' | 'vanguard';
+  name: string;
+  shortName: string;
+  showDay: 'monday' | 'friday' | 'saturday';
+  prestige: number; // 0-100
+  fanBase: number; // Affects attendance baseline
+  color: string; // UI theming
+  description: string;
+}
+```
+
+---
+
+## 2. Yearly PPV & PLE Events (8 Named Events)
+
+Implement all 8 PPV/PLE events, placed appropriately in a 52-week year (4 weeks/month approximation):
+
+| # | Event Name | Month | Week ~# | Tier | Focus |
+|---|------------|-------|---------|------|-------|
+| 1 | **Rumble Royale** | January | 4 | Major | 30-wrestler battle royal, Mania title shot on the line |
+| 2 | **Clash of Titans** | March | 12 | Major | Marquee singles/multi-man spectacles |
+| 3 | **Overdrive** | May | 20 | Minor | High-speed action, Velocity-focused |
+| 4 | **Champions' Ascent** | June | 24 | Minor | All titles defended, new champions crowned |
+| 5 | **Summer Slamfest** | August | 32 | Major | Summer blockbuster, 2nd biggest show |
+| 6 | **Autumn Annihilation** | October | 40 | Minor | Grudge matches, feud blowoffs |
+| 7 | **Night of Glory** | November | 44 | Major | Major PLE, special recurring concept |
+| 8 | **Victory Dome** | December | 50 | Major | Biggest show of the year, WrestleMania equivalent |
+
+### PPV/PLE Data Model
+
+```typescript
+interface PPVEvent {
+  id: string;
+  name: string;
+  month: number; // 1-12
+  weekOfYear: number; // 1-52
+  tier: 'minor' | 'major';
+  isCrossBrand: boolean;
+  focusBrand?: BrandId; // If brand-specific
+  description: string;
+  specialRules?: SpecialMatchRules[]; // e.g., Rumble Royale rules
+}
+```
+
+### Night of Glory Special Rule
+
+Night of Glory can appear up to 3 times per year as brand-specific editions:
+- **Night of Glory: Alpha** (e.g., Week 16)
+- **Night of Glory: Velocity** (e.g., Week 36)
+- **Night of Glory** (Main, November, Week 44)
+
+Implementation: Store Night of Glory as a template that can be instantiated multiple times in the calendar generator.
+
+---
+
+## 3. Championships (8 Titles)
+
+| # | Championship | Brand Scope | Type | Initial Prestige |
+|---|--------------|-------------|------|------------------|
+| 1 | **ROC World Championship** | Alpha | Top Singles | 95 |
+| 2 | **ROC United Championship** | Velocity | Top Singles (for Velocity) | 85 |
+| 3 | **ROC Intercontinental Championship** | Alpha | Mid-card Singles | 75 |
+| 4 | **ROC Tag Team Championship** | Alpha | Tag Team | 70 |
+| 5 | **ROC Velocity Tag Titles** | Velocity | Tag Team | 65 |
+| 6 | **ROC Vanguard Championship** | Vanguard | Top Singles (developmental) | 55 |
+| 7 | **ROC Vanguard Tag Team Titles** | Vanguard | Tag Team | 50 |
+| 8 | **ROC Women's World Championship** | Cross-brand (all) | Women's Singles | 80 |
+
+### Championship Data Model
+
+```typescript
+interface Championship {
+  id: string;
+  name: string;
+  shortName: string;
+  brandScope: BrandId | 'cross-brand';
+  type: 'singles' | 'tag' | 'womens';
+  prestige: number; // 0-100, fluctuates based on holder/defenses
+  currentHolderId: string | null; // Wrestler ID or Tag Team ID
+  isVacant: boolean;
+  history: TitleReign[];
+  createdAt: GameDate;
+}
+
+interface TitleReign {
+  id: string;
+  holderId: string;
+  holderName: string;
+  startShowId: string;
+  startDate: GameDate;
+  endShowId?: string;
+  endDate?: GameDate;
+  defenseCount: number;
+  reignLengthWeeks: number;
+}
+```
+
+### Title Logic Requirements
+
+- **Prestige fluctuates** based on:
+  - Quality of defenses (match star ratings).
+  - Holder's popularity and role.
+  - Length of reign without defenses (prestige decays).
+  - Controversial finishes (prestige drops slightly).
+- **Vacancy handling:** If champion is injured 6+ weeks, retires, or is released, title becomes vacant. Tournament or multi-man match to crown new champion.
+- **Lineage tracking:** Full historical record of every reign, queryable for stats.
+
+---
+
+## 4. Wrestlers
+
+### Roster Size & Composition
+
+- **40–50 active wrestlers** at game start.
+- Balanced across brands: ~15 Alpha, ~15 Velocity, ~15 Vanguard, ~5 floating/injured/legends.
+- Gender split: ~35-40 male, ~10-15 female (women can compete for Women's World Championship and appear on any brand).
+- Some designated as **Major Superstars** (main event legends, eligible for surprise returns).
+
+### Wrestler Data Model
+
+```typescript
+interface Wrestler {
+  // === Identity ===
+  id: string;
+  name: string;
+  nickname?: string;
+  gender: 'male' | 'female';
+  alignment: 'face' | 'heel' | 'tweener';
+  role: 'main_event' | 'upper_midcard' | 'midcard' | 'lower_midcard' | 'jobber';
+  primaryBrand: BrandId;
+  isMajorSuperstar: boolean;
+  isLegend: boolean;
+  
+  // === Physical ===
+  age: number; // Years
+  height: number; // cm
+  weight: number; // kg
+  hometown: string;
+  
+  // === Career ===
+  yearsExperience: number;
+  debutYear: number;
+  
+  // === Attributes (0-100) ===
+  attributes: WrestlerAttributes;
+  
+  // === Dynamic Stats ===
+  popularity: number; // 0-100
+  momentum: number; // -100 to 100
+  morale: number; // -100 to 100
+  fatigue: number; // 0-100 (high = tired)
+  overness: number; // 0-100, crowd connection
+  workRate: number; // 0-100, match quality ability
+  
+  // === Injury ===
+  injury: InjuryStatus | null;
+  injuryHistory: Injury[];
+  
+  // === Contract ===
+  contract: Contract;
+  
+  // === Relationships ===
+  factionId?: string;
+  tagTeamId?: string;
+  managerId?: string;
+  rivalryIds: string[];
+  allyIds: string[];
+  
+  // === Traits & Modifiers ===
+  traits: WrestlerTrait[];
+  signatureSpots: SignatureSpot[];
+  finisher: Finisher;
+  entranceRating: number; // 0-100
+  merchanidseTier: 'none' | 'low' | 'mid' | 'high' | 'mega';
+  
+  // === Career Stats ===
+  stats: CareerStats;
+  
+  // === Status ===
+  status: 'active' | 'injured' | 'suspended' | 'retired' | 'released' | 'free_agent';
+  retiredAt?: GameDate;
+}
+
+interface WrestlerAttributes {
+  brawling: number;
+  technical: number;
+  speed: number;
+  aerial: number;
+  power: number;
+  mic: number;
+  psychology: number;
+  stamina: number;
+  charisma: number;
+  selling: number;
+}
+
+interface InjuryStatus {
+  type: string; // "knee sprain", "concussion", etc.
+  severity: 'minor' | 'moderate' | 'major' | 'career_threatening';
+  weeksRemaining: number;
+  occurredAt: GameDate;
+  matchId?: string;
+}
+
+interface Contract {
+  salaryPerShow: number;
+  salaryPerWeek: number;
+  signingBonus: number;
+  lengthWeeks: number;
+  startDate: GameDate;
+  expirationDate: GameDate;
+  weeksRemaining: number;
+  
+  // Special clauses
+  hasCreativeControl: boolean;
+  noJobClause: string[]; // Wrestler IDs they won't lose to
+  guaranteedTitleShot: boolean;
+  titleShotDeadline?: GameDate;
+  merchandiseSplit: number; // 0-100 percentage
+  downsideGuarantee: number;
+  brandLock?: BrandId; // Locked to specific brand
+}
+
+interface CareerStats {
+  matchesTotal: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  titleReigns: number;
+  titleDefenses: number;
+  ppvMainEvents: number;
+  averageMatchRating: number;
+  highestMatchRating: number;
+  rumbleRoyaleWins: number;
+  showsHeadlined: number;
+}
+
+type WrestlerTrait = 
+  | 'iron_man' // High stamina recovery
+  | 'glass_cannon' // High offense, injury prone
+  | 'locker_room_leader' // Boosts morale of others
+  | 'politician' // Demands creative control
+  | 'workhorse' // Consistent match quality
+  | 'spot_monkey' // High spots, risky
+  | 'promo_god' // Exceptional mic work
+  | 'silent_badass' // Low mic, high presence
+  | 'underdog' // Crowd rallies behind them
+  | 'heat_magnet' // Natural heel heat
+  | 'merch_mover' // High merchandise sales
+  | 'injury_prone' // Higher injury chance
+  | 'durable' // Lower injury chance
+  | 'drama_queen' // Low morale swings
+  | 'professional' // Stable morale
+  | 'social_media_star' // Viral moments
+  | 'old_school' // Traditional style
+  | 'innovator'; // Creates new moves/spots
+```
+
+### Age & Attribute Degradation
+
+**Age Thresholds:**
+- 20-30: Peak years, no degradation.
+- 31-35: Slight Speed/Stamina decline (-1 to -2 per year).
+- 36-40: Moderate decline across physical attributes (-2 to -3 per year).
+- 41-45: Significant decline (-3 to -5 per year), retirement consideration begins.
+- 46+: Severe decline, high retirement probability each year.
+
+**Degradation Formula (per in-game year):**
+```typescript
+function degradeAttributes(wrestler: Wrestler): void {
+  const age = wrestler.age;
+  if (age <= 30) return;
+  
+  const decayFactor = age <= 35 ? 1 : age <= 40 ? 2 : age <= 45 ? 3 : 5;
+  
+  // Physical attributes decay first
+  wrestler.attributes.speed -= randomInt(1, decayFactor);
+  wrestler.attributes.stamina -= randomInt(1, decayFactor);
+  wrestler.attributes.aerial -= randomInt(0, decayFactor);
+  
+  if (age > 40) {
+    wrestler.attributes.brawling -= randomInt(0, decayFactor - 1);
+    wrestler.attributes.power -= randomInt(0, decayFactor - 1);
+  }
+  
+  // Mic and psychology can actually improve with age
+  if (age <= 40 && randomChance(0.3)) {
+    wrestler.attributes.psychology += randomInt(0, 2);
+    wrestler.attributes.mic += randomInt(0, 1);
+  }
+  
+  // Clamp all values
+  clampAttributes(wrestler.attributes, 0, 100);
+}
+```
+
+### Retirement System
+
+**Retirement Triggers:**
+- Age 45+ with declining attributes: Increasing yearly retirement probability.
+- Career-threatening injury: Immediate retirement consideration.
+- Very low morale (<-80) for extended period.
+- Player can force retirement (storyline purposes).
+- Wrestler requests retirement (based on morale, age, injury history).
+
+**Retirement Process:**
+1. Wrestler flagged for retirement evaluation.
+2. Retirement tour option (3-6 month farewell arc with bonus crowd reactions).
+3. Final match at major PPV (preferably Victory Dome).
+4. Status changed to `'retired'`, moved to retired pool.
+5. Eligible for Hall of Fame induction.
+6. Remains in universe data for surprise returns.
+
+### Contracts & Finances
+
+**Contract Lifecycle:**
+1. **Negotiation:** (Free agent signing or renewal)
+   - Base salary negotiation.
+   - Contract length (26 weeks to 156 weeks / 0.5 to 3 years).
+   - Special clauses based on wrestler's leverage.
+2. **Active:** Wrestler is booked normally, paid per show/week.
+3. **Expiring (4 weeks warning):** Player notified, must decide to extend or release.
+4. **Expired:** Wrestler becomes free agent if not extended.
+
+**Paycheck Calculation (per show):**
+```typescript
+function calculateShowPay(wrestler: Wrestler, showType: ShowType): number {
+  const basePay = wrestler.contract.salaryPerShow;
+  const multiplier = showType === 'ppv' ? 2.0 : showType === 'ple' ? 2.5 : 1.0;
+  const mainEventBonus = isMainEvent ? basePay * 0.5 : 0;
+  return Math.floor(basePay * multiplier + mainEventBonus);
+}
+```
+
+---
+
+## 5. Tag Team System
+
+### Tag Team Data Model
+
+```typescript
+interface TagTeam {
+  id: string;
+  name: string;
+  memberIds: [string, string]; // Exactly 2 wrestlers
+  isActive: boolean;
+  brandId: BrandId;
+  
+  // Combined ratings
+  chemistry: number; // 0-100, affects match quality bonus
+  teamworkRating: number; // 0-100
+  combinedPopularity: number; // Derived from members
+  
+  // Identity
+  alignment: 'face' | 'heel' | 'tweener';
+  entranceRating: number;
+  tagFinisher: Finisher;
+  signatureSpots: SignatureSpot[];
+  
+  // Stats
+  stats: {
+    matchesAsTeam: number;
+    wins: number;
+    losses: number;
+    titleReigns: number;
+  };
+  
+  formedAt: GameDate;
+  disbandedAt?: GameDate;
+}
+```
+
+### Tag Team Mechanics
+
+- **Formal Tag Teams:** Registered teams with team name, combined entrance, chemistry bonus.
+- **Ad-hoc Pairings:** Creative Director can suggest pairing two singles wrestlers. Lower chemistry, but can lead to formal team formation if successful.
+- **Chemistry Building:** Repeated successful pairings increase chemistry (up to forming a formal team).
+- **Team Dissolution:** Feud between partners, brand split, injury, or player choice can break up teams.
+
+---
+
+## 6. Faction System
+
+### Faction Data Model
+
+```typescript
+interface Faction {
+  id: string;
+  name: string;
+  shortName: string;
+  leaderId: string;
+  memberIds: string[];
+  alignment: 'face' | 'heel' | 'tweener';
+  brandAffiliation: BrandId | 'cross-brand';
+  
+  // Ratings
+  power: number; // 0-100, influence in storylines
+  unity: number; // 0-100, internal cohesion
+  heat: number; // 0-100, crowd reaction intensity
+  
+  // Storyline
+  isAtWar: boolean;
+  rivalFactionId?: string;
+  
+  formedAt: GameDate;
+  disbandedAt?: GameDate;
+  isActive: boolean;
+}
+```
+
+### Faction Mechanics
+
+- **Member Limit:** 3-7 members typical.
+- **Leader:** Designated leader gets booking priority, speaks for faction.
+- **Faction Warfare:** Multi-month arcs between rival factions.
+- **Interference:** Faction members can interfere in each other's matches (affects finish, match quality).
+- **Unity Decay:** If members lose frequently or aren't booked together, unity drops. Low unity leads to implosion/betrayal angles.
+- **Faction Bonuses:** Members get morale boost from faction success, merchandise bundling.
+
+---
+
+## 7. Economy System
+
+### Revenue Streams
+
+```typescript
+interface PromotionFinances {
+  balance: number; // Current cash
+  
+  // Income tracking
+  weeklyTicketRevenue: number;
+  weeklyMerchRevenue: number;
+  weeklyTVRightsRevenue: number;
+  weeklySponsorshipRevenue: number;
+  ppvBuyRevenue: number;
+  
+  // Expense tracking
+  weeklyPayroll: number;
+  weeklyProductionCosts: number;
+  weeklyVenueCosts: number;
+  weeklyMiscExpenses: number;
+  
+  // History
+  financialHistory: WeeklyFinancialReport[];
+}
+
+interface ShowFinancials {
+  showId: string;
+  attendance: number;
+  maxCapacity: number;
+  ticketPrice: number;
+  grossTicketRevenue: number;
+  merchSales: number;
+  productionCost: number;
+  wrestlerPayroll: number;
+  venueCost: number;
+  netProfitLoss: number;
+  ppvBuyRate?: number; // For PPV/PLE only
+  ppvRevenue?: number;
+}
+```
+
+### Attendance Calculation
+
+```typescript
+function calculateAttendance(show: ShowDraft, universe: UniverseState): number {
+  const baseAttendance = getBaseAttendance(show.type, show.brand);
+  
+  // Modifiers
+  const cardQualityMod = calculateCardQuality(show.matches) * 0.3;
+  const starPowerMod = calculateStarPower(show.matches) * 0.25;
+  const brandPrestigeMod = getBrandPrestige(show.brand) * 0.15;
+  const feudHeatMod = calculateFeudHeat(show.matches) * 0.15;
+  const momentumMod = getPromotionMomentum(universe) * 0.1;
+  const seasonalMod = getSeasonalModifier(universe.currentDate) * 0.05;
+  
+  const totalMod = 1 + cardQualityMod + starPowerMod + brandPrestigeMod + 
+                   feudHeatMod + momentumMod + seasonalMod;
+  
+  const attendance = Math.floor(baseAttendance * totalMod);
+  return clamp(attendance, 0, getVenueCapacity(show));
+}
+
+function getBaseAttendance(type: ShowType, brand: BrandId): number {
+  const bases = {
+    weekly: { alpha: 8000, velocity: 7000, vanguard: 3000 },
+    ppv_minor: 12000,
+    ppv_major: 18000,
+    ple: 25000,
+    victory_dome: 50000,
+  };
+  // Return appropriate base
+}
+```
+
+### Revenue Calculation
+
+```typescript
+function calculateShowRevenue(show: ShowResult): ShowFinancials {
+  const attendance = show.attendance;
+  const ticketPrice = getTicketPrice(show.type);
+  const grossTicketRevenue = attendance * ticketPrice;
+  
+  // Merch (percentage of attendance * average spend * star power factor)
+  const merchSales = Math.floor(attendance * 0.4 * 15 * show.starPowerFactor);
+  
+  // PPV revenue (if applicable)
+  const ppvBuyRate = show.isPpv ? calculatePPVBuyRate(show) : 0;
+  const ppvRevenue = ppvBuyRate * getPPVPrice(show.tier);
+  
+  // Expenses
+  const wrestlerPayroll = calculateShowPayroll(show);
+  const productionCost = getProductionCost(show.type);
+  const venueCost = getVenueCost(show.type, attendance);
+  
+  const netProfitLoss = grossTicketRevenue + merchSales + ppvRevenue - 
+                        wrestlerPayroll - productionCost - venueCost;
+  
+  return {
+    showId: show.id,
+    attendance,
+    maxCapacity: getVenueCapacity(show),
+    ticketPrice,
+    grossTicketRevenue,
+    merchSales,
+    productionCost,
+    wrestlerPayroll,
+    venueCost,
+    netProfitLoss,
+    ppvBuyRate: show.isPpv ? ppvBuyRate : undefined,
+    ppvRevenue: show.isPpv ? ppvRevenue : undefined,
+  };
+}
+```
+
+### TV Ratings System
+
+```typescript
+interface TVRatings {
+  showId: string;
+  overallRating: number; // 0.0 - 5.0 typical range
+  peakRating: number;
+  peakSegment: string;
+  quarterHourBreakdown: QuarterHourRating[];
+  viewership: number;
+  demo18_49: number;
+  yearOverYearChange: number;
+}
+
+interface QuarterHourRating {
+  segmentIndex: number;
+  rating: number;
+  matchOrSegmentId: string;
+  viewershipChange: number; // vs previous quarter
+}
+```
+
+---
+
+## 8. Feud System
+
+### Feud Data Model
+
+```typescript
+interface Feud {
+  id: string;
+  type: 'personal' | 'title' | 'faction' | 'mentor_protege' | 'legacy' | 'random';
+  participantIds: string[]; // Usually 2, but can be more
+  participantType: 'individual' | 'faction' | 'tag_team';
+  
+  // Stakes
+  titleId?: string; // If title feud
+  stipulation?: string; // e.g., "Loser leaves town"
+  
+  // Intensity & Progress
+  intensity: number; // 0-100
+  heat: number; // 0-100, crowd investment
+  weeksActive: number;
+  
+  // Story beats
+  segments: FeudSegment[];
+  startShowId: string;
+  startDate: GameDate;
+  lastSegmentShowId?: string;
+  plannedPayoffShowId?: string;
+  plannedPayoffEvent?: string; // PPV name
+  
+  // Resolution
+  isResolved: boolean;
+  resolvedAt?: GameDate;
+  winner?: string;
+  resolutionType?: 'clean_finish' | 'interference' | 'injury' | 'double_turn' | 'screwjob';
+  
+  // Meta
+  isHotShotted: boolean; // Rushed = diminishing returns
+  fanReception: number; // -100 to 100
+}
+
+interface FeudSegment {
+  id: string;
+  showId: string;
+  type: 'match' | 'promo' | 'attack' | 'confrontation' | 'betrayal' | 'alliance_break';
+  description: string;
+  intensityChange: number;
+  heatChange: number;
+}
+```
+
+### Feud Mechanics
+
+- **Organic Feuds:** Emerge from upsets, title contention, or random events.
+- **Scripted Feuds:** Creative Director proposes feuds for storyline purposes.
+- **Intensity Building:** Each segment/match adds intensity. Higher intensity = bigger payoff.
+- **Payoff Timing:** Feuds should resolve at PPVs for maximum impact. Resolving on weekly TV wastes potential.
+- **Hot-Shotting Penalty:** Rushing to payoff reduces fan reception and diminishes future feud potential between same wrestlers.
+- **Cool-Down Period:** After resolution, wrestlers shouldn't feud again for 6+ months.
+
+---
+
+## 9. AI Creative Director
+
+The AI Creative Director is the core booking engine that generates show cards for player review and modification.
+
+### Creative Director Logic
+
+```typescript
+interface CreativeDirector {
+  generateShowDraft(
+    universe: UniverseState,
+    showInfo: ScheduledShow
+  ): ShowDraft;
+  
+  suggestFeuds(universe: UniverseState): FeudSuggestion[];
+  suggestTitleChanges(universe: UniverseState): TitleChangeSuggestion[];
+  suggestCallUps(universe: UniverseState): CallUpSuggestion[];
+  suggestAlignmentTurns(universe: UniverseState): AlignmentTurnSuggestion[];
+  evaluateRoster(universe: UniverseState): RosterEvaluation;
+}
+
+interface ShowDraft {
+  id: string;
+  showInfo: ScheduledShow;
+  matches: MatchDraft[];
+  segments: SegmentDraft[];
+  estimatedRating: number;
+  estimatedAttendance: number;
+  notes: string[];
+  warnings: string[]; // e.g., "Overusing main eventers"
+}
+
+interface MatchDraft {
+  id: string;
+  matchType: MatchType;
+  participantAIds: string[]; // Wrestler or team IDs
+  participantBIds: string[];
+  titleId?: string;
+  feudId?: string;
+  cardPosition: 'opener' | 'lower_card' | 'mid_card' | 'upper_card' | 'main_event';
+  suggestedWinner: 'A' | 'B' | 'draw';
+  bookingBias: BookingBias;
+  importance: MatchImportance;
+  estimatedTime: number; // minutes
+  estimatedRating: number;
+  rationale: string; // Why AI suggested this match
+}
+
+type BookingBias = 'strong_a' | 'slight_a' | 'even' | 'slight_b' | 'strong_b';
+type MatchImportance = 'throwaway' | 'normal' | 'featured' | 'protected' | 'high_drama';
+```
+
+### Card Generation Algorithm
+
+```typescript
+function generateShowDraft(universe: UniverseState, showInfo: ScheduledShow): ShowDraft {
+  const { brand, isPpv, ppvName, tier } = showInfo;
+  const roster = getAvailableRoster(universe, brand);
+  const activeFeud = getActiveFeuds(universe, brand);
+  const titles = getBrandTitles(universe, brand);
+  
+  const matches: MatchDraft[] = [];
+  const usedWrestlers = new Set<string>();
+  
+  // 1. MAIN EVENT
+  const mainEvent = selectMainEvent(universe, showInfo, roster, activeFeuds, titles);
+  matches.push(mainEvent);
+  addUsedWrestlers(usedWrestlers, mainEvent);
+  
+  // 2. TITLE MATCHES (non-main event)
+  const titleMatches = selectTitleMatches(universe, showInfo, roster, titles, usedWrestlers);
+  matches.push(...titleMatches);
+  titleMatches.forEach(m => addUsedWrestlers(usedWrestlers, m));
+  
+  // 3. FEUD MATCHES
+  const feudMatches = selectFeudMatches(universe, showInfo, activeFeuds, usedWrestlers);
+  matches.push(...feudMatches);
+  feudMatches.forEach(m => addUsedWrestlers(usedWrestlers, m));
+  
+  // 4. FEATURED MATCHES (rising stars, call-up showcases)
+  const featuredMatches = selectFeaturedMatches(universe, showInfo, roster, usedWrestlers);
+  matches.push(...featuredMatches);
+  featuredMatches.forEach(m => addUsedWrestlers(usedWrestlers, m));
+  
+  // 5. FILLER MATCHES (remaining roster, avoid staleness)
+  const fillerMatches = selectFillerMatches(universe, showInfo, roster, usedWrestlers);
+  matches.push(...fillerMatches);
+  
+  // 6. SEGMENTS (promos, backstage, etc.)
+  const segments = generateSegments(universe, showInfo, activeFeuds);
+  
+  // 7. Sort by card position
+  sortByCardPosition(matches);
+  
+  return {
+    id: generateId(),
+    showInfo,
+    matches,
+    segments,
+    estimatedRating: calculateEstimatedRating(matches),
+    estimatedAttendance: calculateEstimatedAttendance(matches, showInfo),
+    notes: generateBookingNotes(matches),
+    warnings: generateBookingWarnings(matches, universe),
+  };
+}
+```
+
+### Booking Rules (Enforced by AI)
+
+1. **No wrestler on consecutive shows** (same brand) unless storyline demands.
+2. **Main eventers limited to 2 matches per week** across all brands.
+3. **Injured wrestlers excluded** from card generation.
+4. **Contract clauses respected** (no-job clauses, brand locks).
+5. **Title defenses spaced appropriately** (not every week).
+6. **Variety in opponents** — avoid same match within 3 weeks unless feud.
+7. **Balance of alignments** — cards shouldn't be all heel vs heel.
+8. **Call-up integration** — Vanguard stars get showcase matches before main roster debut.
+
+---
+
+## 10. Match Simulation Engine
+
+### Match Simulation Flow
+
+```typescript
+function simulateMatch(
+  matchDraft: MatchDraft,
+  universe: UniverseState
+): MatchResult {
+  // 1. Calculate base ratings for each side
+  const sideA = calculateSideRating(matchDraft.participantAIds, universe);
+  const sideB = calculateSideRating(matchDraft.participantBIds, universe);
+  
+  // 2. Apply modifiers
+  const modifiedA = applyMatchModifiers(sideA, matchDraft, universe);
+  const modifiedB = applyMatchModifiers(sideB, matchDraft, universe);
+  
+  // 3. Determine winner
+  const winner = determineWinner(modifiedA, modifiedB, matchDraft.bookingBias);
+  
+  // 4. Calculate match quality
+  const matchQuality = calculateMatchQuality(sideA, sideB, matchDraft);
+  
+  // 5. Generate match narrative
+  const narrative = generateMatchNarrative(matchDraft, winner, matchQuality, universe);
+  
+  // 6. Check for special events
+  const specialEvents = checkSpecialEvents(matchDraft, winner, universe);
+  
+  // 7. Calculate stat changes
+  const statChanges = calculateStatChanges(matchDraft, winner, matchQuality, specialEvents);
+  
+  // 8. Check for injuries
+  const injuries = checkInjuries(matchDraft, universe);
+  
+  return {
+    matchId: matchDraft.id,
+    matchDraft,
+    winner,
+    loser: winner === 'A' ? 'B' : 'A',
+    matchQuality,
+    starRating: qualityToStarRating(matchQuality),
+    duration: calculateDuration(matchDraft, matchQuality),
+    finishType: determineFinishType(matchDraft, winner, universe),
+    narrative,
+    specialEvents,
+    statChanges,
+    injuries,
+    crowdReaction: calculateCrowdReaction(matchDraft, winner, matchQuality),
+  };
+}
+```
+
+### Match Quality Calculation
+
+```typescript
+function calculateMatchQuality(
+  sideA: SideRating,
+  sideB: SideRating,
+  matchDraft: MatchDraft
+): number {
+  // Base quality from wrestler skills
+  const avgWorkRate = (sideA.workRate + sideB.workRate) / 2;
+  const avgPsychology = (sideA.psychology + sideB.psychology) / 2;
+  const avgSelling = (sideA.selling + sideB.selling) / 2;
+  
+  const baseQuality = (avgWorkRate * 0.4) + (avgPsychology * 0.35) + (avgSelling * 0.25);
+  
+  // Modifiers
+  const chemistryMod = calculateChemistry(sideA, sideB) * 0.15;
+  const staminaMod = ((sideA.stamina + sideB.stamina) / 200 - 0.5) * 0.1;
+  const fatiguePenalty = ((sideA.fatigue + sideB.fatigue) / 200) * -0.15;
+  const feudBonus = matchDraft.feudId ? 0.1 : 0;
+  const titleBonus = matchDraft.titleId ? 0.08 : 0;
+  const importanceBonus = getImportanceBonus(matchDraft.importance);
+  const cardPositionBonus = getCardPositionBonus(matchDraft.cardPosition);
+  const crowdHeatMod = ((sideA.popularity + sideB.popularity) / 200 - 0.5) * 0.1;
+  
+  // Random variance (±10%)
+  const variance = (Math.random() - 0.5) * 0.2;
+  
+  const totalQuality = baseQuality * (1 + chemistryMod + staminaMod + fatiguePenalty + 
+                                       feudBonus + titleBonus + importanceBonus + 
+                                       cardPositionBonus + crowdHeatMod + variance);
+  
+  return clamp(totalQuality, 0, 100);
+}
+
+function qualityToStarRating(quality: number): number {
+  // 0-100 quality to 0-5 stars (with precision to 0.25)
+  const raw = (quality / 100) * 5;
+  return Math.round(raw * 4) / 4;
+}
+```
+
+### Winner Determination
+
+```typescript
+function determineWinner(
+  sideA: ModifiedSideRating,
+  sideB: ModifiedSideRating,
+  bias: BookingBias
+): 'A' | 'B' | 'draw' {
+  // Base win probability from ratings
+  const ratingDiff = sideA.overall - sideB.overall;
+  let baseWinProbA = 0.5 + (ratingDiff / 200); // ±25% swing based on rating
+  
+  // Apply booking bias
+  const biasModifiers = {
+    'strong_a': 0.35,
+    'slight_a': 0.15,
+    'even': 0,
+    'slight_b': -0.15,
+    'strong_b': -0.35,
+  };
+  
+  baseWinProbA += biasModifiers[bias];
+  baseWinProbA = clamp(baseWinProbA, 0.05, 0.95);
+  
+  // Roll
+  const roll = Math.random();
+  if (roll < baseWinProbA) return 'A';
+  return 'B';
+}
+```
+
+### Upset Detection
+
+```typescript
+function checkForUpset(
+  matchDraft: MatchDraft,
+  winner: 'A' | 'B',
+  universe: UniverseState
+): UpsetEvent | null {
+  const winnerIds = winner === 'A' ? matchDraft.participantAIds : matchDraft.participantBIds;
+  const loserIds = winner === 'A' ? matchDraft.participantBIds : matchDraft.participantAIds;
+  
+  const winnerPopularity = getAveragePopularity(winnerIds, universe);
+  const loserPopularity = getAveragePopularity(loserIds, universe);
+  const winnerRole = getHighestRole(winnerIds, universe);
+  const loserRole = getHighestRole(loserIds, universe);
+  
+  const popularityGap = loserPopularity - winnerPopularity;
+  const roleGap = getRoleGap(loserRole, winnerRole);
+  
+  // Major upset: Jobber beats Main Eventer, or 30+ popularity gap
+  if (roleGap >= 3 || popularityGap >= 30) {
+    return {
+      type: 'major_upset',
+      winnerId: winnerIds[0],
+      loserId: loserIds[0],
+      popularityGap,
+      roleGap,
+      description: `MAJOR UPSET: ${getWrestlerName(winnerIds[0])} defeats ${getWrestlerName(loserIds[0])}!`,
+    };
+  }
+  
+  // Minor upset: Significant but not shocking
+  if (roleGap >= 2 || popularityGap >= 20) {
+    return {
+      type: 'minor_upset',
+      winnerId: winnerIds[0],
+      loserId: loserIds[0],
+      popularityGap,
+      roleGap,
+      description: `Upset victory for ${getWrestlerName(winnerIds[0])}!`,
+    };
+  }
+  
+  return null;
+}
+```
+
+### Match Narrative Generation
+
+```typescript
+interface MatchNarrative {
+  opening: string;
+  earlyAction: string[];
+  midMatchSpot: string[];
+  heatSegment: string;
+  comeback?: string;
+  nearFalls: string[];
+  finish: string;
+  postMatch?: string;
+}
+
+function generateMatchNarrative(
+  matchDraft: MatchDraft,
+  winner: 'A' | 'B',
+  quality: number,
+  universe: UniverseState
+): MatchNarrative {
+  const participantsA = getWrestlers(matchDraft.participantAIds, universe);
+  const participantsB = getWrestlers(matchDraft.participantBIds, universe);
+  
+  const narrative: MatchNarrative = {
+    opening: generateOpening(participantsA, participantsB, matchDraft),
+    earlyAction: generateEarlyAction(participantsA, participantsB, matchDraft),
+    midMatchSpot: generateMidMatchSpots(participantsA, participantsB, quality),
+    heatSegment: generateHeatSegment(winner === 'A' ? participantsB : participantsA),
+    nearFalls: generateNearFalls(quality, matchDraft),
+    finish: generateFinish(winner, participantsA, participantsB, matchDraft, universe),
+  };
+  
+  // Add comeback for face winner or high-drama match
+  if (shouldHaveComeback(winner, participantsA, participantsB, matchDraft)) {
+    narrative.comeback = generateComeback(winner === 'A' ? participantsA : participantsB);
+  }
+  
+  // Add post-match for feuds or title changes
+  if (matchDraft.feudId || matchDraft.titleId) {
+    narrative.postMatch = generatePostMatch(matchDraft, winner, universe);
+  }
+  
+  return narrative;
+}
+```
+
+---
+
+## 11. Show Simulation Engine
+
+```typescript
+function simulateShow(
+  showDraft: ShowDraft,
+  universe: UniverseState
+): { showResult: ShowResult; updatedUniverse: UniverseState } {
+  let currentUniverse = deepClone(universe);
+  const matchResults: MatchResult[] = [];
+  const segmentResults: SegmentResult[] = [];
+  const showEvents: ShowEvent[] = [];
+  
+  // Pre-show processing
+  const surpriseReturn = checkSurpriseReturn(showDraft, currentUniverse);
+  if (surpriseReturn) {
+    currentUniverse = processSurpriseReturn(surpriseReturn, currentUniverse);
+    showEvents.push(surpriseReturn);
+  }
+  
+  // Process each card item in order
+  for (const item of showDraft.cardOrder) {
+    if (item.type === 'match') {
+      const matchDraft = showDraft.matches.find(m => m.id === item.id)!;
+      const matchResult = simulateMatch(matchDraft, currentUniverse);
+      matchResults.push(matchResult);
+      
+      // Apply match effects to universe
+      currentUniverse = applyMatchEffects(matchResult, currentUniverse);
+      
+      // Check for title change
+      if (matchDraft.titleId && matchResult.winner) {
+        const titleChange = processTitleChange(matchDraft, matchResult, currentUniverse);
+        if (titleChange) {
+          showEvents.push(titleChange);
+          currentUniverse = applyTitleChange(titleChange, currentUniverse);
+        }
+      }
+      
+      // Add any match events
+      showEvents.push(...matchResult.specialEvents);
+      
+    } else if (item.type === 'segment') {
+      const segmentDraft = showDraft.segments.find(s => s.id === item.id)!;
+      const segmentResult = simulateSegment(segmentDraft, currentUniverse);
+      segmentResults.push(segmentResult);
+      currentUniverse = applySegmentEffects(segmentResult, currentUniverse);
+    }
+  }
+  
+  // Post-show processing
+  currentUniverse = processPostShowEffects(showDraft, matchResults, currentUniverse);
+  
+  // Calculate show financials
+  const financials = calculateShowFinancials(showDraft, matchResults, currentUniverse);
+  currentUniverse = applyFinancials(financials, currentUniverse);
+  
+  // Calculate show ratings
+  const ratings = calculateShowRatings(matchResults, segmentResults, showDraft);
+  
+  // Age/contract progression (if end of week)
+  if (isEndOfWeek(showDraft.showInfo)) {
+    currentUniverse = processWeekEnd(currentUniverse);
+  }
+  
+  // Year-end processing
+  if (isEndOfYear(showDraft.showInfo)) {
+    currentUniverse = processYearEnd(currentUniverse);
+  }
+  
+  const showResult: ShowResult = {
+    id: showDraft.id,
+    showInfo: showDraft.showInfo,
+    matchResults,
+    segmentResults,
+    showEvents,
+    financials,
+    ratings,
+    overallRating: calculateOverallShowRating(matchResults),
+    fanSatisfaction: calculateFanSatisfaction(matchResults, showEvents, currentUniverse),
+  };
+  
+  // Log show to history
+  currentUniverse = logShowToHistory(showResult, currentUniverse);
+  
+  return { showResult, updatedUniverse: currentUniverse };
+}
+```
+
+### Post-Show Effect Processing
+
+```typescript
+function processPostShowEffects(
+  showDraft: ShowDraft,
+  matchResults: MatchResult[],
+  universe: UniverseState
+): UniverseState {
+  let updated = deepClone(universe);
+  
+  // Update wrestler stats
+  for (const result of matchResults) {
+    for (const change of result.statChanges) {
+      updated = applyWrestlerStatChange(change, updated);
+    }
+    for (const injury of result.injuries) {
+      updated = applyInjury(injury, updated);
+    }
+  }
+  
+  // Update feud intensities
+  for (const result of matchResults) {
+    if (result.matchDraft.feudId) {
+      updated = updateFeudIntensity(result, updated);
+    }
+  }
+  
+  // Check for new feuds from upsets
+  const upsets = matchResults.flatMap(r => r.specialEvents.filter(e => e.type.includes('upset')));
+  for (const upset of upsets) {
+    if (Math.random() < 0.4) { // 40% chance upset spawns feud
+      updated = createFeudFromUpset(upset, updated);
+    }
+  }
+  
+  // Reset weekly fatigue (partial)
+  updated = resetPartialFatigue(updated, showDraft.showInfo.brand);
+  
+  // Process retirements
+  const retirementCandidates = checkRetirementCandidates(updated);
+  for (const candidate of retirementCandidates) {
+    if (shouldRetire(candidate, updated)) {
+      updated = processRetirement(candidate, updated);
+    }
+  }
+  
+  return updated;
+}
+```
+
+---
+
+## 12. Events System
+
+### Surprise Returns
+
+```typescript
+function checkSurpriseReturn(
+  showDraft: ShowDraft,
+  universe: UniverseState
+): SurpriseReturnEvent | null {
+  // Only at major PPVs
+  if (!showDraft.showInfo.isPpv) return null;
+  
+  const majorPPVs = ['Rumble Royale', 'Victory Dome', 'Summer Slamfest', 'Night of Glory'];
+  if (!majorPPVs.includes(showDraft.showInfo.ppvName || '')) return null;
+  
+  // Check retired pool for eligible returners
+  const eligibleReturners = universe.retiredWrestlers.filter(w => 
+    w.isMajorSuperstar &&
+    w.age < 55 &&
+    weeksSinceRetirement(w, universe) >= 26 && // At least 6 months retired
+    !w.permanentlyRetired
+  );
+  
+  if (eligibleReturners.length === 0) return null;
+  
+  // Probability based on PPV importance
+  const baseProbability = showDraft.showInfo.ppvName === 'Victory Dome' ? 0.5 : 0.25;
+  
+  if (Math.random() > baseProbability) return null;
+  
+  // Select returner
+  const returner = selectBestReturner(eligibleReturners, universe);
+  
+  return {
+    type: 'surprise_return',
+    wrestlerId: returner.id,
+    wrestlerName: returner.name,
+    showId: showDraft.id,
+    description: `SHOCKING RETURN: ${returner.name} HAS RETURNED!`,
+    popularityBoost: 25,
+    momentumBoost: 50,
+    crowdReaction: 'thunderous',
+  };
+}
+```
+
+### Social Media System
+
+```typescript
+interface SocialMediaPost {
+  id: string;
+  wrestlerId: string;
+  type: 'promo' | 'callout' | 'celebration' | 'complaint' | 'cryptic' | 'shoot' | 'heel_work' | 'face_work';
+  content: string;
+  kayfabe: boolean;
+  viralScore: number; // 0-100, affects popularity/storyline
+  generatedAt: GameDate;
+  reactions: {
+    likes: number;
+    retweets: number;
+    replies: number;
+  };
+  consequences?: SocialMediaConsequence[];
+}
+
+function generateSocialMediaEvents(
+  showResult: ShowResult,
+  universe: UniverseState
+): SocialMediaPost[] {
+  const posts: SocialMediaPost[] = [];
+  
+  // Winners celebration posts
+  for (const match of showResult.matchResults) {
+    if (Math.random() < 0.3) {
+      const winnerId = getWinnerId(match);
+      const winner = getWrestler(winnerId, universe);
+      if (winner.traits.includes('social_media_star')) {
+        posts.push(generateCelebrationPost(winner, match));
+      }
+    }
+  }
+  
+  // Callouts from upcoming feuds
+  for (const feud of universe.activeFeuds) {
+    if (feud.intensity > 50 && Math.random() < 0.4) {
+      posts.push(generateCalloutPost(feud, universe));
+    }
+  }
+  
+  // Heel heat posts
+  for (const heel of getActiveHeels(universe)) {
+    if (heel.traits.includes('social_media_star') && Math.random() < 0.2) {
+      posts.push(generateHeelWorkPost(heel, universe));
+    }
+  }
+  
+  // Cryptic teasers for upcoming storylines
+  if (Math.random() < 0.1) {
+    posts.push(generateCrypticPost(universe));
+  }
+  
+  return posts;
+}
+```
+
+### Dirt Sheet System
+
+```typescript
+interface DirtSheetLeak {
+  id: string;
+  type: 'storyline_spoiler' | 'contract_news' | 'backstage_heat' | 'injury_update' | 'return_rumor' | 'title_change_plan';
+  headline: string;
+  content: string;
+  accuracy: number; // 0-100, how true is this
+  impactedWrestlerIds: string[];
+  impactedAngleId?: string;
+  generatedAt: GameDate;
+  consequences: LeakConsequence[];
+}
+
+function generateDirtSheetLeaks(
+  universe: UniverseState
+): DirtSheetLeak[] {
+  const leaks: DirtSheetLeak[] = [];
+  
+  // Storyline spoiler (ruins surprise if accurate)
+  if (universe.plannedSurprises.length > 0 && Math.random() < 0.15) {
+    const surprise = randomChoice(universe.plannedSurprises);
+    leaks.push({
+      id: generateId(),
+      type: 'storyline_spoiler',
+      headline: `RUMOR: Big Surprise Planned for ${surprise.targetEvent}`,
+      content: generateSpoilerContent(surprise),
+      accuracy: Math.random() < 0.7 ? 90 : 30, // Usually accurate
+      impactedAngleId: surprise.id,
+      impactedWrestlerIds: surprise.involvedWrestlerIds,
+      generatedAt: universe.currentDate,
+      consequences: [{ type: 'reduced_pop_if_accurate', reduction: 30 }],
+    });
+  }
+  
+  // Contract news
+  const expiringContracts = getExpiringContracts(universe, 8);
+  if (expiringContracts.length > 0 && Math.random() < 0.3) {
+    const contract = randomChoice(expiringContracts);
+    leaks.push(generateContractLeak(contract, universe));
+  }
+  
+  // Backstage heat
+  const unhappyWrestlers = universe.wrestlers.filter(w => w.morale < -50);
+  if (unhappyWrestlers.length > 0 && Math.random() < 0.25) {
+    const unhappy = randomChoice(unhappyWrestlers);
+    leaks.push(generateBackstageHeatLeak(unhappy, universe));
+  }
+  
+  return leaks;
+}
+```
+
+---
+
+## 13. Calendar System
+
+```typescript
+interface GameCalendar {
+  currentYear: number;
+  currentWeek: number; // 1-52
+  currentShowIndex: number;
+  scheduledShows: ScheduledShow[];
+  completedShows: string[]; // Show IDs
+}
+
+interface ScheduledShow {
+  id: string;
+  year: number;
+  week: number;
+  dayOfWeek: 'monday' | 'friday' | 'saturday' | 'sunday';
+  brand: BrandId | 'cross-brand';
+  showType: 'weekly' | 'ppv' | 'ple' | 'special';
+  name: string;
+  isPpv: boolean;
+  ppvName?: string;
+  ppvTier?: 'minor' | 'major';
+  venue?: string;
+  isCompleted: boolean;
+}
+
+function generateYearCalendar(year: number): ScheduledShow[] {
+  const shows: ScheduledShow[] = [];
+  let showId = 0;
+  
+  for (let week = 1; week <= 52; week++) {
+    // Check for PPV this week
+    const ppvThisWeek = PPV_SCHEDULE.find(p => p.weekOfYear === week);
+    
+    if (ppvThisWeek) {
+      // Add PPV (typically Sunday)
+      shows.push({
+        id: `${year}-${++showId}`,
+        year,
+        week,
+        dayOfWeek: 'sunday',
+        brand: ppvThisWeek.isCrossBrand ? 'cross-brand' : ppvThisWeek.focusBrand!,
+        showType: ppvThisWeek.tier === 'major' ? 'ple' : 'ppv',
+        name: ppvThisWeek.name,
+        isPpv: true,
+        ppvName: ppvThisWeek.name,
+        ppvTier: ppvThisWeek.tier,
+        isCompleted: false,
+      });
+    }
+    
+    // Weekly shows (always, unless PPV replaces them)
+    if (!ppvThisWeek || !ppvThisWeek.replacesWeeklyShows) {
+      // Monday - Alpha
+      shows.push({
+        id: `${year}-${++showId}`,
+        year,
+        week,
+        dayOfWeek: 'monday',
+        brand: 'alpha',
+        showType: 'weekly',
+        name: 'ROC Alpha',
+        isPpv: false,
+        isCompleted: false,
+      });
+      
+      // Friday - Velocity
+      shows.push({
+        id: `${year}-${++showId}`,
+        year,
+        week,
+        dayOfWeek: 'friday',
+        brand: 'velocity',
+        showType: 'weekly',
+        name: 'ROC Velocity',
+        isPpv: false,
+        isCompleted: false,
+      });
+      
+      // Saturday - Vanguard
+      shows.push({
+        id: `${year}-${++showId}`,
+        year,
+        week,
+        dayOfWeek: 'saturday',
+        brand: 'vanguard',
+        showType: 'weekly',
+        name: 'ROC Vanguard',
+        isPpv: false,
+        isCompleted: false,
+      });
+    }
+  }
+  
+  return shows.sort((a, b) => {
+    if (a.week !== b.week) return a.week - b.week;
+    return getDayOrder(a.dayOfWeek) - getDayOrder(b.dayOfWeek);
+  });
+}
+
+function getNextShow(calendar: GameCalendar): ScheduledShow {
+  return calendar.scheduledShows.find(s => !s.isCompleted)!;
+}
+
+function advanceToNextShow(calendar: GameCalendar): GameCalendar {
+  const nextShow = getNextShow(calendar);
+  const updatedShows = calendar.scheduledShows.map(s =>
+    s.id === nextShow.id ? { ...s, isCompleted: true } : s
+  );
+  
+  // Generate next year if needed
+  if (updatedShows.every(s => s.isCompleted)) {
+    const nextYearShows = generateYearCalendar(calendar.currentYear + 1);
+    return {
+      currentYear: calendar.currentYear + 1,
+      currentWeek: 1,
+      currentShowIndex: 0,
+      scheduledShows: nextYearShows,
+      completedShows: [...calendar.completedShows, ...updatedShows.map(s => s.id)],
+    };
+  }
+  
+  const newNextShow = updatedShows.find(s => !s.isCompleted)!;
+  return {
+    ...calendar,
+    currentWeek: newNextShow.week,
+    currentShowIndex: calendar.currentShowIndex + 1,
+    scheduledShows: updatedShows,
+    completedShows: [...calendar.completedShows, nextShow.id],
+  };
+}
+```
+
+---
+
+## 14. Free Agent System
+
+```typescript
+interface FreeAgentPool {
+  availableFreeAgents: FreeAgent[];
+  recentReleases: FreeAgent[];
+  retiredLegends: FreeAgent[];
+  generationQueue: FreeAgentGenerationConfig;
+}
+
+interface FreeAgent {
+  wrestler: Wrestler;
+  source: 'generated' | 'released' | 'retired' | 'rival_promotion';
+  availableSince: GameDate;
+  demandedSalary: number;
+  demandedLength: number;
+  specialDemands: ContractDemand[];
+  interestLevel: number; // 0-100, how interested in joining ROC
+  competingOffers: CompetingOffer[];
+}
+
+interface ContractDemand {
+  type: 'creative_control' | 'no_job_clause' | 'title_shot' | 'brand_choice' | 'signing_bonus' | 'merch_split';
+  details: string;
+  required: boolean;
+  value?: any;
+}
+
+interface ContractNegotiation {
+  freeAgentId: string;
+  status: 'initial_offer' | 'counter' | 'final' | 'accepted' | 'rejected' | 'walked_away';
+  rocOffer: ContractOffer;
+  counterOffer?: ContractOffer;
+  negotiationRounds: number;
+  deadline: GameDate;
+  competingOfferPressure: boolean;
+}
+
+interface ContractOffer {
+  salaryPerShow: number;
+  lengthWeeks: number;
+  signingBonus: number;
+  brandAssignment: BrandId;
+  creativeConto: boolean;
+  titleShotGuarantee: boolean;
+  titleShotDeadlineWeeks?: number;
+  noJobClause: string[];
+  merchSplit: number;
+}
+
+function generateFreeAgent(): FreeAgent {
+  const age = randomInt(21, 38);
+  const experience = Math.max(0, age - 18 - randomInt(0, 3));
+  
+  const wrestler = generateWrestler({
+    age,
+    experience,
+    role: weightedRandom(['jobber', 'lower_midcard', 'midcard', 'upper_midcard', 'main_event'], [0.3, 0.3, 0.25, 0.1, 0.05]),
+    popularity: randomInt(10, 60),
+  });
+  
+  const demandedSalary = calculateDemandedSalary(wrestler);
+  const demandedLength = randomInt(26, 104);
+  
+  return {
+    wrestler,
+    source: 'generated',
+    availableSince: getCurrentDate(),
+    demandedSalary,
+    demandedLength,
+    specialDemands: generateSpecialDemands(wrestler),
+    interestLevel: randomInt(30, 100),
+    competingOffers: [],
+  };
+}
+
+function processNegotiation(
+  negotiation: ContractNegotiation,
+  universe: UniverseState
+): NegotiationResult {
+  const freeAgent = getFreeAgent(negotiation.freeAgentId, universe);
+  
+  // Calculate how good our offer is vs their demands
+  const offerScore = scoreOffer(negotiation.rocOffer, freeAgent);
+  const demandScore = scoreDemands(freeAgent);
+  const satisfaction = offerScore / demandScore;
+  
+  // Factor in competing offers
+  const competingPressure = freeAgent.competingOffers.length > 0 ? 0.9 : 1.0;
+  const interestMod = freeAgent.interestLevel / 100;
+  
+  const acceptanceProbability = satisfaction * competingPressure * interestMod;
+  
+  if (acceptanceProbability >= 0.8) {
+    return { status: 'accepted', message: `${freeAgent.wrestler.name} has signed with ROC!` };
+  } else if (acceptanceProbability >= 0.5) {
+    const counter = generateCounterOffer(freeAgent, negotiation.rocOffer);
+    return { status: 'counter', counterOffer: counter, message: `${freeAgent.wrestler.name} has made a counter-offer.` };
+  } else if (acceptanceProbability >= 0.3) {
+    return { status: 'rejected', message: `${freeAgent.wrestler.name} has rejected the offer but remains in talks.` };
+  } else {
+    return { status: 'walked_away', message: `${freeAgent.wrestler.name} has ended negotiations.` };
+  }
+}
+```
+
+---
+
+## 15. Morale & Locker Room System
+
+```typescript
+interface LockerRoom {
+  overallMorale: number; // -100 to 100
+  harmony: number; // 0-100
+  cliques: Clique[];
+  leaders: string[]; // Wrestler IDs with locker room influence
+  recentIncidents: LockerRoomIncident[];
+}
+
+interface Clique {
+  id: string;
+  name: string;
+  leaderIds: string[];
+  memberIds: string[];
+  alignment: 'positive' | 'negative' | 'neutral';
+  influence: number; // 0-100
+}
+
+interface LockerRoomIncident {
+  id: string;
+  type: 'fight' | 'complaint' | 'walkout' | 'political_play' | 'mentoring' | 'party' | 'prank';
+  involvedWrestlerIds: string[];
+  description: string;
+  moraleImpact: number;
+  harmonyImpact: number;
+  occurredAt: GameDate;
+}
+
+function updateMorale(wrestler: Wrestler, events: MoraleEvent[]): Wrestler {
+  let moraleChange = 0;
+  
+  for (const event of events) {
+    switch (event.type) {
+      case 'win':
+        moraleChange += 5;
+        break;
+      case 'loss':
+        moraleChange -= 3;
+        break;
+      case 'title_win':
+        moraleChange += 20;
+        break;
+      case 'title_loss':
+        moraleChange -= 15;
+        break;
+      case 'ppv_main_event':
+        moraleChange += 10;
+        break;
+      case 'not_booked':
+        moraleChange -= 5;
+        break;
+      case 'jobbed_out':
+        moraleChange -= 10;
+        break;
+      case 'pushed':
+        moraleChange += 8;
+        break;
+      case 'creative_disagreement':
+        moraleChange -= 12;
+        break;
+      case 'contract_extension':
+        moraleChange += 15;
+        break;
+      case 'passed_over_for_title':
+        moraleChange -= 8;
+        break;
+    }
+  }
+  
+  // Apply traits
+  if (wrestler.traits.includes('professional')) {
+    moraleChange = Math.floor(moraleChange * 0.6);
+  } else if (wrestler.traits.includes('drama_queen')) {
+    moraleChange = Math.floor(moraleChange * 1.5);
+  }
+  
+  const newMorale = clamp(wrestler.morale + moraleChange, -100, 100);
+  
+  return { ...wrestler, morale: newMorale };
+}
+
+function checkMoraleConsequences(wrestler: Wrestler, universe: UniverseState): MoraleConsequence[] {
+  const consequences: MoraleConsequence[] = [];
+  
+  if (wrestler.morale <= -80) {
+    // Very unhappy - might demand release
+    if (Math.random() < 0.2) {
+      consequences.push({ type: 'release_request', severity: 'high' });
+    }
+    // Might leak to dirt sheets
+    if (Math.random() < 0.3) {
+      consequences.push({ type: 'dirt_sheet_leak', severity: 'medium' });
+    }
+  } else if (wrestler.morale <= -50) {
+    // Unhappy - reduced performance
+    consequences.push({ type: 'reduced_performance', severity: 'low', performanceMod: -10 });
+    // Might complain publicly
+    if (Math.random() < 0.15) {
+      consequences.push({ type: 'social_media_complaint', severity: 'medium' });
+    }
+  }
+  
+  // Very happy wrestlers
+  if (wrestler.morale >= 80) {
+    consequences.push({ type: 'performance_boost', severity: 'positive', performanceMod: 5 });
+    if (wrestler.traits.includes('locker_room_leader')) {
+      consequences.push({ type: 'morale_spread', severity: 'positive', spreadMod: 3 });
+    }
+  }
+  
+  return consequences;
+}
+```
+
+---
+
+## 16. UI/UX Architecture
+
+### Navigation Structure
+
+```typescript
+// Main navigation structure
+type RootStackParamList = {
+  MainTabs: undefined;
+  ShowDetail: { showId: string };
+  WrestlerDetail: { wrestlerId: string };
+  MatchDetail: { matchId: string };
+  FeudDetail: { feudId: string };
+  FactionDetail: { factionId: string };
+  ChampionshipDetail: { championshipId: string };
+  ContractNegotiation: { freeAgentId: string };
+  CreateWrestler: undefined;
+  Settings: undefined;
+  SaveManager: undefined;
+};
+
+type MainTabParamList = {
+  Office: undefined;
+  Booking: undefined;
+  Roster: undefined;
+  Storylines: undefined;
+  Business: undefined;
+};
+
+// Navigation component
+function AppNavigator() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="MainTabs" component={MainTabNavigator} options={{ headerShown: false }} />
+        <Stack.Screen name="ShowDetail" component={ShowDetailScreen} />
+        <Stack.Screen name="WrestlerDetail" component={WrestlerDetailScreen} />
+        {/* ... other detail screens */}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+function MainTabNavigator() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        tabBarStyle: styles.tabBar,
+        tabBarActiveTintColor: theme.colors.primary,
+      }}
+    >
+      <Tab.Screen name="Office" component={OfficeScreen} options={{ tabBarIcon: OfficeIcon }} />
+      <Tab.Screen name="Booking" component={BookingScreen} options={{ tabBarIcon: BookingIcon }} />
+      <Tab.Screen name="Roster" component={RosterScreen} options={{ tabBarIcon: RosterIcon }} />
+      <Tab.Screen name="Storylines" component={StorylinesScreen} options={{ tabBarIcon: StorylinesIcon }} />
+      <Tab.Screen name="Business" component={BusinessScreen} options={{ tabBarIcon: BusinessIcon }} />
+    </Tab.Navigator>
+  );
+}
+```
+
+### Office Screen (Home)
+
+```typescript
+function OfficeScreen() {
+  const universe = useUniverseStore(state => state.universe);
+  const nextShow = useNextShow();
+  const expiringContracts = useExpiringContracts(4); // Next 4 weeks
+  const alerts = useAlerts();
+  
+  return (
+    <ScrollView style={styles.container}>
+      {/* Header with date and balance */}
+      <OfficeHeader
+        year={universe.calendar.currentYear}
+        week={universe.calendar.currentWeek}
+        balance={universe.finances.balance}
+      />
+      
+      {/* Next show card */}
+      <NextShowCard show={nextShow} onGenerateCard={() => navigateToBooking()} />
+      
+      {/* Upcoming PPV countdown */}
+      <UpcomingPPVCard />
+      
+      {/* Alerts section */}
+      <AlertsSection alerts={alerts} />
+      
+      {/* Contract alerts */}
+      {expiringContracts.length > 0 && (
+        <ContractAlertsCard
+          contracts={expiringContracts}
+          onExtend={handleExtendContract}
+          onRelease={handleReleaseWrestler}
+        />
+      )}
+      
+      {/* Champions showcase */}
+      <ChampionsShowcase championships={universe.championships} />
+      
+      {/* Recent news feed */}
+      <NewsFeed items={universe.recentNews} />
+      
+      {/* Quick stats */}
+      <QuickStats universe={universe} />
+    </ScrollView>
+  );
+}
+```
+
+### Booking Screen
+
+```typescript
+function BookingScreen() {
+  const [showDraft, setShowDraft] = useState<ShowDraft | null>(null);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const { generateCard, simulateShow } = useGameEngine();
+  
+  const handleGenerateCard = async () => {
+    const draft = await generateCard();
+    setShowDraft(draft);
+  };
+  
+  const handleUpdateMatch = (matchId: string, updates: Partial<MatchDraft>) => {
+    setShowDraft(prev => ({
+      ...prev!,
+      matches: prev!.matches.map(m => m.id === matchId ? { ...m, ...updates } : m),
+    }));
+  };
+  
+  const handleRunShow = async () => {
+    setIsSimulating(true);
+    const result = await simulateShow(showDraft!);
+    navigation.navigate('ShowRecap', { showResult: result });
+    setIsSimulating(false);
+  };
+  
+  if (!showDraft) {
+    return (
+      <View style={styles.centered}>
+        <ShowPreview show={getNextShow()} />
+        <Button mode="contained" onPress={handleGenerateCard}>
+          Generate Proposed Card
+        </Button>
+      </View>
+    );
+  }
+  
+  return (
+    <View style={styles.container}>
+      {/* Show header */}
+      <ShowDraftHeader draft={showDraft} />
+      
+      {/* Estimated metrics */}
+      <EstimatedMetrics
+        rating={showDraft.estimatedRating}
+        attendance={showDraft.estimatedAttendance}
+      />
+      
+      {/* Warnings */}
+      {showDraft.warnings.length > 0 && (
+        <WarningsCard warnings={showDraft.warnings} />
+      )}
+      
+      {/* Match list */}
+      <FlatList
+        data={showDraft.matches}
+        keyExtractor={m => m.id}
+        renderItem={({ item }) => (
+          <MatchDraftCard
+            match={item}
+            onUpdateBias={(bias) => handleUpdateMatch(item.id, { bookingBias: bias })}
+            onUpdateImportance={(imp) => handleUpdateMatch(item.id, { importance: imp })}
+            onSwapWrestler={() => openWrestlerSwapModal(item.id)}
+          />
+        )}
+      />
+      
+      {/* Segments */}
+      <SegmentsList segments={showDraft.segments} />
+      
+      {/* Action buttons */}
+      <View style={styles.actions}>
+        <Button mode="outlined" onPress={() => setShowDraft(null)}>
+          Regenerate
+        </Button>
+        <Button mode="contained" onPress={handleRunShow} loading={isSimulating}>
+          Run Show
+        </Button>
+      </View>
+    </View>
+  );
+}
+```
+
+### Match Draft Card Component
+
+```typescript
+function MatchDraftCard({ match, onUpdateBias, onUpdateImportance, onSwapWrestler }: Props) {
+  const participantsA = useWrestlers(match.participantAIds);
+  const participantsB = useWrestlers(match.participantBIds);
+  const title = match.titleId ? useChampionship(match.titleId) : null;
+  const feud = match.feudId ? useFeud(match.feudId) : null;
+  
+  return (
+    <Card style={styles.matchCard}>
+      {/* Card position badge */}
+      <CardPositionBadge position={match.cardPosition} />
+      
+      {/* Title indicator */}
+      {title && <TitleMatchBadge title={title} />}
+      
+      {/* Participants */}
+      <View style={styles.participants}>
+        <ParticipantSide
+          wrestlers={participantsA}
+          side="A"
+          onSwap={() => onSwapWrestler('A')}
+        />
+        <Text style={styles.vs}>VS</Text>
+        <ParticipantSide
+          wrestlers={participantsB}
+          side="B"
+          onSwap={() => onSwapWrestler```typescript
+          onSwap={() => onSwapWrestler('B')}
+        />
+      </View>
+      
+      {/* Feud indicator */}
+      {feud && (
+        <FeudIndicator
+          feud={feud}
+          intensity={feud.intensity}
+        />
+      )}
+      
+      {/* Match type */}
+      <Chip style={styles.matchType}>{formatMatchType(match.matchType)}</Chip>
+      
+      {/* Booking controls */}
+      <View style={styles.bookingControls}>
+        <View style={styles.controlGroup}>
+          <Text style={styles.controlLabel}>Booking Bias</Text>
+          <SegmentedButtons
+            value={match.bookingBias}
+            onValueChange={onUpdateBias}
+            buttons={[
+              { value: 'strong_a', label: 'A++' },
+              { value: 'slight_a', label: 'A+' },
+              { value: 'even', label: '=' },
+              { value: 'slight_b', label: 'B+' },
+              { value: 'strong_b', label: 'B++' },
+            ]}
+            density="small"
+          />
+        </View>
+        
+        <View style={styles.controlGroup}>
+          <Text style={styles.controlLabel}>Importance</Text>
+          <SegmentedButtons
+            value={match.importance}
+            onValueChange={onUpdateImportance}
+            buttons={[
+              { value: 'throwaway', label: 'Low' },
+              { value: 'normal', label: 'Normal' },
+              { value: 'featured', label: 'Featured' },
+              { value: 'protected', label: 'Protected' },
+              { value: 'high_drama', label: 'High Drama' },
+            ]}
+            density="small"
+          />
+        </View>
+      </View>
+      
+      {/* Estimated outcome */}
+      <View style={styles.estimatedOutcome}>
+        <Text style={styles.estimatedLabel}>Est. Rating: </Text>
+        <StarRating rating={match.estimatedRating} size="small" />
+        <Text style={styles.estimatedTime}>{match.estimatedTime} min</Text>
+      </View>
+      
+      {/* AI rationale (expandable) */}
+      <Accordion title="Why this match?">
+        <Text style={styles.rationale}>{match.rationale}</Text>
+      </Accordion>
+    </Card>
+  );
+}
+```
+
+### Show Recap Screen
+
+```typescript
+function ShowRecapScreen({ route }: Props) {
+  const { showResult } = route.params;
+  const [expandedMatch, setExpandedMatch] = useState<string | null>(null);
+  
+  return (
+    <ScrollView style={styles.container}>
+      {/* Show header with overall results */}
+      <ShowRecapHeader
+        showInfo={showResult.showInfo}
+        overallRating={showResult.overallRating}
+        fanSatisfaction={showResult.fanSatisfaction}
+      />
+      
+      {/* Financial summary */}
+      <FinancialSummaryCard financials={showResult.financials} />
+      
+      {/* TV Ratings (if applicable) */}
+      {showResult.ratings && (
+        <TVRatingsCard ratings={showResult.ratings} />
+      )}
+      
+      {/* Major events banner */}
+      {showResult.showEvents.length > 0 && (
+        <MajorEventsCard events={showResult.showEvents} />
+      )}
+      
+      {/* Match results */}
+      <Text style={styles.sectionTitle}>Match Results</Text>
+      {showResult.matchResults.map((match, index) => (
+        <MatchResultCard
+          key={match.matchId}
+          match={match}
+          cardPosition={index + 1}
+          isExpanded={expandedMatch === match.matchId}
+          onToggleExpand={() => setExpandedMatch(
+            expandedMatch === match.matchId ? null : match.matchId
+          )}
+        />
+      ))}
+      
+      {/* Segment results */}
+      {showResult.segmentResults.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>Segments</Text>
+          {showResult.segmentResults.map((segment) => (
+            <SegmentResultCard key={segment.id} segment={segment} />
+          ))}
+        </>
+      )}
+      
+      {/* Wrestler status changes */}
+      <StatusChangesCard
+        injuries={showResult.matchResults.flatMap(m => m.injuries)}
+        popularityChanges={getSignificantPopularityChanges(showResult)}
+        momentumChanges={getSignificantMomentumChanges(showResult)}
+      />
+      
+      {/* Title changes */}
+      {showResult.showEvents.filter(e => e.type === 'title_change').length > 0 && (
+        <TitleChangesCard
+          changes={showResult.showEvents.filter(e => e.type === 'title_change')}
+        />
+      )}
+      
+      {/* Next show button */}
+      <Button
+        mode="contained"
+        style={styles.nextButton}
+        onPress={() => navigation.navigate('Office')}
+      >
+        Continue to Next Show
+      </Button>
+    </ScrollView>
+  );
+}
+```
+
+### Match Result Card Component
+
+```typescript
+function MatchResultCard({ match, cardPosition, isExpanded, onToggleExpand }: Props) {
+  const winnerWrestlers = useWrestlers(
+    match.winner === 'A' ? match.matchDraft.participantAIds : match.matchDraft.participantBIds
+  );
+  const loserWrestlers = useWrestlers(
+    match.winner === 'A' ? match.matchDraft.participantBIds : match.matchDraft.participantAIds
+  );
+  
+  const hasUpset = match.specialEvents.some(e => e.type.includes('upset'));
+  const hasTitleChange = match.specialEvents.some(e => e.type === 'title_change');
+  
+  return (
+    <Card style={[styles.matchResultCard, hasUpset && styles.upsetCard]}>
+      <TouchableOpacity onPress={onToggleExpand}>
+        {/* Match number and position */}
+        <View style={styles.matchHeader}>
+          <Text style={styles.matchNumber}>Match {cardPosition}</Text>
+          <CardPositionBadge position={match.matchDraft.cardPosition} small />
+        </View>
+        
+        {/* Result summary */}
+        <View style={styles.resultSummary}>
+          <View style={styles.winnerSide}>
+            <Icon name="trophy" color={theme.colors.gold} />
+            <Text style={styles.winnerNames}>
+              {winnerWrestlers.map(w => w.name).join(' & ')}
+            </Text>
+            <AlignmentBadge alignment={winnerWrestlers[0].alignment} />
+          </View>
+          
+          <Text style={styles.defeated}>defeated</Text>
+          
+          <View style={styles.loserSide}>
+            <Text style={styles.loserNames}>
+              {loserWrestlers.map(w => w.name).join(' & ')}
+            </Text>
+            <AlignmentBadge alignment={loserWrestlers[0].alignment} />
+          </View>
+        </View>
+        
+        {/* Star rating and duration */}
+        <View style={styles.matchMeta}>
+          <StarRating rating={match.starRating} />
+          <Text style={styles.duration}>{match.duration} min</Text>
+          <FinishTypeBadge finish={match.finishType} />
+        </View>
+        
+        {/* Special event badges */}
+        <View style={styles.eventBadges}>
+          {hasUpset && <Badge style={styles.upsetBadge}>UPSET!</Badge>}
+          {hasTitleChange && <Badge style={styles.titleBadge}>NEW CHAMPION!</Badge>}
+        </View>
+      </TouchableOpacity>
+      
+      {/* Expanded content */}
+      {isExpanded && (
+        <View style={styles.expandedContent}>
+          {/* Match narrative */}
+          <Text style={styles.narrativeTitle}>Match Highlights</Text>
+          <MatchNarrativeDisplay narrative={match.narrative} />
+          
+          {/* Stat changes */}
+          <Text style={styles.changesTitle}>Impact</Text>
+          {match.statChanges.map((change, i) => (
+            <StatChangeRow key={i} change={change} />
+          ))}
+          
+          {/* Injuries */}
+          {match.injuries.length > 0 && (
+            <>
+              <Text style={styles.injuryTitle}>Injuries</Text>
+              {match.injuries.map((injury, i) => (
+                <InjuryRow key={i} injury={injury} />
+              ))}
+            </>
+          )}
+          
+          {/* Crowd reaction */}
+          <CrowdReactionMeter reaction={match.crowdReaction} />
+        </View>
+      )}
+    </Card>
+  );
+}
+```
+
+### Roster Screen
+
+```typescript
+function RosterScreen() {
+  const [selectedBrand, setSelectedBrand] = useState<BrandId | 'all'>('all');
+  const [sortBy, setSortBy] = useState<SortOption>('popularity');
+  const [filterRole, setFilterRole] = useState<RoleFilter>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const wrestlers = useFilteredRoster({
+    brand: selectedBrand,
+    sortBy,
+    filterRole,
+    searchQuery,
+  });
+  
+  return (
+    <View style={styles.container}>
+      {/* Search bar */}
+      <Searchbar
+        placeholder="Search wrestlers..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        style={styles.searchbar}
+      />
+      
+      {/* Filter chips */}
+      <ScrollView horizontal style={styles.filterRow}>
+        <BrandFilterChips
+          selected={selectedBrand}
+          onSelect={setSelectedBrand}
+        />
+        <Divider vertical />
+        <RoleFilterChips
+          selected={filterRole}
+          onSelect={setFilterRole}
+        />
+      </ScrollView>
+      
+      {/* Sort options */}
+      <SortDropdown
+        value={sortBy}
+        onChange={setSortBy}
+        options={[
+          { value: 'popularity', label: 'Popularity' },
+          { value: 'momentum', label: 'Momentum' },
+          { value: 'overall', label: 'Overall Rating' },
+          { value: 'name', label: 'Name' },
+          { value: 'age', label: 'Age' },
+          { value: 'contract', label: 'Contract Expiry' },
+        ]}
+      />
+      
+      {/* Roster list */}
+      <FlatList
+        data={wrestlers}
+        keyExtractor={(w) => w.id}
+        renderItem={({ item }) => (
+          <WrestlerRow
+            wrestler={item}
+            onPress={() => navigation.navigate('WrestlerDetail', { wrestlerId: item.id })}
+          />
+        )}
+        ItemSeparatorComponent={Divider}
+      />
+      
+      {/* FAB for creating wrestler */}
+      <FAB
+        icon="plus"
+        style={styles.fab}
+        onPress={() => navigation.navigate('CreateWrestler')}
+        label="Create Wrestler"
+      />
+    </View>
+  );
+}
+```
+
+### Wrestler Detail Screen
+
+```typescript
+function WrestlerDetailScreen({ route }: Props) {
+  const { wrestlerId } = route.params;
+  const wrestler = useWrestler(wrestlerId);
+  const titleHistory = useTitleHistory(wrestlerId);
+  const matchHistory = useMatchHistory(wrestlerId, 20);
+  const feudHistory = useFeudHistory(wrestlerId);
+  
+  const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'history' | 'contract'>('overview');
+  
+  if (!wrestler) return <LoadingScreen />;
+  
+  return (
+    <ScrollView style={styles.container}>
+      {/* Header with photo and key info */}
+      <WrestlerHeader wrestler={wrestler} />
+      
+      {/* Quick stats bar */}
+      <QuickStatsBar
+        popularity={wrestler.popularity}
+        momentum={wrestler.momentum}
+        morale={wrestler.morale}
+      />
+      
+      {/* Status indicators */}
+      <StatusIndicators
+        injury={wrestler.injury}
+        championshipId={getCurrentChampionship(wrestler.id)}
+        factionId={wrestler.factionId}
+        tagTeamId={wrestler.tagTeamId}
+      />
+      
+      {/* Tab navigation */}
+      <SegmentedButtons
+        value={activeTab}
+        onValueChange={setActiveTab}
+        buttons={[
+          { value: 'overview', label: 'Overview' },
+          { value: 'stats', label: 'Attributes' },
+          { value: 'history', label: 'History' },
+          { value: 'contract', label: 'Contract' },
+        ]}
+        style={styles.tabs}
+      />
+      
+      {/* Tab content */}
+      {activeTab === 'overview' && (
+        <OverviewTab wrestler={wrestler} />
+      )}
+      
+      {activeTab === 'stats' && (
+        <AttributesTab
+          attributes={wrestler.attributes}
+          traits={wrestler.traits}
+          age={wrestler.age}
+        />
+      )}
+      
+      {activeTab === 'history' && (
+        <HistoryTab
+          matchHistory={matchHistory}
+          titleHistory={titleHistory}
+          feudHistory={feudHistory}
+          careerStats={wrestler.stats}
+        />
+      )}
+      
+      {activeTab === 'contract' && (
+        <ContractTab
+          contract={wrestler.contract}
+          onExtend={() => handleExtendContract(wrestler.id)}
+          onRelease={() => handleReleaseWrestler(wrestler.id)}
+        />
+      )}
+      
+      {/* Actions menu */}
+      <ActionsMenu
+        wrestler={wrestler}
+        onChangeBrand={() => openBrandChangeModal()}
+        onChangeAlignment={() => openAlignmentChangeModal()}
+        onChangeRole={() => openRoleChangeModal()}
+        onAddToFaction={() => openFactionModal()}
+        onCreateTagTeam={() => openTagTeamModal()}
+        onGimmickChange={() => openGimmickChangeModal()}
+      />
+    </ScrollView>
+  );
+}
+```
+
+### Attributes Tab Component
+
+```typescript
+function AttributesTab({ attributes, traits, age }: Props) {
+  return (
+    <View style={styles.container}>
+      {/* Attribute radar chart */}
+      <AttributeRadarChart attributes={attributes} />
+      
+      {/* Attribute bars */}
+      <View style={styles.attributeList}>
+        <AttributeBar label="Brawling" value={attributes.brawling} color={colors.brawling} />
+        <AttributeBar label="Technical" value={attributes.technical} color={colors.technical} />
+        <AttributeBar label="Speed" value={attributes.speed} color={colors.speed} />
+        <AttributeBar label="Aerial" value={attributes.aerial} color={colors.aerial} />
+        <AttributeBar label="Power" value={attributes.power} color={colors.power} />
+        <AttributeBar label="Mic Skills" value={attributes.mic} color={colors.mic} />
+        <AttributeBar label="Psychology" value={attributes.psychology} color={colors.psychology} />
+        <AttributeBar label="Stamina" value={attributes.stamina} color={colors.stamina} />
+        <AttributeBar label="Charisma" value={attributes.charisma} color={colors.charisma} />
+        <AttributeBar label="Selling" value={attributes.selling} color={colors.selling} />
+      </View>
+      
+      {/* Age degradation warning */}
+      {age > 35 && (
+        <Card style={styles.warningCard}>
+          <Icon name="alert" color={colors.warning} />
+          <Text style={styles.warningText}>
+            Physical attributes are declining due to age ({age} years old).
+          </Text>
+        </Card>
+      )}
+      
+      {/* Traits */}
+      <Text style={styles.sectionTitle}>Traits</Text>
+      <View style={styles.traitList}>
+        {traits.map((trait) => (
+          <TraitChip key={trait} trait={trait} />
+        ))}
+      </View>
+      
+      {/* Calculated ratings */}
+      <Text style={styles.sectionTitle}>Calculated Ratings</Text>
+      <CalculatedRatingsCard
+        workRate={calculateWorkRate(attributes)}
+        starPower={calculateStarPower(attributes)}
+        draw={calculateDraw(attributes)}
+      />
+    </View>
+  );
+}
+```
+
+### Storylines Screen (Feuds & Factions)
+
+```typescript
+function StorylinesScreen() {
+  const [activeTab, setActiveTab] = useState<'feuds' | 'factions' | 'champions'>('feuds');
+  
+  return (
+    <View style={styles.container}>
+      {/* Tab navigation */}
+      <SegmentedButtons
+        value={activeTab}
+        onValueChange={setActiveTab}
+        buttons={[
+          { value: 'feuds', label: 'Feuds' },
+          { value: 'factions', label: 'Factions' },
+          { value: 'champions', label: 'Champions' },
+        ]}
+        style={styles.tabs}
+      />
+      
+      {activeTab === 'feuds' && <FeudsTab />}
+      {activeTab === 'factions' && <FactionsTab />}
+      {activeTab === 'champions' && <ChampionsTab />}
+    </View>
+  );
+}
+
+function FeudsTab() {
+  const activeFeuds = useActiveFeuds();
+  const resolvedFeuds = useResolvedFeuds(10); // Last 10
+  
+  return (
+    <ScrollView>
+      <Text style={styles.sectionTitle}>Active Feuds ({activeFeuds.length})</Text>
+      {activeFeuds.map((feud) => (
+        <FeudCard
+          key={feud.id}
+          feud={feud}
+          onPress={() => navigation.navigate('FeudDetail', { feudId: feud.id })}
+        />
+      ))}
+      
+      <Text style={styles.sectionTitle}>Recently Resolved</Text>
+      {resolvedFeuds.map((feud) => (
+        <FeudCard
+          key={feud.id}
+          feud={feud}
+          resolved
+          onPress={() => navigation.navigate('FeudDetail', { feudId: feud.id })}
+        />
+      ))}
+      
+      {/* Create feud FAB */}
+      <FAB
+        icon="plus"
+        style={styles.fab}
+        onPress={() => openCreateFeudModal()}
+        label="Start Feud"
+      />
+    </ScrollView>
+  );
+}
+```
+
+### Business Screen
+
+```typescript
+function BusinessScreen() {
+  const finances = useFinances();
+  const recentShows = useRecentShows(10);
+  const contracts = useAllContracts();
+  
+  const [activeTab, setActiveTab] = useState<'overview' | 'shows' | 'contracts' | 'freeagents'>('overview');
+  
+  return (
+    <View style={styles.container}>
+      {/* Balance header */}
+      <BalanceHeader
+        balance={finances.balance}
+        trend={finances.weeklyTrend}
+      />
+      
+      {/* Tab navigation */}
+      <SegmentedButtons
+        value={activeTab}
+        onValueChange={setActiveTab}
+        buttons={[
+          { value: 'overview', label: 'Overview' },
+          { value: 'shows', label: 'Shows' },
+          { value: 'contracts', label: 'Contracts' },
+          { value: 'freeagents', label: 'Free Agents' },
+        ]}
+        style={styles.tabs}
+      />
+      
+      {activeTab === 'overview' && (
+        <FinancialOverviewTab finances={finances} />
+      )}
+      
+      {activeTab === 'shows' && (
+        <ShowFinancialsTab shows={recentShows} />
+      )}
+      
+      {activeTab === 'contracts' && (
+        <ContractsTab contracts={contracts} />
+      )}
+      
+      {activeTab === 'freeagents' && (
+        <FreeAgentsTab />
+      )}
+    </View>
+  );
+}
+
+function FinancialOverviewTab({ finances }: Props) {
+  return (
+    <ScrollView>
+      {/* Revenue breakdown chart */}
+      <Card style={styles.chartCard}>
+        <Text style={styles.cardTitle}>Revenue Breakdown</Text>
+        <PieChart
+          data={[
+            { label: 'Tickets', value: finances.weeklyTicketRevenue, color: colors.tickets },
+            { label: 'Merch', value: finances.weeklyMerchRevenue, color: colors.merch },
+            { label: 'TV Rights', value: finances.weeklyTVRightsRevenue, color: colors.tv },
+            { label: 'Sponsorships', value: finances.weeklySponsorshipRevenue, color: colors.sponsor },
+            { label: 'PPV', value: finances.ppvBuyRevenue, color: colors.ppv },
+          ]}
+        />
+      </Card>
+      
+      {/* Expense breakdown */}
+      <Card style={styles.chartCard}>
+        <Text style={styles.cardTitle}>Expenses</Text>
+        <BarChart
+          data={[
+            { label: 'Payroll', value: finances.weeklyPayroll },
+            { label: 'Production', value: finances.weeklyProductionCosts },
+            { label: 'Venues', value: finances.weeklyVenueCosts },
+            { label: 'Other', value: finances.weeklyMiscExpenses },
+          ]}
+        />
+      </Card>
+      
+      {/* Profit/loss trend */}
+      <Card style={styles.chartCard}>
+        <Text style={styles.cardTitle}>Profit/Loss Trend (12 weeks)</Text>
+        <LineChart
+          data={finances.financialHistory.slice(-12).map(w => ({
+            week: w.week,
+            value: w.netProfitLoss,
+          }))}
+        />
+      </Card>
+      
+      {/* Key metrics */}
+      <KeyMetricsGrid
+        metrics={[
+          { label: 'Avg Attendance', value: formatNumber(finances.avgAttendance) },
+          { label: 'Avg Show Rating', value: finances.avgShowRating.toFixed(2) },
+          { label: 'Total Payroll', value: formatCurrency(finances.weeklyPayroll) },
+          { label: 'Top Earner', value: finances.topEarner.name },
+        ]}
+      />
+    </ScrollView>
+  );
+}
+```
+
+### Free Agents Tab
+
+```typescript
+function FreeAgentsTab() {
+  const freeAgentPool = useFreeAgentPool();
+  const [sortBy, setSortBy] = useState<'overall' | 'popularity' | 'salary'>('overall');
+  const [filterType, setFilterType] = useState<'all' | 'generated' | 'released' | 'legends'>('all');
+  
+  const filteredAgents = useMemo(() => {
+    let agents = [...freeAgentPool.availableFreeAgents];
+    
+    if (filterType !== 'all') {
+      agents = agents.filter(a => a.source === filterType);
+    }
+    
+    return agents.sort((a, b) => {
+      switch (sortBy) {
+        case 'overall':
+          return calculateOverall(b.wrestler) - calculateOverall(a.wrestler);
+        case 'popularity':
+          return b.wrestler.popularity - a.wrestler.popularity;
+        case 'salary':
+          return a.demandedSalary - b.demandedSalary;
+      }
+    });
+  }, [freeAgentPool, sortBy, filterType]);
+  
+  return (
+    <View style={styles.container}>
+      {/* Filters */}
+      <View style={styles.filterRow}>
+        <FilterChips
+          selected={filterType}
+          onSelect={setFilterType}
+          options={[
+            { value: 'all', label: 'All' },
+            { value: 'generated', label: 'New Talent' },
+            { value: 'released', label: 'Released' },
+            { value: 'legends', label: 'Legends' },
+          ]}
+        />
+        <SortDropdown value={sortBy} onChange={setSortBy} />
+      </View>
+      
+      {/* Free agent list */}
+      <FlatList
+        data={filteredAgents}
+        keyExtractor={(a) => a.wrestler.id}
+        renderItem={({ item }) => (
+          <FreeAgentCard
+            freeAgent={item}
+            onNegotiate={() => navigation.navigate('ContractNegotiation', {
+              freeAgentId: item.wrestler.id,
+            })}
+          />
+        )}
+        ListEmptyComponent={
+          <EmptyState
+            icon="account-search"
+            title="No Free Agents Available"
+            description="Check back later or release some wrestlers."
+          />
+        }
+      />
+    </View>
+  );
+}
+
+function FreeAgentCard({ freeAgent, onNegotiate }: Props) {
+  const wrestler = freeAgent.wrestler;
+  const hasCompetingOffers = freeAgent.competingOffers.length > 0;
+  
+  return (
+    <Card style={styles.freeAgentCard}>
+      <View style={styles.cardHeader}>
+        <View style={styles.wrestlerInfo}>
+          <Text style={styles.name}>{wrestler.name}</Text>
+          <View style={styles.badges}>
+            <RoleBadge role={wrestler.role} />
+            <AlignmentBadge alignment={wrestler.alignment} />
+            {wrestler.isMajorSuperstar && <Badge>★ Star</Badge>}
+          </View>
+        </View>
+        {hasCompetingOffers && (
+          <Chip icon="alert" style={styles.competingChip}>
+            Competing Offers!
+          </Chip>
+        )}
+      </View>
+      
+      {/* Key stats */}
+      <View style={styles.statsRow}>
+        <StatPill label="Pop" value={wrestler.popularity} />
+        <StatPill label="Work" value={calculateWorkRate(wrestler.attributes)} />
+        <StatPill label="Age" value={wrestler.age} />
+      </View>
+      
+      {/* Demands summary */}
+      <View style={styles.demandsSummary}>
+        <Text style={styles.demandsLabel}>Demands:</Text>
+        <Text style={styles.salary}>{formatCurrency(freeAgent.demandedSalary)}/show</Text>
+        <Text style={styles.length}>{formatWeeks(freeAgent.demandedLength)}</Text>
+      </View>
+      
+      {/* Special demands */}
+      {freeAgent.specialDemands.length > 0 && (
+        <View style={styles.specialDemands}>
+          {freeAgent.specialDemands.slice(0, 2).map((demand, i) => (
+            <DemandChip key={i} demand={demand} />
+          ))}
+          {freeAgent.specialDemands.length > 2 && (
+            <Text style={styles.moreDemands}>
+              +{freeAgent.specialDemands.length - 2} more
+            </Text>
+          )}
+        </View>
+      )}
+      
+      {/* Source indicator */}
+      <View style={styles.sourceRow}>
+        <SourceBadge source={freeAgent.source} />
+        <Text style={styles.availableSince}>
+          Available since {formatDate(freeAgent.availableSince)}
+        </Text>
+      </View>
+      
+      {/* Negotiate button */}
+      <Button mode="contained" onPress={onNegotiate} style={styles.negotiateButton}>
+        Open Negotiations
+      </Button>
+    </Card>
+  );
+}
+```
+
+### Contract Negotiation Screen
+
+```typescript
+function ContractNegotiationScreen({ route }: Props) {
+  const { freeAgentId } = route.params;
+  const freeAgent = useFreeAgent(freeAgentId);
+  const [offer, setOffer] = useState<ContractOffer>(getDefaultOffer(freeAgent));
+  const [negotiationState, setNegotiationState] = useState<NegotiationState>('initial');
+  const [counterOffer, setCounterOffer] = useState<ContractOffer | null>(null);
+  const [messages, setMessages] = useState<NegotiationMessage[]>([]);
+  
+  const { submitOffer, acceptCounter, walkAway } = useNegotiation(freeAgentId);
+  
+  const handleSubmitOffer = async () => {
+    const result = await submitOffer(offer);
+    setMessages([...messages, { type: 'player_offer', offer, timestamp: Date.now() }]);
+    
+    if (result.status === 'accepted') {
+      setNegotiationState('accepted');
+      // Navigate to success screen after delay
+    } else if (result.status === 'counter') {
+      setCounterOffer(result.counterOffer);
+      setNegotiationState('counter_received');
+      setMessages([...messages, { type: 'counter', offer: result.counterOffer, message: result.message }]);
+    } else if (result.status === 'walked_away') {
+      setNegotiationState('failed');
+    } else {
+      setNegotiationState('rejected');
+      setMessages([...messages, { type: 'rejection', message: result.message }]);
+    }
+  };
+  
+  const handleAcceptCounter = async () => {
+    await acceptCounter(counterOffer!);
+    setNegotiationState('accepted');
+  };
+  
+  return (
+    <ScrollView style={styles.container}>
+      {/* Wrestler info header */}
+      <WrestlerNegotiationHeader wrestler={freeAgent.wrestler} />
+      
+      {/* Their demands summary */}
+      <Card style={styles.demandsCard}>
+        <Text style={styles.cardTitle}>Their Demands</Text>
+        <DemandsList
+          salary={freeAgent.demandedSalary}
+          length={freeAgent.demandedLength}
+          specialDemands={freeAgent.specialDemands}
+        />
+      </Card>
+      
+      {/* Competing offers warning */}
+      {freeAgent.competingOffers.length > 0 && (
+        <Card style={styles.warningCard}>
+          <Icon name="alert" color={colors.warning} />
+          <Text style={styles.warningText}>
+            {freeAgent.competingOffers.length} competing offer(s) from rival promotions!
+          </Text>
+        </Card>
+      )}
+      
+      {/* Negotiation history */}
+      <NegotiationHistory messages={messages} />
+      
+      {/* Counter offer display */}
+      {negotiationState === 'counter_received' && counterOffer && (
+        <Card style={styles.counterCard}>
+          <Text style={styles.cardTitle}>Their Counter-Offer</Text>
+          <CounterOfferDisplay offer={counterOffer} />
+          <View style={styles.counterActions}>
+            <Button mode="outlined" onPress={() => setNegotiationState('negotiating')}>
+              Counter Again
+            </Button>
+            <Button mode="contained" onPress={handleAcceptCounter}>
+              Accept
+            </Button>
+          </View>
+        </Card>
+      )}
+      
+      {/* Your offer builder */}
+      {(negotiationState === 'initial' || negotiationState === 'rejected' || negotiationState === 'negotiating') && (
+        <Card style={styles.offerCard}>
+          <Text style={styles.cardTitle}>Your Offer</Text>
+          
+          {/* Salary slider */}
+          <View style={styles.sliderGroup}>
+            <Text style={styles.sliderLabel}>
+              Salary per Show: {formatCurrency(offer.salaryPerShow)}
+            </Text>
+            <Slider
+              value={offer.salaryPerShow}
+              onValueChange={(v) => setOffer({ ...offer, salaryPerShow: v })}
+              minimumValue={1000}
+              maximumValue={50000}
+              step={500}
+            />
+            <ComparisonIndicator
+              offered={offer.salaryPerShow}
+              demanded={freeAgent.demandedSalary}
+            />
+          </View>
+          
+          {/* Contract length */}
+          <View style={styles.sliderGroup}>
+            <Text style={styles.sliderLabel}>
+              Contract Length: {formatWeeks(offer.lengthWeeks)}
+            </Text>
+            <Slider
+              value={offer.lengthWeeks}
+              onValueChange={(v) => setOffer({ ...offer, lengthWeeks: v })}
+              minimumValue={13}
+              maximumValue={156}
+              step={13}
+            />
+          </View>
+          
+          {/* Signing bonus */}
+          <View style={styles.sliderGroup}>
+            <Text style={styles.sliderLabel}>
+              Signing Bonus: {formatCurrency(offer.signingBonus)}
+            </Text>
+            <Slider
+              value={offer.signingBonus}
+              onValueChange={(v) => setOffer({ ...offer, signingBonus: v })}
+              minimumValue={0}
+              maximumValue={500000}
+              step={10000}
+            />
+          </View>
+          
+          {/* Brand assignment */}
+          <View style={styles.selectGroup}>
+            <Text style={styles.selectLabel}>Brand Assignment</Text>
+            <SegmentedButtons
+              value={offer.brandAssignment}
+              onValueChange={(v) => setOffer({ ...offer, brandAssignment: v })}
+              buttons={[
+                { value: 'alpha', label: 'Alpha' },
+                { value: 'velocity', label: 'Velocity' },
+                { value: 'vanguard', label: 'Vanguard' },
+              ]}
+            />
+          </View>
+          
+          {/* Special clauses toggles */}
+          <Text style={styles.clausesTitle}>Special Clauses</Text>
+          
+          <SwitchRow
+            label="Creative Control"
+            value={offer.creativeControl}
+            onValueChange={(v) => setOffer({ ...offer, creativeControl: v })}
+            disabled={!freeAgent.specialDemands.some(d => d.type === 'creative_control')}
+          />
+          
+          <SwitchRow
+            label="Guaranteed Title Shot"
+            value={offer.titleShotGuarantee}
+            onValueChange={(v) => setOffer({ ...offer, titleShotGuarantee: v })}
+          />
+          
+          {offer.titleShotGuarantee && (
+            <View style={styles.sliderGroup}>
+              <Text style={styles.sliderLabel}>
+                Title Shot Within: {offer.titleShotDeadlineWeeks} weeks
+              </Text>
+              <Slider
+                value={offer.titleShotDeadlineWeeks || 26}
+                onValueChange={(v) => setOffer({ ...offer, titleShotDeadlineWeeks: v })}
+                minimumValue={4}
+                maximumValue={52}
+                step={4}
+              />
+            </View>
+          )}
+          
+          {/* Merch split */}
+          <View style={styles.sliderGroup}>
+            <Text style={styles.sliderLabel}>
+              Merchandise Split: {offer.merchSplit}% to wrestler
+            </Text>
+            <Slider
+              value={offer.merchSplit}
+              onValueChange={(v) => setOffer({ ...offer, merchSplit: v })}
+              minimumValue={10}
+              maximumValue={50}
+              step={5}
+            />
+          </View>
+          
+          {/* Total cost estimate */}
+          <Card style={styles.costEstimate}>
+            <Text style={styles.costTitle}>Estimated Total Cost</Text>
+            <Text style={styles.costValue}>
+              {formatCurrency(calculateTotalCost(offer))}
+            </Text>
+            <Text style={styles.costBreakdown}>
+              ({formatCurrency(offer.signingBonus)} signing + {formatCurrency(offer.salaryPerShow * estimateShowsPerYear(offer.lengthWeeks))} salary)
+            </Text>
+          </Card>
+          
+          {/* Submit button */}
+          <Button
+            mode="contained"
+            onPress={handleSubmitOffer}
+            style={styles.submitButton}
+          >
+            Submit Offer
+          </Button>
+        </Card>
+      )}
+      
+      {/* Success state */}
+      {negotiationState === 'accepted' && (
+        <Card style={styles.successCard}>
+          <Icon name="check-circle" size={64} color={colors.success} />
+          <Text style={styles.successTitle}>Contract Signed!</Text>
+          <Text style={styles.successText}>
+            {freeAgent.wrestler.name} has joined {offer.brandAssignment.toUpperCase()}!
+          </Text>
+          <Button mode="contained" onPress={() => navigation.goBack()}>
+            Continue
+          </Button>
+        </Card>
+      )}
+      
+      {/* Failed state */}
+      {negotiationState === 'failed' && (
+        <Card style={styles.failedCard}>
+          <Icon name="close-circle" size={64} color={colors.error} />
+          <Text style={styles.failedTitle}>Negotiations Failed</Text>
+          <Text style={styles.failedText}>
+            {freeAgent.wrestler.name} has walked away from negotiations.
+          </Text>
+          <Button mode="outlined" onPress={() => navigation.goBack()}>
+            Return
+          </Button>
+        </Card>
+      )}
+      
+      {/* Walk away button */}
+      {negotiationState !== 'accepted' && negotiationState !== 'failed' && (
+        <Button
+          mode="text"
+          onPress={walkAway}
+          style={styles.walkAwayButton}
+          textColor={colors.error}
+        >
+          Walk Away from Negotiations
+        </Button>
+      )}
+    </ScrollView>
+  );
+}
+```
+
+---
+
+## 17. State Management (Zustand)
+
+### Store Structure
+
+```typescript
+// src/store/universeStore.ts
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { MMKV } from 'react-native-mmkv';
+
+const storage = new MMKV();
+
+const mmkvStorage = {
+  getItem: (name: string) => {
+    const value = storage.getString(name);
+    return value ?? null;
+  },
+  setItem: (name: string, value: string) => {
+    storage.set(name, value);
+  },
+  removeItem: (name: string) => {
+    storage.delete(name);
+  },
+};
+
+interface UniverseState {
+  // Core data
+  universe: Universe;
+  
+  // Current session
+  currentShowDraft: ShowDraft | null;
+  lastShowResult: ShowResult | null;
+  
+  // UI state
+  isLoading: boolean;
+  error: string | null;
+}
+
+interface UniverseActions {
+  // Initialization
+  initializeNewUniverse: (config?: UniverseConfig) => void;
+  loadUniverse: (saveSlot: string) => Promise<void>;
+  saveUniverse: (saveSlot?: string) => Promise<void>;
+  
+  // Game flow
+  generateShowDraft: () => Promise<ShowDraft>;
+  updateShowDraft: (updates: Partial<ShowDraft>) => void;
+  updateMatchDraft: (matchId: string, updates: Partial<MatchDraft>) => void;
+  simulateShow: () => Promise<ShowResult>;
+  advanceToNextShow: () => void;
+  
+  // Roster management
+  hireWrestler: (wrestlerId: string, contract: ContractOffer) => void;
+  releaseWrestler: (wrestlerId: string) => void;
+  extendContract: (wrestlerId: string, newContract: ContractOffer) => void;
+  changeBrand: (wrestlerId: string, newBrand: BrandId) => void;
+  changeAlignment: (wrestlerId: string, newAlignment: Alignment) => void;
+  changeRole: (wrestlerId: string, newRole: Role) => void;
+  retireWrestler: (wrestlerId: string, withTour?: boolean) => void;
+  
+  // Tag teams & factions
+  createTagTeam: (memberIds: [string, string], name: string) => void;
+  disbandTagTeam: (tagTeamId: string) => void;
+  createFaction: (name: string, leaderId: string, memberIds: string[]) => void;
+  addToFaction: (factionId: string, wrestlerId: string) => void;
+  removeFromFaction: (factionId: string, wrestlerId: string) => void;
+  disbandFaction: (factionId: string) => void;
+  
+  // Storylines
+  createFeud: (type: FeudType, participantIds: string[], titleId?: string) => void;
+  updateFeud: (feudId: string, updates: Partial<Feud>) => void;
+  resolveFeud: (feudId: string, winnerId: string, resolutionType: ResolutionType) => void;
+  
+  // Championships
+  vacateTitle: (titleId: string) => void;
+  awardTitle: (titleId: string, newHolderId: string) => void;
+  
+  // Create-a-Wrestler
+  createWrestler: (wrestler: Partial<Wrestler>) => void;
+  
+  // Year One scripting
+  triggerScriptedEvent: (eventId: string) => void;
+}
+
+export const useUniverseStore = create<UniverseState & UniverseActions>()(
+  persist(
+    (set, get) => ({
+      // Initial state
+      universe: createDefaultUniverse(),
+      currentShowDraft: null,
+      lastShowResult: null,
+      isLoading: false,
+      error: null,
+      
+      // Initialization
+      initializeNewUniverse: (config) => {
+        const newUniverse = createUniverse(config);
+        set({ universe: newUniverse, currentShowDraft: null, lastShowResult: null });
+      },
+      
+      loadUniverse: async (saveSlot) => {
+        set({ isLoading: true, error: null });
+        try {
+          const savedData = storage.getString(`save_${saveSlot}`);
+          if (!savedData) throw new Error('Save not found');
+          const universe = JSON.parse(savedData) as Universe;
+          set({ universe, isLoading: false });
+        } catch (error) {
+          set({ error: (error as Error).message, isLoading: false });
+        }
+      },
+      
+      saveUniverse: async (saveSlot = 'autosave') => {
+        const { universe } = get();
+        storage.set(`save_${saveSlot}`, JSON.stringify(universe));
+        storage.set(`save_${saveSlot}_meta`, JSON.stringify({
+          savedAt: Date.now(),
+          year: universe.calendar.currentYear,
+          week: universe.calendar.currentWeek,
+          balance: universe.finances.balance,
+        }));
+      },
+      
+      // Game flow
+      generateShowDraft: async () => {
+        const { universe } = get();
+        const nextShow = getNextShow(universe.calendar);
+        const draft = creativeDirector.generateShowDraft(universe, nextShow);
+        set({ currentShowDraft: draft });
+        return draft;
+      },
+      
+      updateShowDraft: (updates) => {
+        set((state) => ({
+          currentShowDraft: state.currentShowDraft 
+            ? { ...state.currentShowDraft, ...updates }
+            : null,
+        }));
+      },
+      
+      updateMatchDraft: (matchId, updates) => {
+        set((state) => ({
+          currentShowDraft: state.currentShowDraft ? {
+            ...state.currentShowDraft,
+            matches: state.currentShowDraft.matches.map((m) =>
+              m.id === matchId ? { ...m, ...updates } : m
+            ),
+          } : null,
+        }));
+      },
+      
+      simulateShow: async () => {
+        const { universe, currentShowDraft } = get();
+        if (!currentShowDraft) throw new Error('No show draft');
+        
+        set({ isLoading: true });
+        
+        const { showResult, updatedUniverse } = simulateShow(currentShowDraft, universe);
+        
+        set({
+          universe: updatedUniverse,
+          lastShowResult: showResult,
+          currentShowDraft: null,
+          isLoading: false,
+        });
+        
+        // Auto-save after each show
+        get().saveUniverse();
+        
+        return showResult;
+      },
+      
+      advanceToNextShow: () => {
+        set((state) => ({
+          universe: {
+            ...state.universe,
+            calendar: advanceCalendar(state.universe.calendar),
+          },
+          lastShowResult: null,
+        }));
+      },
+      
+      // Roster management
+      hireWrestler: (wrestlerId, contract) => {
+        set((state) => {
+          const freeAgent = state.universe.freeAgentPool.availableFreeAgents
+            .find((fa) => fa.wrestler.id === wrestlerId);
+          if (!freeAgent) return state;
+          
+          const wrestler: Wrestler = {
+            ...freeAgent.wrestler,
+            status: 'active',
+            contract: createContract(contract, state.universe.calendar.currentDate),
+            primaryBrand: contract.brandAssignment,
+          };
+          
+          return {
+            universe: {
+              ...state.universe,
+              wrestlers: [...state.universe.wrestlers, wrestler],
+              freeAgentPool: {
+                ...state.universe.freeAgentPool,
+                availableFreeAgents: state.universe.freeAgentPool.availableFreeAgents
+                  .filter((fa) => fa.wrestler.id !== wrestlerId),
+              },
+            },
+          };
+        });
+      },
+      
+      releaseWrestler: (wrestlerId) => {
+        set((state) => {
+          const wrestler = state.universe.wrestlers.find((w) => w.id === wrestlerId);
+          if (!wrestler) return state;
+          
+          const releasedWrestler: Wrestler = {
+            ...wrestler,
+            status: 'released',
+          };
+          
+          const freeAgent: FreeAgent = {
+            wrestler: releasedWrestler,
+            source: 'released',
+            availableSince: state.universe.calendar.currentDate,
+            demandedSalary: wrestler.contract.salaryPerShow * 0.8,
+            demandedLength: 52,
+            specialDemands: [],
+            interestLevel: 50,
+            competingOffers: [],
+          };
+          
+          return {
+            universe: {
+              ...state.universe,
+              wrestlers: state.universe.wrestlers.filter((w) => w.id !== wrestlerId),
+              freeAgentPool: {
+                ...state.universe.freeAgentPool,
+                recentReleases: [freeAgent, ...state.universe.freeAgentPool.recentReleases],
+              },
+            },
+          };
+        });
+      },
+      
+      // ... additional actions
+      
+    }),
+    {
+      name: 'awum-universe',
+      storage: createJSONStorage(() => mmkvStorage),
+      partialize: (state) => ({
+        universe: state.universe,
+      }),
+    }
+  )
+);
+
+// Selector hooks for performance
+export const useWrestler = (id: string) => 
+  useUniverseStore((state) => state.universe.wrestlers.find((w) => w.id === id));
+
+export const useWrestlers = (ids: string[]) =>
+  useUniverseStore((state) => 
+    ids.map((id) => state.universe.wrestlers.find((w) => w.id === id)).filter(Boolean) as Wrestler[]
+  );
+
+export const useActiveFeuds = () =>
+  useUniverseStore((state) => state.universe.feuds.filter((f) => !f.isResolved));
+
+export const useChampionship = (id: string) =>
+  useUniverseStore((state) => state.universe.championships.find((c) => c.id === id));
+
+export const useNextShow = () =>
+  useUniverseStore((state) => getNextShow(state.universe.calendar));
+
+export const useExpiringContracts = (weeksAhead: number) =>
+  useUniverseStore((state) => {
+    const currentWeek = state.universe.calendar.currentWeek;
+    const currentYear = state.universe.calendar.currentYear;
+    
+    return state.universe.wrestlers.filter((w) => {
+      const weeksRemaining = w.contract.weeksRemaining;
+      return weeksRemaining > 0 && weeksRemaining <= weeksAhead;
+    });
+  });
+
+export const useFinances = () =>
+  useUniverseStore((state) => state.universe.finances);
+
+export const useFreeAgentPool = () =>
+  useUniverseStore((state) => state.universe.freeAgentPool);
+```
+
+### Save Manager Store
+
+```typescript
+// src/store/saveManagerStore.ts
+import { create } from 'zustand';
+import { MMKV } from 'react-native-mmkv';
+
+const storage = new MMKV();
+
+interface SaveSlot {
+  id: string;
+  name: string;
+  savedAt: number;
+  year: number;
+  week: number;
+  balance: number;
+  promotionName: string;
+}
+
+interface SaveManagerState {
+  saveSlots: SaveSlot[];
+  currentSlot: string | null;
+}
+
+interface SaveManagerActions {
+  loadSaveSlots: () => void;
+  createNewSave: (name: string) => string;
+  deleteSave: (slotId: string) => void;
+  renameSave: (slotId: string, newName: string) => void;
+  setCurrentSlot: (slotId: string) => void;
+}
+
+export const useSaveManagerStore = create<SaveManagerState & SaveManagerActions>((set, get) => ({
+  saveSlots: [],
+  currentSlot: null,
+  
+  loadSaveSlots: () => {
+    const keys = storage.getAllKeys();
+    const saveKeys = keys.filter((k) => k.startsWith('save_') && k.endsWith('_meta'));
+    
+    const slots: SaveSlot[] = saveKeys.map((key) => {
+      const slotId = key.replace('save_', '').replace('_meta', '');
+      const meta = JSON.parse(storage.getString(key) || '{}');
+      return {
+        id: slotId,
+        name: meta.name || slotId,
+        savedAt: meta.savedAt || 0,
+        year: meta.year || 1,
+        week: meta.week || 1,
+        balance: meta.balance || 0,
+        promotionName: meta.promotionName || 'Ring of Champions',
+      };
+    }).sort((a, b) => b.savedAt - a.savedAt);
+    
+    set({ saveSlots: slots });
+  },
+  
+  createNewSave: (name) => {
+    const slotId = `slot_${Date.now()}`;
+    const meta: SaveSlot = {
+      id: slotId,
+      name,
+      savedAt: Date.now(),
+      year: 1,
+      week: 1,
+      balance: 5000000,
+      promotionName: 'Ring of Champions',
+    };
+    
+    storage.set(`save_${slotId}_meta`, JSON.stringify(meta));
+    
+    set((state) => ({
+      saveSlots: [meta, ...state.saveSlots],
+      currentSlot: slotId,
+    }));
+    
+    return slotId;
+  },
+  
+  deleteSave: (slotId) => {
+    storage.delete(`save_${slotId}`);
+    storage.delete(`save_${slotId}_meta`);
+    
+    set((state) => ({
+      saveSlots: state.saveSlots.filter((s) => s.id !== slotId),
+      currentSlot: state.currentSlot === slotId ? null : state.currentSlot,
+    }));
+  },
+  
+  renameSave: (slotId, newName) => {
+    const metaKey = `save_${slotId}_meta`;
+    const meta = JSON.parse(storage.getString(metaKey) || '{}');
+    meta.name = newName;
+    storage.set(metaKey, JSON.stringify(meta));
+    
+    set((state) => ({
+      saveSlots: state.saveSlots.map((s) =>
+        s.id === slotId ? { ...s, name: newName } : s
+      ),
+    }));
+  },
+  
+  setCurrentSlot: (slotId) => {
+    set({ currentSlot: slotId });
+  },
+}));
+```
+
+---
+
+## 18. Project Structure
+
+```
+awum/
+├── app.json
+├── App.tsx
+├── babel.config.js
+├── tsconfig.json
+├── package.json
+├── .eslintrc.js
+├── .prettierrc
+│
+├── src/
+│   ├── app/
+│   │   └── index.tsx              # Entry point
+│   │
+│   ├── navigation/
+│   │   ├── RootNavigator.tsx
+│   │   ├── MainTabNavigator.tsx
+│   │   ├── types.ts
+│   │   └── linking.ts
+│   │
+│   ├── screens/
+│   │   ├── office/
+│   │   │   ├── OfficeScreen.tsx
+│   │   │   └── components/
+│   │   ├── booking/
+│   │   │   ├── BookingScreen.tsx
+│   │   │   ├── ShowRecapScreen.tsx
+│   │   │   └── components/
+│   │   ├── roster/
+│   │   │   ├── RosterScreen.tsx
+│   │   │   ├── WrestlerDetailScreen.tsx
+│   │   │   ├── CreateWrestlerScreen.tsx
+│   │   │   └── components/
+│   │   ├── storylines/
+│   │   │   ├── StorylinesScreen.tsx
+│   │   │   ├── FeudDetailScreen.tsx
+│   │   │   ├── FactionDetailScreen.tsx
+│   │   │   └── components/
+│   │   ├── business/
+│   │   │   ├── BusinessScreen.tsx
+│   │   │   ├── ContractNegotiationScreen.tsx
+│   │   │   └── components/
+│   │   ├── championships/
+│   │   │   ├── ChampionshipDetailScreen.tsx
+│   │   │   └── components/
+│   │   └── settings/
+│   │       ├── SettingsScreen.tsx
+│   │       └── SaveManagerScreen.tsx
+│   │
+│   ├── components/
+│   │   ├── common/
+│   │   │   ├── Card.tsx
+│   │   │   ├── Badge.tsx
+│   │   │   ├── StarRating.tsx
+│   │   │   ├── ProgressBar.tsx
+│   │   │   ├── Slider.tsx
+│   │   │   ├── EmptyState.tsx
+│   │   │   ├── LoadingScreen.tsx
+│   │   │   └── ErrorBoundary.tsx
+│   │   ├── wrestlers/
+│   │   │   ├── WrestlerRow.tsx
+│   │   │   ├── WrestlerCard.tsx
+│   │   │   ├── AttributeBar.tsx
+│   │   │   ├── AttributeRadarChart.tsx
+│   │   │   ├── AlignmentBadge.tsx
+│   │   │   ├── RoleBadge.tsx
+│   │   │   └── TraitChip.tsx
+│   │   ├── matches/
+│   │   │   ├── MatchDraftCard.tsx
+│   │   │   ├── MatchResultCard.tsx
+│   │   │   ├── MatchNarrativeDisplay.tsx
+│   │   │   └── BookingControls.tsx
+│   │   ├── shows/
+│   │   │   ├── ShowDraftHeader.tsx
+│   │   │   ├── ShowRecapHeader.tsx
+│   │   │   ├── NextShowCard.tsx
+│   │   │   └── ShowFinancialsCard.tsx
+│   │   ├── storylines/
+│   │   │   ├── FeudCard.tsx
+│   │   │   ├── FactionCard.tsx
+│   │   │   ├── FeudIntensityMeter.tsx
+│   │   │   └── StorylineTimeline.tsx
+│   │   ├── championships/
+│   │   │   ├── ChampionshipCard.tsx
+│   │   │   ├── TitleHistoryList.tsx
+│   │   │   └── TitleMatchBadge.tsx
+│   │   ├── finances/
+│   │   │   ├── BalanceHeader.tsx
+│   │   │   ├── FinancialSummaryCard.tsx
+│   │   │   ├── ContractAlertsCard.tsx
+│   │   │   └── RevenueChart.tsx
+│   │   └── freeagents/
+│   │       ├── FreeAgentCard.tsx
+│   │       ├── DemandChip.tsx
+│   │       └── NegotiationHistory.tsx
+│   │
+│   ├── engine/
+│   │   ├── index.ts               # Exports all engine modules
+│   │   ├── universe/
+│   │   │   ├── createUniverse.ts
+│   │   │   ├── universeTypes.ts
+│   │   │   └── universeHelpers.ts
+│   │   ├── calendar/
+│   │   │   ├── calendarSystem.ts
+│   │   │   ├── ppvSchedule.ts
+│   │   │   └── calendarTypes.ts
+│   │   ├── wrestlers/
+│   │   │   ├── wrestlerGenerator.ts
+│   │   │   ├── aging.ts
+│   │   │   ├── retirement.ts
+│   │   │   ├── morale.ts
+│   │   │   ├── injuries.ts
+│   │   │   └── wrestlerTypes.ts
+│   │   ├── matches/
+│   │   │   ├── matchSimulation.ts
+│   │   │   ├── matchQuality.ts
+│   │   │   ├── matchNarrative.ts
+│   │   │   ├── upsetDetection.ts
+│   │   │   └── matchTypes.ts
+│   │   ├── shows/
+│   │   │   ├── showSimulation.ts
+│   │   │   ├── attendance.ts
+│   │   │   ├── ratings.ts
+│   │   │   └── showTypes.ts
+│   │   ├── creative/
+│   │   │   ├── creativeDirector.ts
+│   │   │   ├── cardGeneration.ts
+│   │   │   ├── matchSelection.ts
+│   │   │   ├── segmentGeneration.ts
+│   │   │   └── creativeTypes.ts
+│   │   ├── storylines/
+│   │   │   ├── feudSystem.ts
+│   │   │   ├── factionSystem.ts
+│   │   │   ├── alignmentTurns.ts
+│   │   │   ├── surpriseReturns.ts
+│   │   │   └storylineTypes.ts
+│   │   ├── championships/
+│   │   │   ├── titleSystem.ts
+│   │   │   ├── titleHistory.ts
+│   │   │   └── championshipTypes.ts
+│   │   ├── economy/
+│   │   │   ├── finances.ts
+│   │   │   ├── contracts.ts
+│   │   │   ├── revenue.ts
+│   │   │   ├── merchandise.ts
+│   │   │   └── economyTypes.ts
+│   │   ├── freeAgents/
+│   │   │   ├── freeAgentPool.ts
+│   │   │   ├── freeAgentGenerator.ts
+│   │   │   ├── negotiation.ts
+│   │   │   └── freeAgentTypes.ts
+│   │   ├── tagTeams/
+│   │   │   ├── tagTeamSystem.ts
+│   │   │   └── tagTeamTypes.ts
+│   │   ├── social/
+│   │   │   ├── socialMedia.ts
+│   │   │   ├── dirtSheets.ts
+│   │   │   └── socialTypes.ts
+│   │   ├── lockerRoom/
+│   │   │   ├── lockerRoomSystem.ts
+│   │   │   ├── politics.ts
+│   │   │   └── lockerRoomTypes.ts
+│   │   └── yearOne/
+│   │       ├── scriptedEvents.ts
+│   │       ├── storyBeats.ts
+│   │       └── yearOneTypes.ts
+│   │
+│   ├── data/
+│   │   ├── defaultWrestlers.ts
+│   │   ├── defaultChampionships.ts
+│   │   ├── defaultBrands.ts
+│   │   ├── finishTypes.ts
+│   │   ├── matchTypes.ts
+│   │   ├── traitDefinitions.ts
+│   │   ├── signatureSpots.ts
+│   │   ├── hometowns.ts
+│   │   ├── firstNames.ts
+│   │   ├── lastNames.ts
+│   │   └── nicknames.ts
+│   │
+│   ├── store/
+│   │   ├── universeStore.ts
+│   │   ├── saveManagerStore.ts
+│   │   ├── settingsStore.ts
+│   │   └── uiStore.ts
+│   │
+│   ├── hooks/
+│   │   ├── useGameEngine.ts
+│   │   ├── useNegotiation.ts
+│   │   ├── useFilteredRoster.ts
+│   │   ├── useMatchHistory.ts
+│   │   ├── useTitleHistory.ts
+│   │   └── useAlerts.ts
+│   │
+│   ├── theme/
+│   │   ├── theme.ts
+│   │   ├── colors.ts
+│   │   ├── typography.ts
+│   │   └── spacing.ts
+│   │
+│   ├── utils/
+│   │   ├── random.ts
+│   │   ├── formatting.ts
+│   │   ├── calculations.ts
+│   │   ├── validators.ts
+│   │   ├── idGenerator.ts
+│   │   └── dateHelpers.ts
+│   │
+│   └── types/
+│       ├── index.ts
+│       ├── wrestler.ts
+│       ├── match.ts
+│       ├── show.ts
+│       ├── championship.ts
+│       ├── feud.ts
+│       ├── faction.ts
+│       ├── economy.ts
+│       ├── calendar.ts
+│       └── navigation.ts
+│
+├── assets/
+│   ├── fonts/
+│   ├── images/
+│   └── icons/
+│
+└── __tests__/
+    ├── engine/
+    │   ├── matchSimulation.test.ts
+    │   ├── showSimulation.test.ts
+    │   ├── creativeDirector.test.ts
+    │   ├── feudSystem.test.ts
+    │   └── economy.test.ts
+    ├── components/
+    │   └── ...
+    └── integration/
+        └── gameFlow.test.ts
+```
+
+---
+
+## 19. Implementation Roadmap
+
+### Phase 1: Foundation (Weeks 1-2)
+
+**Goal:** Core infrastructure and basic game loop
+
+1. **Project Setup**
+   - Initialize Expo project with TypeScript
+   - Configure ESLint, Prettier, Husky
+   - Set up React Navigation structure
+   - Configure React Native Paper theming
+   - Set up MMKV storage
+
+2. **Core Types & Data Models**
+   - Define all TypeScript interfaces
+   - Create default data files (wrestlers, championships, brands)
+   - Implement ID generation and utility functions
+
+3. **State Management**
+   - Implement Zustand universe store
+   - Implement save/load functionality
+   - Create selector hooks
+
+4. **Basic Screens**
+   - Office screen (basic layout)
+   - Navigation between tabs
+   - Settings screen with save manager
+
+### Phase 2: Game Engine Core (Weeks 3-4)
+
+**Goal:** Match and show simulation working
+
+5. **Calendar System**
+   - Implement calendar generation
+   - PPV scheduling
+   - Show advancement
+
+6. **Match Simulation Engine**
+   - Attribute calculations
+   - Winner determination
+   - Match quality calculation
+   - Basic narrative generation
+   - Injury system
+
+7. **Show Simulation Engine**
+   - Card execution
+   - State updates after matches
+   - Financial calculations
+   - Event detection (upsets, title changes)
+
+8. **Basic Booking Screen**
+   - Display generated card
+   - Booking bias controls
+   - Run show functionality
+
+### Phase 3: Creative Director (Weeks 5-6)
+
+**Goal:** AI-generated cards that make sense
+
+9. **Creative Director - Card Generation**
+   - Main event selection
+   - Title match booking
+   - Feature match selection
+   - Filler match selection
+   - Card ordering
+
+10. **Creative Director - Context Awareness**
+    - Feud consideration
+    - PPV-appropriate booking
+    - Roster fatigue management
+    - Brand-specific logic
+
+11. **Enhanced Booking UI**
+    - Match swapping
+    - Detailed match previews
+    - Warnings and suggestions
+
+### Phase 4: Storylines & Dynamics (Weeks 7-8)
+
+**Goal:** Living, breathing universe
+
+12. **Feud System**
+    - Feud creation and tracking
+    - Intensity management
+    - Payoff scheduling
+    - Resolution handling
+
+13. **Faction System**
+    - Faction management
+    - Unity/power tracking
+    - Faction warfare
+
+14. **Tag Team System**
+    - Formal teams
+    - Chemistry building
+    - Team dissolution
+
+15. **Surprise Returns**
+    - Retired pool management
+    - Return probability
+    - Return effects
+
+### Phase 5: Economy & Contracts (Weeks 9-10)
+
+**Goal:** Business simulation depth
+
+16. **Financial System**
+    - Revenue tracking
+    - Expense management
+    - Balance over time
+    - Charts and graphs
+
+17. **Contract System**
+    - Expiration alerts
+    - Extension UI
+    - Release functionality
+
+18. **Free Agent System**
+    - Pool generation
+    - Negotiation flow
+    - Signing process
+
+19. **TV Ratings & Attendance**
+    - Detailed calculations
+    - Quarter-hour breakdown
+    - Historical tracking
+
+### Phase 6: Polish & Extended Features (Weeks 11-12)
+
+**Goal:** Depth and immersion
+
+20. **Morale & Locker Room**
+    - Morale tracking
+    - Consequences
+    - Locker room politics
+
+21. **Social Media & Dirt Sheets**
+    - Event generation
+    - Leak system
+    - Viral moments
+
+22. **Create-A-Wrestler**
+    - Full creation flow
+    - Attribute assignment
+    - Validation
+
+23. **Year One Storyline**
+    - Scripted events
+    - Story beats
+    - Tutorial integration
+
+### Phase 7: Final Polish (Weeks 13-14)
+
+**Goal:** Production-ready
+
+24. **UI/UX Polish**
+    - Animations with Reanimated
+    - Loading states
+    - Error handling
+    - Empty states
+
+25. **Performance Optimization**
+    - List virtualization
+    - Memo optimization
+    - Storage optimization
+
+26. **Testing**
+    - Unit tests for engine
+    - Component tests
+    - Integration tests
+
+27. **Final Review**
+    - Bug fixes
+    - Balance tuning
+    - Documentation
+
+---
+
+## 20. Quality Assurance Checklist
+
+### Functionality
+- [ ] New universe creation works
+- [ ] Save/load works across app restarts
+- [ ] Multiple save slots work
+- [ ] Calendar advances correctly
+- [ ] All 8 PPVs appear at correct times
+- [ ] Weekly shows for all 3 brands work
+- [ ] Match simulation produces varied results
+- [ ] Show simulation updates all state correctly
+- [ ] Title changes are tracked
+- [ ] Feuds progress and resolve
+- [ ] Contracts expire and can be extended/released
+- [ ] Free agent negotiation works
+- [ ] Injuries occur and heal
+- [ ] Aging and retirement work
+- [ ] Surprise returns trigger at big PPVs
+- [ ] Upsets are detected and logged
+- [ ] Financial calculations are accurate
+- [ ] Create-A-Wrestler works
+
+### UI/UX
+- [ ] All screens render correctly
+- [ ] Navigation works throughout
+- [ ] All buttons/touchables respond
+- [ ] Forms validate correctly
+- [ ] Loading states appear appropriately
+- [ ] Errors are handled gracefully
+- [ ] Empty states are informative
+- [ ] Theming is consistent
+- [ ] Text is readable
+- [ ] Touch targets are large enough
+
+### Performance
+- [ ] App launches in < 3 seconds
+- [ ] No jank during navigation
+- [ ] Large lists scroll smoothly
+- [ ] State updates don't cause lag
+- [ ] Save/load is fast
+- [ ] Memory usage is reasonable
+
+### Offline
+- [ ] App works with airplane mode
+- [ ] No network calls are made
+- [ ] All features work offline
+

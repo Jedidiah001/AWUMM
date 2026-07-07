@@ -1,0 +1,452 @@
+<!-- Save/Load Management View -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="bi bi-floppy"></i> Save/Load Game</h2>
+        <p class="lead">Manage your universe save files.</p>
+        <hr>
+    </div>
+</div>
+
+<!-- Current Universe Info -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Current Universe</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Year/Week:</strong> <span id="currentYearWeek">-</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Balance:</strong> <span id="currentBalance">-</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Total Wrestlers:</strong> <span id="currentWrestlers">-</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Shows Run:</strong> <span id="currentShows">-</span>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <button class="btn btn-success" onclick="quickSave()">
+                        <i class="bi bi-floppy"></i> Quick Save (Slot 1)
+                    </button>
+                    <button class="btn btn-warning" onclick="showSaveModal()">
+                        <i class="bi bi-floppy-fill"></i> Save As...
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Save Slots -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-save"></i> Save Slots</h5>
+            </div>
+            <div class="card-body">
+                <div id="saveSlotsList">
+                    <p class="text-center text-muted">Loading save slots...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import/Export -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="bi bi-upload"></i> Import Save</h5>
+            </div>
+            <div class="card-body">
+                <form id="importForm" onsubmit="importSave(event)">
+                    <div class="mb-3">
+                        <label class="form-label">Select Save File (JSON)</label>
+                        <input type="file" class="form-control" id="importFile" accept=".json" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Import to Slot</label>
+                        <select class="form-select" id="importSlot">
+                            <option value="1">Slot 1</option>
+                            <option value="2">Slot 2</option>
+                            <option value="3">Slot 3</option>
+                            <option value="4">Slot 4</option>
+                            <option value="5">Slot 5</option>
+                            <option value="6">Slot 6</option>
+                            <option value="7">Slot 7</option>
+                            <option value="8">Slot 8</option>
+                            <option value="9">Slot 9</option>
+                            <option value="10">Slot 10</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload"></i> Import
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="bi bi-download"></i> Export Save</h5>
+            </div>
+            <div class="card-body">
+                <p>Export save files to backup or share with others.</p>
+                <p class="text-muted small">Click the <i class="bi bi-download"></i> icon next to any save slot to download.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Save Modal -->
+<div class="modal fade" id="saveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Save Universe</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="saveForm">
+                    <div class="mb-3">
+                        <label class="form-label">Save Slot</label>
+                        <select class="form-select" id="saveSlot">
+                            <option value="1">Slot 1</option>
+                            <option value="2">Slot 2</option>
+                            <option value="3">Slot 3</option>
+                            <option value="4">Slot 4</option>
+                            <option value="5">Slot 5</option>
+                            <option value="6">Slot 6</option>
+                            <option value="7">Slot 7</option>
+                            <option value="8">Slot 8</option>
+                            <option value="9">Slot 9</option>
+                            <option value="10">Slot 10</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Save Name</label>
+                        <input type="text" class="form-control" id="saveName" placeholder="My Universe" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="includeHistory" checked>
+                        <label class="form-check-label" for="includeHistory">
+                            Include Full History (larger file size)
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="performSave()">
+                    <i class="bi bi-floppy"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load Confirmation Modal -->
+<div class="modal fade" id="loadConfirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">⚠️ Confirm Load</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Warning:</strong> Loading a save will replace your current universe!</p>
+                <p>Make sure to save your current progress first if you want to keep it.</p>
+                <p>Load save: <strong id="loadSaveName">-</strong></p>
+                <p class="text-muted small">Year <span id="loadYear">-</span>, Week <span id="loadWeek">-</span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="confirmLoad()">
+                    <i class="bi bi-arrow-clockwise"></i> Load Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentLoadSlot = null;
+
+// Load current universe info
+async function loadCurrentUniverseInfo() {
+    try {
+        const state = await fetchAPI('/api/universe/state');
+        
+        document.getElementById('currentYearWeek').textContent = `Year ${state.year}, Week ${state.week}`;
+        document.getElementById('currentBalance').textContent = `$${state.balance.toLocaleString()}`;
+        document.getElementById('currentWrestlers').textContent = state.total_roster;
+        
+        const summary = await fetchAPI('/api/stats/roster-summary');
+        const showHistory = await fetchAPI('/api/show/history?limit=1');
+        
+        document.getElementById('currentShows').textContent = state.show_count || 0;
+        
+    } catch (error) {
+        console.error('Failed to load universe info:', error);
+    }
+}
+
+// Load save slots
+async function loadSaveSlots() {
+    try {
+        const response = await fetchAPI('/api/saves/list');
+        
+        const container = document.getElementById('saveSlotsList');
+        
+        if (response.total === 0) {
+            container.innerHTML = '<p class="text-muted text-center">No saves found. Create your first save above!</p>';
+            return;
+        }
+        
+        let html = '<div class="list-group">';
+        
+        // Sort by slot number
+        response.saves.sort((a, b) => a.save_slot - b.save_slot);
+        
+        response.saves.forEach(save => {
+            const isAutosave = save.save_slot === 0;
+            const slotLabel = isAutosave ? '🔄 AUTOSAVE' : `Slot ${save.save_slot}`;
+            const badgeClass = isAutosave ? 'bg-warning text-dark' : 'bg-primary';
+            
+            const date = new Date(save.last_modified);
+            const dateStr = date.toLocaleString();
+            
+            html += `
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">
+                                <span class="badge ${badgeClass}">${slotLabel}</span>
+                                ${save.save_name}
+                            </h6>
+                            <p class="mb-1 small">
+                                Year ${save.current_year}, Week ${save.current_week} | 
+                                Balance: $${save.balance.toLocaleString()} | 
+                                ${save.total_wrestlers} wrestlers
+                            </p>
+                            <p class="mb-0 text-muted small">
+                                <i class="bi bi-clock"></i> ${dateStr}
+                            </p>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-success" onclick="loadSave(${save.save_slot}, '${save.save_name}', ${save.current_year}, ${save.current_week})" ${isAutosave ? 'disabled' : ''}>
+                                <i class="bi bi-arrow-clockwise"></i> Load
+                            </button>
+                            <button class="btn btn-sm btn-info" onclick="exportSave(${save.save_slot})">
+                                <i class="bi bi-download"></i>
+                            </button>
+                            ${!isAutosave ? `
+                                <button class="btn btn-sm btn-danger" onclick="deleteSave(${save.save_slot})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        container.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Failed to load save slots:', error);
+        document.getElementById('saveSlotsList').innerHTML = 
+            `<div class="alert alert-danger">Failed to load saves: ${error.message}</div>`;
+    }
+}
+
+// Quick save to slot 1
+async function quickSave() {
+    try {
+        const saveName = `Quick Save - ${new Date().toLocaleString()}`;
+        
+        const response = await fetchAPI('/api/saves/save', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                slot: 1,
+                save_name: saveName,
+                include_history: true
+            })
+        });
+        
+        if (response.success) {
+            alert('✅ Game saved to Slot 1!');
+            loadSaveSlots();
+        } else {
+            alert(`❌ Save failed: ${response.error}`);
+        }
+        
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
+// Show save modal
+function showSaveModal() {
+    const modal = new bootstrap.Modal(document.getElementById('saveModal'));
+    document.getElementById('saveName').value = `Save - ${new Date().toLocaleDateString()}`;
+    modal.show();
+}
+
+// Perform save from modal
+async function performSave() {
+    try {
+        const slot = parseInt(document.getElementById('saveSlot').value);
+        const saveName = document.getElementById('saveName').value;
+        const includeHistory = document.getElementById('includeHistory').checked;
+        
+        const response = await fetchAPI('/api/saves/save', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                slot: slot,
+                save_name: saveName,
+                include_history: includeHistory
+            })
+        });
+        
+        if (response.success) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('saveModal'));
+            modal.hide();
+            
+            alert(`✅ Game saved to Slot ${slot}!`);
+            loadSaveSlots();
+        } else {
+            alert(`❌ Save failed: ${response.error}`);
+        }
+        
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
+// Load save (show confirmation first)
+function loadSave(slot, name, year, week) {
+    currentLoadSlot = slot;
+    
+    document.getElementById('loadSaveName').textContent = name;
+    document.getElementById('loadYear').textContent = year;
+    document.getElementById('loadWeek').textContent = week;
+    
+    const modal = new bootstrap.Modal(document.getElementById('loadConfirmModal'));
+    modal.show();
+}
+
+// Confirm and perform load
+async function confirmLoad() {
+    if (currentLoadSlot === null) return;
+    
+    try {
+        const response = await fetchAPI('/api/saves/load', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                slot: currentLoadSlot
+            })
+        });
+        
+        if (response.success) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('loadConfirmModal'));
+            modal.hide();
+            
+            alert('✅ Save loaded successfully! Refreshing page...');
+            
+            // Refresh page to reload universe
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            alert(`❌ Load failed: ${response.error}`);
+        }
+        
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
+// Delete save
+async function deleteSave(slot) {
+    if (!confirm(`Are you sure you want to delete Save Slot ${slot}?\n\nThis cannot be undone!`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetchAPI(`/api/saves/delete/${slot}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.success) {
+            alert(`✅ Save Slot ${slot} deleted.`);
+            loadSaveSlots();
+        } else {
+            alert(`❌ Delete failed: ${response.error}`);
+        }
+        
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
+// Export save
+function exportSave(slot) {
+    window.location.href = `/api/saves/export/${slot}`;
+}
+
+// Import save
+async function importSave(event) {
+    event.preventDefault();
+    
+    const fileInput = document.getElementById('importFile');
+    const slot = document.getElementById('importSlot').value;
+    
+    if (!fileInput.files.length) {
+        alert('Please select a file to import.');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    formData.append('slot', slot);
+    
+    try {
+        const response = await fetch('/api/saves/import', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(`✅ Save imported to Slot ${slot}!`);
+            loadSaveSlots();
+            document.getElementById('importForm').reset();
+        } else {
+            alert(`❌ Import failed: ${data.error}`);
+        }
+        
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
+// Initialize
+loadCurrentUniverseInfo();
+loadSaveSlots();
+</script>

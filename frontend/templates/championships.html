@@ -1,0 +1,2899 @@
+<!-- Championships Management View -->
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">🏆 Championship Management</h1>
+            <p class="text-muted mb-0">Manage titles, track defenses, handle vacancies and create custom championships</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-primary me-2" onclick="refreshAllData()">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+            <button class="btn btn-success me-2" onclick="showCreateChampionshipModal()">
+                <i class="bi bi-plus-circle"></i> Create Championship
+            </button>
+            <button class="btn btn-primary" onclick="showDefenseSchedule()">
+                <i class="bi bi-calendar-check"></i> Defense Schedule
+            </button>
+        </div>
+    </div>
+
+    <!-- Alerts Section -->
+    <div id="situationAlerts" class="mb-4">
+        <!-- Dynamic alerts will be inserted here -->
+    </div>
+
+    <!-- Quick Stats Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-2">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-1 text-white-50 small">Total Titles</h6>
+                            <h3 class="card-title mb-0" id="statTotalTitles">-</h3>
+                        </div>
+                        <i class="bi bi-trophy-fill fs-2 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-1 text-white-50 small">Active Champions</h6>
+                            <h3 class="card-title mb-0" id="statActiveChampions">-</h3>
+                        </div>
+                        <i class="bi bi-person-check-fill fs-2 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-1 text-dark-50 small">Vacant Titles</h6>
+                            <h3 class="card-title mb-0" id="statVacantTitles">-</h3>
+                        </div>
+                        <i class="bi bi-exclamation-triangle-fill fs-2 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-1 text-white-50 small">Custom Titles</h6>
+                            <h3 class="card-title mb-0" id="statCustomTitles">-</h3>
+                        </div>
+                        <i class="bi bi-star-fill fs-2 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-danger text-white h-100">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-1 text-white-50 small">Issues</h6>
+                            <h3 class="card-title mb-0" id="statIssues">-</h3>
+                        </div>
+                        <i class="bi bi-shield-exclamation fs-2 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-secondary text-white h-100">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-1 text-white-50 small">Avg Prestige</h6>
+                            <h3 class="card-title mb-0" id="statAvgPrestige">-</h3>
+                        </div>
+                        <i class="bi bi-graph-up fs-2 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Tabs -->
+    <ul class="nav nav-tabs mb-4" id="championshipTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                <i class="bi bi-grid-3x3-gap"></i> Overview
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="custom-tab" data-bs-toggle="tab" data-bs-target="#custom" type="button" role="tab">
+                <i class="bi bi-star"></i> Custom Titles
+                <span class="badge bg-info ms-1" id="customBadge" style="display: none;">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="retired-tab" data-bs-toggle="tab" data-bs-target="#retired" type="button" role="tab">
+                <i class="bi bi-archive"></i> Retired Titles
+                <span class="badge bg-secondary ms-1" id="retiredBadge" style="display: none;">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="situations-tab" data-bs-toggle="tab" data-bs-target="#situations" type="button" role="tab">
+                <i class="bi bi-exclamation-circle"></i> Situations
+                <span class="badge bg-danger ms-1" id="situationsBadge" style="display: none;">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="defenses-tab" data-bs-toggle="tab" data-bs-target="#defenses" type="button" role="tab">
+                <i class="bi bi-shield-check"></i> Defense History
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="vacancies-tab" data-bs-toggle="tab" data-bs-target="#vacancies" type="button" role="tab">
+                <i class="bi bi-inbox"></i> Vacancy History
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="shots-tab" data-bs-toggle="tab" data-bs-target="#shots" type="button" role="tab">
+                <i class="bi bi-ticket-perforated"></i> Guaranteed Shots
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="championshipTabContent">
+        <!-- Overview Tab -->
+        <div class="tab-pane fade show active" id="overview" role="tabpanel">
+            <!-- Filter Row -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <select class="form-select" id="filterBrand" onchange="filterChampionships()">
+                        <option value="">All Brands</option>
+                        <option value="ROC Alpha">ROC Alpha</option>
+                        <option value="ROC Velocity">ROC Velocity</option>
+                        <option value="ROC Vanguard">ROC Vanguard</option>
+                        <option value="Cross-Brand">Cross-Brand</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="filterType" onchange="filterChampionships()">
+                        <option value="">All Types</option>
+                        <option value="World">World</option>
+                        <option value="Secondary">Secondary</option>
+                        <option value="Midcard">Midcard</option>
+                        <option value="Tag Team">Tag Team</option>
+                        <option value="Women">Women</option>
+                        <option value="Developmental">Developmental</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="filterDivision" onchange="filterChampionships()">
+                        <option value="">All Divisions</option>
+                        <option value="mens">Men's</option>
+                        <option value="womens">Women's</option>
+                        <option value="tag_team">Tag Team</option>
+                        <option value="open">Open</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="showRetired" onchange="filterChampionships()">
+                        <label class="form-check-label" for="showRetired">Show Retired</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-4" id="championshipsGrid">
+                <!-- Championship cards will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Custom Titles Tab -->
+        <div class="tab-pane fade" id="custom" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="bi bi-star text-warning"></i> Custom Championships</h5>
+                <button class="btn btn-success" onclick="showCreateChampionshipModal()">
+                    <i class="bi bi-plus-circle"></i> Create New
+                </button>
+            </div>
+            <div class="row g-4" id="customChampionshipsGrid">
+                <!-- Custom championship cards will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Retired Titles Tab -->
+        <div class="tab-pane fade" id="retired" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="bi bi-archive text-secondary"></i> Retired Championships</h5>
+            </div>
+            <div class="row g-4" id="retiredChampionshipsGrid">
+                <!-- Retired championship cards will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Situations Tab -->
+        <div class="tab-pane fade" id="situations" role="tabpanel">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-circle text-warning"></i> Title Situations Requiring Attention</h5>
+                </div>
+                <div class="card-body">
+                    <div id="situationsList">
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-check-circle fs-1"></i>
+                            <p class="mt-2">No situations requiring attention</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Defense History Tab -->
+        <div class="tab-pane fade" id="defenses" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-shield-check text-success"></i> Recent Title Defenses</h5>
+                    <select class="form-select form-select-sm w-auto" id="defensesTitleFilter" onchange="loadDefenseHistory()">
+                        <option value="">All Titles</option>
+                    </select>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="defensesTable">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Champion</th>
+                                    <th>Challenger</th>
+                                    <th>Result</th>
+                                    <th>Rating</th>
+                                    <th>Show</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="defensesTableBody">
+                                <!-- Defense rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vacancy History Tab -->
+        <div class="tab-pane fade" id="vacancies" role="tabpanel">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-inbox text-secondary"></i> Vacancy History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="vacanciesTable">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Previous Champion</th>
+                                    <th>Reason</th>
+                                    <th>Vacated</th>
+                                    <th>Filled</th>
+                                    <th>New Champion</th>
+                                    <th>Weeks Vacant</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vacanciesTableBody">
+                                <!-- Vacancy rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guaranteed Shots Tab -->
+        <div class="tab-pane fade" id="shots" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-ticket-perforated text-info"></i> Guaranteed Title Shots</h5>
+                    <button class="btn btn-sm btn-outline-primary" onclick="showGrantShotModal()">
+                        <i class="bi bi-plus-circle"></i> Grant Shot
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="guaranteedShotsList">
+                        <!-- Shots will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Championship Modal -->
+<div class="modal fade" id="createChampionshipModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Create Custom Championship</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Preset Selection -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Start from Preset (Optional)</label>
+                    <div class="row g-2" id="presetButtons">
+                        <!-- Preset buttons will be inserted here -->
+                    </div>
+                    <button class="btn btn-sm btn-outline-secondary mt-2" onclick="clearPreset()">
+                        <i class="bi bi-x-circle"></i> Clear / Start Fresh
+                    </button>
+                </div>
+                
+                <hr>
+                
+                <form id="createChampionshipForm">
+                    <div class="row">
+                        <!-- Left Column: Basic Info -->
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3"><i class="bi bi-info-circle"></i> Basic Information</h6>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Championship Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="champName" required 
+                                       minlength="3" maxlength="50" placeholder="e.g., ROC Hardcore Championship">
+                                <div class="invalid-feedback" id="champNameError"></div>
+                                <small class="text-muted">3-50 characters</small>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Assigned Brand <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="champBrand" required>
+                                        <option value="">Select Brand...</option>
+                                        <option value="ROC Alpha">ROC Alpha</option>
+                                        <option value="ROC Velocity">ROC Velocity</option>
+                                        <option value="ROC Vanguard">ROC Vanguard</option>
+                                        <option value="Cross-Brand">Cross-Brand</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Title Type <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="champType" required onchange="onTitleTypeChange()">
+                                        <option value="">Select Type...</option>
+                                        <option value="World">World</option>
+                                        <option value="Secondary">Secondary</option>
+                                        <option value="Midcard">Midcard</option>
+                                        <option value="Tag Team">Tag Team</option>
+                                        <option value="Women">Women</option>
+                                        <option value="Developmental">Developmental</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Division</label>
+                                    <select class="form-select" id="champDivision">
+                                        <option value="open">Open (Anyone)</option>
+                                        <option value="mens">Men's Only</option>
+                                        <option value="womens">Women's Only</option>
+                                        <option value="intergender">Intergender</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Weight Class</label>
+                                    <select class="form-select" id="champWeightClass">
+                                        <option value="open">Open (No Restriction)</option>
+                                        <option value="heavyweight">Heavyweight</option>
+                                        <option value="cruiserweight">Cruiserweight</option>
+                                        <option value="light_heavyweight">Light Heavyweight</option>
+                                        <option value="super_heavyweight">Super Heavyweight</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Initial Prestige</label>
+                                <div class="d-flex align-items-center">
+                                    <input type="range" class="form-range flex-grow-1 me-3" id="champPrestige" 
+                                           min="10" max="100" value="50" oninput="updatePrestigeDisplay()">
+                                    <span id="prestigeValue" class="badge bg-primary fs-6" style="min-width: 50px;">50</span>
+                                </div>
+                                <small class="text-muted">Suggested: <span id="suggestedPrestige">50</span></small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" id="champDescription" rows="2" 
+                                          placeholder="Optional description of the championship..."></textarea>
+                            </div>
+                            
+                            <!-- Tag Team Options -->
+                            <div id="tagTeamOptions" style="display: none;">
+                                <div class="card bg-light mb-3">
+                                    <div class="card-body py-2">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="champIsTagTeam" onchange="toggleTagTeamSize()">
+                                            <label class="form-check-label" for="champIsTagTeam">
+                                                <strong>Tag Team Championship</strong>
+                                            </label>
+                                        </div>
+                                        <div id="tagTeamSizeContainer" style="display: none;">
+                                            <label class="form-label">Team Size</label>
+                                            <select class="form-select form-select-sm" id="champTagTeamSize">
+                                                <option value="2">Standard (2 members)</option>
+                                                <option value="3">Trios (3 members)</option>
+                                                <option value="4">Freebird (4 members)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column: Appearance & Requirements -->
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3"><i class="bi bi-palette"></i> Belt Appearance</h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Belt Style</label>
+                                    <select class="form-select" id="champBeltStyle" onchange="updateBeltPreview()">
+                                        <option value="classic">Classic</option>
+                                        <option value="modern">Modern</option>
+                                        <option value="big_gold">Big Gold</option>
+                                        <option value="spinner">Spinner</option>
+                                        <option value="vintage">Vintage</option>
+                                        <option value="prestigious">Prestigious</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Primary Color</label>
+                                    <select class="form-select" id="champPrimaryColor" onchange="updateBeltPreview()">
+                                        <option value="gold">Gold</option>
+                                        <option value="silver">Silver</option>
+                                        <option value="black">Black</option>
+                                        <option value="white">White</option>
+                                        <option value="red">Red</option>
+                                        <option value="blue">Blue</option>
+                                        <option value="green">Green</option>
+                                        <option value="purple">Purple</option>
+                                        <option value="bronze">Bronze</option>
+                                        <option value="platinum">Platinum</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Secondary Color</label>
+                                    <select class="form-select" id="champSecondaryColor" onchange="updateBeltPreview()">
+                                        <option value="">None</option>
+                                        <option value="gold">Gold</option>
+                                        <option value="silver">Silver</option>
+                                        <option value="black">Black</option>
+                                        <option value="white">White</option>
+                                        <option value="red">Red</option>
+                                        <option value="blue">Blue</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Strap Color</label>
+                                    <select class="form-select" id="champStrapColor">
+                                        <option value="black">Black</option>
+                                        <option value="brown">Brown</option>
+                                        <option value="white">White</option>
+                                        <option value="red">Red</option>
+                                        <option value="blue">Blue</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Belt Preview -->
+                            <div class="card mb-3" id="beltPreviewCard">
+                                <div class="card-body text-center py-3">
+                                    <div id="beltPreview" class="belt-preview">
+                                        <div class="belt-strap"></div>
+                                        <div class="belt-plate">
+                                            <span class="belt-icon">🏆</span>
+                                        </div>
+                                        <div class="belt-strap"></div>
+                                    </div>
+                                    <small class="text-muted d-block mt-2">Belt Preview</small>
+                                </div>
+                            </div>
+                            
+                            <h6 class="text-primary mb-3"><i class="bi bi-calendar-check"></i> Defense Requirements</h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Max Days Between Defenses</label>
+                                    <input type="number" class="form-control" id="champMaxDays" 
+                                           min="14" max="90" value="30">
+                                    <small class="text-muted">14-90 days</small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Min Defenses Per Year</label>
+                                    <input type="number" class="form-control" id="champMinDefenses" 
+                                           min="4" max="52" value="12">
+                                    <small class="text-muted">4-52 per year</small>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="champPPVRequired" checked>
+                                        <label class="form-check-label" for="champPPVRequired">
+                                            Must defend at PPVs
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="champTVAllowed" checked>
+                                        <label class="form-check-label" for="champTVAllowed">
+                                            Can defend on TV
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Validation Summary -->
+                    <div id="validationSummary" class="alert alert-danger mt-3" style="display: none;">
+                        <strong>Please fix the following errors:</strong>
+                        <ul id="validationErrors" class="mb-0 mt-2"></ul>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-outline-primary" onclick="validateChampionship()">
+                    <i class="bi bi-check-circle"></i> Validate
+                </button>
+                <button type="button" class="btn btn-success" onclick="createChampionship()">
+                    <i class="bi bi-plus-circle"></i> Create Championship
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Championship Detail Modal -->
+<div class="modal fade" id="championshipDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="championshipDetailTitle">Championship Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="championshipDetailBody">
+                <!-- Detail content will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Title Situation Action Modal -->
+<div class="modal fade" id="situationActionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> <span id="situationActionTitle">Handle Situation</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="situationActionBody">
+                <!-- Action options will be inserted here -->
+            </div>
+            <div class="modal-footer" id="situationActionFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Defense Schedule Modal -->
+<div class="modal fade" id="defenseScheduleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-calendar-check"></i> Defense Schedule</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="defenseScheduleBody">
+                <!-- Schedule will be inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grant Title Shot Modal -->
+<div class="modal fade" id="grantShotModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-ticket-perforated"></i> Grant Guaranteed Title Shot</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="grantShotForm">
+                    <div class="mb-3">
+                        <label class="form-label">Wrestler</label>
+                        <select class="form-select" id="grantShotWrestler" required>
+                            <option value="">Select wrestler...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Championship</label>
+                        <select class="form-select" id="grantShotTitle" required>
+                            <option value="">Select championship...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Reason</label>
+                        <select class="form-select" id="grantShotReason" required>
+                            <option value="tournament_winner">Tournament Winner</option>
+                            <option value="rematch_clause">Rematch Clause</option>
+                            <option value="injury_return">Injury Return</option>
+                            <option value="storyline">Storyline</option>
+                            <option value="contract_clause">Contract Clause</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Expires In (weeks)</label>
+                        <input type="number" class="form-control" id="grantShotExpires" value="52" min="4" max="104">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes (optional)</label>
+                        <textarea class="form-control" id="grantShotNotes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="grantTitleShot()">Grant Shot</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vacate Title Modal -->
+<div class="modal fade" id="vacateTitleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-octagon"></i> Vacate Championship</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> This action will vacate the title. The champion will receive a guaranteed title shot upon return.
+                </div>
+                <form id="vacateTitleForm">
+                    <input type="hidden" id="vacateTitleId">
+                    <div class="mb-3">
+                        <label class="form-label">Reason</label>
+                        <select class="form-select" id="vacateReason" required>
+                            <option value="injury">Injury</option>
+                            <option value="contract_expiration">Contract Expiration</option>
+                            <option value="released">Released</option>
+                            <option value="retired">Retired</option>
+                            <option value="suspended">Suspended</option>
+                            <option value="relinquished">Voluntarily Relinquished</option>
+                            <option value="stripped">Stripped (Misconduct)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" id="vacateNotes" rows="2" placeholder="Optional notes..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Attacker (Optional - for injury angle)</label>
+                        <select class="form-select" id="vacateAttacker">
+                            <option value="">No attacker</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="executeVacate()">Vacate Title</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interim Champion Modal -->
+<div class="modal fade" id="interimChampionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="bi bi-person-badge"></i> Create Interim Champion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> An interim champion will defend the title until the original champion returns for a unification match.
+                </div>
+                <input type="hidden" id="interimTitleId">
+                <div class="mb-3">
+                    <label class="form-label">Select Interim Champion</label>
+                    <div id="interimCandidatesList" class="list-group">
+                        <!-- Candidates will be inserted here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fill Vacancy Modal -->
+<div class="modal fade" id="fillVacancyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-trophy"></i> Crown New Champion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="fillVacancyTitleId">
+                <div class="mb-3">
+                    <label class="form-label">New Champion</label>
+                    <select class="form-select" id="fillVacancyChampion" required>
+                        <option value="">Select new champion...</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">How was the title won?</label>
+                    <select class="form-select" id="fillVacancyMethod">
+                        <option value="match">Singles Match</option>
+                        <option value="tournament">Tournament Final</option>
+                        <option value="battle_royal">Battle Royal</option>
+                        <option value="ladder_match">Ladder Match</option>
+                        <option value="awarded">Awarded by Authority</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Show Name</label>
+                    <input type="text" class="form-control" id="fillVacancyShow" placeholder="e.g., Clash of Titans">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="executeFillVacancy()">Crown Champion</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Championship Modal -->
+<div class="modal fade" id="editChampionshipModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-pencil"></i> Edit Championship</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editChampId">
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" id="editChampDescription" rows="3"></textarea>
+                </div>
+                <h6 class="mt-4">Defense Requirements</h6>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Max Days Between Defenses</label>
+                        <input type="number" class="form-control" id="editMaxDays" min="14" max="90">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Min Defenses Per Year</label>
+                        <input type="number" class="form-control" id="editMinDefenses" min="4" max="52">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveChampionshipEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Retire Championship Modal -->
+<div class="modal fade" id="retireChampionshipModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title"><i class="bi bi-archive"></i> Retire Championship</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> Retiring a championship will deactivate it. It can be reactivated later if needed.
+                </div>
+                <p>Are you sure you want to retire <strong id="retireChampName"></strong>?</p>
+                <div id="retireChampionWarning" class="alert alert-danger" style="display: none;">
+                    <i class="bi bi-exclamation-octagon"></i> This championship currently has a champion. The title will be vacated before retiring.
+                </div>
+                <div id="retireDefaultWarning" class="alert alert-info" style="display: none;">
+                    <i class="bi bi-info-circle"></i> This is a default championship. Retiring it will remove it from active rotation.
+                </div>
+                <input type="hidden" id="retireChampId">
+                <input type="hidden" id="retireChampIsCustom">
+                <div class="mb-3">
+                    <label class="form-label">Reason for Retirement</label>
+                    <select class="form-select" id="retireReason">
+                        <option value="consolidation">Title Consolidation</option>
+                        <option value="rebrand">Rebranding</option>
+                        <option value="lack_of_interest">Lack of Interest</option>
+                        <option value="storyline">Storyline Decision</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Notes (optional)</label>
+                    <textarea class="form-control" id="retireNotes" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" onclick="executeRetireChampionship()">
+                    <i class="bi bi-archive"></i> Retire Championship
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteChampionshipModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-trash"></i> Delete Championship</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-octagon"></i> <strong>Warning!</strong> This action cannot be undone.
+                </div>
+                <p>Are you sure you want to permanently delete <strong id="deleteChampName"></strong>?</p>
+                <p class="text-muted small">All title history, defenses, and records will be permanently removed.</p>
+                <div id="deleteDefaultWarning" class="alert alert-warning" style="display: none;">
+                    <i class="bi bi-exclamation-triangle"></i> This is a default championship. Consider retiring it instead of deleting.
+                </div>
+                <input type="hidden" id="deleteChampId">
+                <input type="hidden" id="deleteChampIsCustom">
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="confirmDeleteCheck">
+                    <label class="form-check-label text-danger" for="confirmDeleteCheck">
+                        I understand this action is permanent and cannot be undone
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" onclick="executeDeleteChampionship()" disabled>
+                    <i class="bi bi-trash"></i> Delete Permanently
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Title Lineage Modal -->
+<div class="modal fade" id="titleLineageModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-clock-history"></i> <span id="lineageTitle">Title Lineage</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3" id="lineageStats">
+                    <!-- Stats cards will be inserted here -->
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover" id="lineageTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Champion</th>
+                                <th>Won At</th>
+                                <th>Lost At</th>
+                                <th>Days Held</th>
+                                <th>Defenses</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lineageTableBody">
+                            <!-- Lineage rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reign Details Modal -->
+<div class="modal fade" id="reignDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-trophy"></i> Reign Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="reignDetailsBody">
+                <!-- Reign details will be inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .championship-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+    }
+    .championship-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .tier-world { border-left: 4px solid #ffd700; }
+    .tier-secondary { border-left: 4px solid #c0c0c0; }
+    .tier-midcard { border-left: 4px solid #cd7f32; }
+    .tier-tag_team, .tier-tag-team { border-left: 4px solid #6c757d; }
+    .tier-womens, .tier-women { border-left: 4px solid #e91e8c; }
+    .tier-developmental { border-left: 4px solid #17a2b8; }
+    
+    .prestige-bar {
+        height: 8px;
+        border-radius: 4px;
+        background: #e9ecef;
+        overflow: hidden;
+    }
+    .prestige-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s;
+    }
+    .prestige-high { background: linear-gradient(90deg, #28a745, #20c997); }
+    .prestige-medium { background: linear-gradient(90deg, #ffc107, #fd7e14); }
+    .prestige-low { background: linear-gradient(90deg, #dc3545, #fd7e14); }
+    
+    .situation-card {
+        border-left: 4px solid;
+    }
+    .situation-normal { border-left-color: #28a745; }
+    .situation-warning { border-left-color: #ffc107; }
+    .situation-critical { border-left-color: #dc3545; }
+    
+    .urgency-0 { color: #28a745; }
+    .urgency-1 { color: #ffc107; }
+    .urgency-2 { color: #fd7e14; }
+    .urgency-3 { color: #dc3545; }
+    
+    .interim-badge {
+        background: linear-gradient(135deg, #17a2b8, #138496);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .vacant-badge {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        color: #000;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .custom-badge {
+        background: linear-gradient(135deg, #6f42c1, #5a32a3);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .retired-badge {
+        background: #6c757d;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .default-badge {
+        background: #0d6efd;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .star-rating {
+        color: #ffc107;
+    }
+    
+    .candidate-item {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .candidate-item:hover {
+        background-color: #f8f9fa;
+    }
+    .candidate-item.selected {
+        background-color: #e3f2fd;
+        border-color: #2196f3;
+    }
+    
+    /* Belt Preview Styles */
+    .belt-preview {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+    }
+    .belt-strap {
+        width: 60px;
+        height: 20px;
+        background: #1a1a1a;
+        border-radius: 3px;
+    }
+    .belt-plate {
+        width: 80px;
+        height: 60px;
+        background: linear-gradient(145deg, #ffd700, #daa520);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid #b8860b;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .belt-icon {
+        font-size: 2rem;
+    }
+    
+    /* Belt color variations */
+    .belt-gold .belt-plate { background: linear-gradient(145deg, #ffd700, #daa520); border-color: #b8860b; }
+    .belt-silver .belt-plate { background: linear-gradient(145deg, #c0c0c0, #a8a8a8); border-color: #808080; }
+    .belt-black .belt-plate { background: linear-gradient(145deg, #333, #1a1a1a); border-color: #000; }
+    .belt-red .belt-plate { background: linear-gradient(145deg, #dc3545, #a71d2a); border-color: #721c24; }
+    .belt-blue .belt-plate { background: linear-gradient(145deg, #007bff, #0056b3); border-color: #004085; }
+    .belt-purple .belt-plate { background: linear-gradient(145deg, #6f42c1, #5a32a3); border-color: #4a2890; }
+    .belt-bronze .belt-plate { background: linear-gradient(145deg, #cd7f32, #a0522d); border-color: #8b4513; }
+    .belt-platinum .belt-plate { background: linear-gradient(145deg, #e5e4e2, #c0c0c0); border-color: #a8a8a8; }
+    
+    .preset-btn {
+        transition: all 0.2s;
+    }
+    .preset-btn:hover {
+        transform: scale(1.05);
+    }
+    .preset-btn.active {
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.5);
+    }
+    
+    .action-btn-group .btn {
+        margin: 2px;
+    }
+    
+    .management-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+
+    /* Defense Status Indicators */
+    .defense-status-0 { color: #28a745; }
+    .defense-status-1 { color: #ffc107; }
+    .defense-status-2 { color: #fd7e14; }
+    .defense-status-3 { color: #dc3545; font-weight: bold; }
+
+    .defense-alert {
+        border-left: 4px solid #dc3545;
+        background: #f8d7da;
+    }
+
+    .defense-warning {
+        border-left: 4px solid #ffc107;
+        background: #fff3cd;
+    }
+
+    .defense-due {
+        border-left: 4px solid #17a2b8;
+        background: #d1ecf1;
+    }
+</style>
+
+<script>
+(function() {
+    // Global state
+    var championships = [];
+    var customChampionships = [];
+    var retiredChampionships = [];
+    var situations = [];
+    var wrestlers = [];
+    var presets = [];
+    var selectedPreset = null;
+
+    // Initialize on page load
+    loadAllData();
+
+    // Load all championship data
+    async function loadAllData() {
+        await Promise.all([
+            loadChampionships(),
+            loadSituations(),
+            loadWrestlers(),
+            loadPresets(),
+            loadCustomChampionships()
+        ]);
+        updateStats();
+        populateFilters();
+    }
+
+    function refreshAllData() {
+        loadAllData();
+        showToast('Data refreshed', 'success');
+    }
+
+    // Load championships with defense status
+    async function loadChampionships() {
+        try {
+            var response = await fetch('/api/championships?include_retired=true');
+            var data = await response.json();
+            var allChamps = data.championships || [];
+        
+            // Separate active and retired
+            championships = allChamps.filter(function(c) { return !c.retired; });
+        
+            // Load defense status for each active championship
+            for (var i = 0; i < championships.length; i++) {
+                var champ = championships[i];
+                if (!champ.is_vacant) {
+                    try {
+                        var statusResponse = await fetch('/api/championships/' + champ.id + '/defense-frequency');
+                        var statusData = await statusResponse.json();
+                        if (statusData.success) {
+                            champ.defense_status = statusData.status;
+                        }
+                    } catch (err) {
+                        console.error('Error loading defense status for ' + champ.name, err);
+                    }
+                }
+            }
+        
+            // Add retired non-custom championships to retiredChampionships
+            var retiredDefault = allChamps.filter(function(c) { return c.retired && !c.is_custom; });
+            retiredChampionships = retiredChampionships.concat(retiredDefault);
+        
+            renderChampionshipsGrid();
+        } catch (error) {
+            console.error('Error loading championships:', error);
+            showToast('Failed to load championships', 'danger');
+        }
+    }
+
+    // Load custom championships
+    async function loadCustomChampionships() {
+        try {
+            var response = await fetch('/api/championships/custom?include_retired=true');
+            var data = await response.json();
+            
+            if (data.success) {
+                var allCustom = data.championships || [];
+                customChampionships = allCustom.filter(function(c) { return !c.retired; });
+                
+                // Add retired custom championships
+                var retiredCustom = allCustom.filter(function(c) { return c.retired; });
+                retiredChampionships = retiredChampionships.filter(function(c) { return !c.is_custom; });
+                retiredChampionships = retiredChampionships.concat(retiredCustom);
+                
+                renderCustomChampionshipsGrid();
+                renderRetiredChampionshipsGrid();
+                
+                var badge = document.getElementById('customBadge');
+                if (customChampionships.length > 0) {
+                    badge.textContent = customChampionships.length;
+                    badge.style.display = 'inline';
+                } else {
+                    badge.style.display = 'none';
+                }
+                
+                var retiredBadge = document.getElementById('retiredBadge');
+                if (retiredChampionships.length > 0) {
+                    retiredBadge.textContent = retiredChampionships.length;
+                    retiredBadge.style.display = 'inline';
+                } else {
+                    retiredBadge.style.display = 'none';
+                }
+            }
+        } catch (error) {
+            console.error('Error loading custom championships:', error);
+        }
+    }
+
+    // Load presets
+    async function loadPresets() {
+        try {
+            var response = await fetch('/api/championships/custom/presets');
+            var data = await response.json();
+            
+            if (data.success) {
+                presets = data.presets || [];
+                renderPresetButtons();
+            }
+        } catch (error) {
+            console.error('Error loading presets:', error);
+        }
+    }
+
+    // Load situations
+    async function loadSituations() {
+        try {
+            var response = await fetch('/api/championships/situations');
+            var data = await response.json();
+            
+            if (data.success) {
+                situations = data.situations || [];
+                renderSituations();
+                renderAlerts();
+                
+                var issues = situations.filter(function(s) { return s.situation_type !== 'normal'; });
+                var badge = document.getElementById('situationsBadge');
+                if (issues.length > 0) {
+                    badge.textContent = issues.length;
+                    badge.style.display = 'inline';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        } catch (error) {
+            console.error('Error loading situations:', error);
+        }
+    }
+
+    // Load wrestlers for dropdowns
+    async function loadWrestlers() {
+        try {
+            var response = await fetch('/api/roster?active_only=true');
+            var data = await response.json();
+            wrestlers = data.wrestlers || [];
+        } catch (error) {
+            console.error('Error loading wrestlers:', error);
+        }
+    }
+
+    // Update stats cards
+    function updateStats() {
+        var activeChamps = championships.filter(function(c) { return !c.retired; });
+        document.getElementById('statTotalTitles').textContent = activeChamps.length;
+        
+        var activeChampions = activeChamps.filter(function(c) { return !c.is_vacant; }).length;
+        document.getElementById('statActiveChampions').textContent = activeChampions;
+        
+        var vacant = activeChamps.filter(function(c) { return c.is_vacant; }).length;
+        document.getElementById('statVacantTitles').textContent = vacant;
+        
+        document.getElementById('statCustomTitles').textContent = customChampionships.length;
+        
+        var issues = situations.filter(function(s) { return s.situation_type !== 'normal'; }).length;
+        document.getElementById('statIssues').textContent = issues;
+        
+        if (activeChamps.length > 0) {
+            var avgPrestige = Math.round(activeChamps.reduce(function(sum, c) { return sum + (c.prestige || 50); }, 0) / activeChamps.length);
+            document.getElementById('statAvgPrestige').textContent = avgPrestige;
+        }
+    }
+
+    // Render preset buttons
+    function renderPresetButtons() {
+        var container = document.getElementById('presetButtons');
+        
+        var html = '';
+        presets.forEach(function(preset) {
+            html += '<div class="col-md-3 col-6">' +
+                '<button class="btn btn-outline-secondary preset-btn w-100 py-2" ' +
+                'onclick="selectPreset(\'' + preset.id + '\')" id="preset-' + preset.id + '">' +
+                '<small><strong>' + preset.name + '</strong></small>' +
+                '</button></div>';
+        });
+        
+        container.innerHTML = html;
+    }
+
+    // Select a preset
+    function selectPreset(presetId) {
+        var preset = presets.find(function(p) { return p.id === presetId; });
+        if (!preset) return;
+        
+        selectedPreset = preset;
+        
+        document.querySelectorAll('.preset-btn').forEach(function(btn) {
+            btn.classList.remove('active', 'btn-success');
+            btn.classList.add('btn-outline-secondary');
+        });
+        var btn = document.getElementById('preset-' + presetId);
+        if (btn) {
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('btn-success', 'active');
+        }
+        
+        document.getElementById('champName').value = preset.name;
+        document.getElementById('champType').value = preset.title_type;
+        document.getElementById('champDivision').value = preset.division || 'open';
+        document.getElementById('champWeightClass').value = preset.weight_class || 'open';
+        document.getElementById('champPrestige').value = preset.suggested_prestige || 50;
+        document.getElementById('champDescription').value = preset.description || '';
+        document.getElementById('champIsTagTeam').checked = preset.is_tag_team || false;
+        
+        if (preset.is_tag_team) {
+            document.getElementById('champTagTeamSize').value = preset.tag_team_size || 2;
+        }
+        
+        updatePrestigeDisplay();
+        onTitleTypeChange();
+        
+        showToast('Loaded preset: ' + preset.name, 'info');
+    }
+
+    function clearPreset() {
+        selectedPreset = null;
+        
+        document.querySelectorAll('.preset-btn').forEach(function(btn) {
+            btn.classList.remove('active', 'btn-success');
+            btn.classList.add('btn-outline-secondary');
+        });
+        
+        document.getElementById('createChampionshipForm').reset();
+        document.getElementById('champPrestige').value = 50;
+        updatePrestigeDisplay();
+        
+        showToast('Form cleared', 'info');
+    }
+
+    function updatePrestigeDisplay() {
+        var value = document.getElementById('champPrestige').value;
+        document.getElementById('prestigeValue').textContent = value;
+    }
+
+    function onTitleTypeChange() {
+        var titleType = document.getElementById('champType').value;
+        var tagOptions = document.getElementById('tagTeamOptions');
+        
+        if (titleType === 'Tag Team') {
+            tagOptions.style.display = 'block';
+            document.getElementById('champIsTagTeam').checked = true;
+            document.getElementById('champDivision').value = 'open';
+            toggleTagTeamSize();
+        } else {
+            tagOptions.style.display = 'none';
+            document.getElementById('champIsTagTeam').checked = false;
+        }
+        
+        var brand = document.getElementById('champBrand').value || 'ROC Alpha';
+        var suggested = getSuggestedPrestige(titleType, brand);
+        document.getElementById('suggestedPrestige').textContent = suggested;
+        
+        if (titleType === 'Women') {
+            document.getElementById('champDivision').value = 'womens';
+        }
+    }
+
+    function getSuggestedPrestige(titleType, brand) {
+        var base = {
+            'World': 85,
+            'Secondary': 65,
+            'Midcard': 50,
+            'Tag Team': 55,
+            'Women': 70,
+            'Developmental': 40
+        }[titleType] || 50;
+        
+        if (brand === 'Cross-Brand') base += 5;
+        if (brand === 'ROC Alpha') base += 3;
+        
+        return Math.min(100, base);
+    }
+
+    function toggleTagTeamSize() {
+        var container = document.getElementById('tagTeamSizeContainer');
+        var isTagTeam = document.getElementById('champIsTagTeam').checked;
+        container.style.display = isTagTeam ? 'block' : 'none';
+    }
+
+    function updateBeltPreview() {
+        var primaryColor = document.getElementById('champPrimaryColor').value;
+        var preview = document.getElementById('beltPreview');
+        preview.className = 'belt-preview belt-' + primaryColor;
+    }
+
+    function showCreateChampionshipModal() {
+        clearPreset();
+        document.getElementById('validationSummary').style.display = 'none';
+        var modal = new bootstrap.Modal(document.getElementById('createChampionshipModal'));
+        modal.show();
+    }
+
+    async function validateChampionship() {
+        var data = getFormData();
+        
+        try {
+            var response = await fetch('/api/championships/custom/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            var result = await response.json();
+            
+            if (result.success) {
+                if (result.is_valid) {
+                    document.getElementById('validationSummary').style.display = 'none';
+                    showToast('✓ All fields are valid!', 'success');
+                } else {
+                    showValidationErrors(result.errors);
+                }
+            }
+        } catch (error) {
+            showToast('Validation error: ' + error.message, 'danger');
+        }
+    }
+
+    function getFormData() {
+        return {
+            name: document.getElementById('champName').value.trim(),
+            assigned_brand: document.getElementById('champBrand').value,
+            title_type: document.getElementById('champType').value,
+            division: document.getElementById('champDivision').value,
+            weight_class: document.getElementById('champWeightClass').value,
+            initial_prestige: parseInt(document.getElementById('champPrestige').value),
+            description: document.getElementById('champDescription').value.trim(),
+            is_tag_team: document.getElementById('champIsTagTeam').checked,
+            tag_team_size: parseInt(document.getElementById('champTagTeamSize').value),
+            appearance: {
+                style: document.getElementById('champBeltStyle').value,
+                primary_color: document.getElementById('champPrimaryColor').value,
+                secondary_color: document.getElementById('champSecondaryColor').value || null,
+                strap_color: document.getElementById('champStrapColor').value
+            },
+            defense_requirements: {
+                max_days_between_defenses: parseInt(document.getElementById('champMaxDays').value),
+                min_defenses_per_year: parseInt(document.getElementById('champMinDefenses').value),
+                ppv_defense_required: document.getElementById('champPPVRequired').checked,
+                weekly_tv_defense_allowed: document.getElementById('champTVAllowed').checked
+            }
+        };
+    }
+
+    function showValidationErrors(errors) {
+        var summary = document.getElementById('validationSummary');
+        var list = document.getElementById('validationErrors');
+        
+        var html = '';
+        for (var field in errors) {
+            errors[field].forEach(function(error) {
+                html += '<li>' + error + '</li>';
+            });
+        }
+        
+        list.innerHTML = html;
+        summary.style.display = 'block';
+    }
+
+    async function createChampionship() {
+        var data = getFormData();
+        
+        if (!data.name || !data.assigned_brand || !data.title_type) {
+            showToast('Please fill in all required fields', 'warning');
+            return;
+        }
+        
+        try {
+            var response = await fetch('/api/championships/custom/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            var result = await response.json();
+            
+            if (result.success) {
+                showToast('Championship "' + data.name + '" created!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('createChampionshipModal')).hide();
+                loadAllData();
+            } else {
+                if (result.errors) {
+                    showValidationErrors(result.errors);
+                } else {
+                    showToast(result.error || 'Failed to create championship', 'danger');
+                }
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'danger');
+        }
+    }
+
+    function renderChampionshipsGrid() {
+        var grid = document.getElementById('championshipsGrid');
+        var filteredChamps = filterChampionshipsList(championships);
+        
+        if (filteredChamps.length === 0) {
+            grid.innerHTML = 
+                '<div class="col-12 text-center py-5 text-muted">' +
+                '<i class="bi bi-trophy fs-1"></i>' +
+                '<p class="mt-2">No championships found</p>' +
+                '</div>';
+            return;
+        }
+        
+        var sorted = filteredChamps.slice().sort(function(a, b) { return (b.prestige || 50) - (a.prestige || 50); });
+        
+        var html = '';
+        sorted.forEach(function(champ) {
+            html += renderChampionshipCard(champ);
+        });
+        
+        grid.innerHTML = html;
+    }
+
+    function filterChampionshipsList(champs) {
+        var brandFilter = document.getElementById('filterBrand').value;
+        var typeFilter = document.getElementById('filterType').value;
+        var divisionFilter = document.getElementById('filterDivision').value;
+        var showRetired = document.getElementById('showRetired').checked;
+        
+        return champs.filter(function(c) {
+            if (brandFilter && c.assigned_brand !== brandFilter) return false;
+            if (typeFilter && c.title_type !== typeFilter) return false;
+            if (divisionFilter && c.division !== divisionFilter) return false;
+            if (!showRetired && c.retired) return false;
+            return true;
+        });
+    }
+
+    function filterChampionships() {
+        renderChampionshipsGrid();
+    }
+
+    function renderChampionshipCard(champ) {
+        var champId = champ.id || champ.title_id;
+        var tierClass = 'tier-' + (champ.title_type || 'midcard').toLowerCase().replace(' ', '-');
+        var prestige = champ.prestige || 50;
+        var prestigeClass = prestige >= 70 ? 'prestige-high' : prestige >= 40 ? 'prestige-medium' : 'prestige-low';
+    
+        var badges = '';
+        if (champ.is_vacant) {
+            badges += '<span class="vacant-badge me-1">VACANT</span>';
+        }
+        if (champ.has_interim_champion) {
+            badges += '<span class="interim-badge me-1">INTERIM</span>';
+        }
+        if (champ.is_custom) {
+            badges += '<span class="custom-badge me-1">CUSTOM</span>';
+        } else {
+            badges += '<span class="default-badge me-1">DEFAULT</span>';
+        }
+        if (champ.retired) {
+            badges += '<span class="retired-badge me-1">RETIRED</span>';
+        }
+    
+        // STEP 25: Add defense status badge
+        var defenseStatusHtml = '';
+        if (champ.defense_status && !champ.is_vacant) {
+            var urgency = champ.defense_status.urgency_level;
+            var urgencyClass = 'defense-status-' + urgency;
+            var urgencyLabel = champ.defense_status.urgency_label;
+            var urgencyBadge = '';
+        
+            if (urgency === 3) {
+                urgencyBadge = '<span class="badge bg-danger me-1"><i class="bi bi-exclamation-octagon"></i> DEFENSE OVERDUE</span>';
+            } else if (urgency === 2) {
+                urgencyBadge = '<span class="badge bg-warning text-dark me-1"><i class="bi bi-exclamation-triangle"></i> DEFENSE SOON</span>';
+            } else if (urgency === 1) {
+                urgencyBadge = '<span class="badge bg-info me-1"><i class="bi bi-clock"></i> DEFENSE DUE</span>';
+            }
+            
+            defenseStatusHtml = urgencyBadge;
+        
+            // Add defense info to card
+            defenseStatusHtml += '<div class="mt-2 small ' + urgencyClass + '">' +
+                '<i class="bi bi-shield-check"></i> Last defense: ' + 
+                (champ.defense_status.days_since_defense || 0) + ' days ago' +
+                '</div>';
+        }
+    
+        var situation = situations.find(function(s) { return s.title_id === champId; });
+        var hasIssues = situation && situation.situation_type !== 'normal';
+    
+        // Add defense overdue to issues
+        if (champ.defense_status && champ.defense_status.is_overdue) {
+            hasIssues = true;
+        }
+    
+        var issueIcon = hasIssues ? '<i class="bi bi-exclamation-triangle text-warning float-end"></i>' : '';
+        
+        var championDisplay = '';
+        if (champ.is_vacant) {
+            championDisplay = '<em class="text-warning">Vacant</em>';
+        } else if (champ.has_interim_champion) {
+            championDisplay = '<span class="text-muted">' + (champ.current_holder_display || champ.current_holder_name || 'Unknown') + '</span> / <strong>' + (champ.interim_holder_name || 'Unknown') + '</strong>';
+        } else {
+            championDisplay = champ.current_holder_display || champ.current_holder_name || '<em class="text-muted">No champion</em>';
+        }
+    
+        var actionsHtml = '';
+        if (champ.retired) {
+            actionsHtml = '<button class="btn btn-sm btn-outline-success" onclick="event.stopPropagation(); reactivateChampionship(\'' + champId + '\')">' +
+                '<i class="bi bi-arrow-counterclockwise"></i></button>';
+        } else if (champ.is_vacant) {
+            actionsHtml = '<button class="btn btn-sm btn-outline-success" onclick="event.stopPropagation(); showFillVacancyModal(\'' + champId + '\')">' +
+                '<i class="bi bi-trophy"></i></button>';
+        } else {
+            actionsHtml = '<button class="btn btn-sm btn-outline-secondary" onclick="event.stopPropagation(); showChampionshipActions(\'' + champId + '\')">' +
+                '<i class="bi bi-gear"></i></button>';
+        }
+    
+        return '<div class="col-md-6 col-lg-4">' +
+            '<div class="card championship-card h-100 ' + tierClass + (champ.retired ? ' opacity-50' : '') + '" onclick="showChampionshipDetail(\'' + champId + '\')">' +
+            '<div class="card-body">' +
+            '<div class="d-flex justify-content-between align-items-start mb-2">' +
+            '<h6 class="card-title mb-0">' + champ.name + '</h6>' +
+            issueIcon +
+            '</div>' +
+            '<div class="mb-2">' + badges + '</div>' +
+            defenseStatusHtml +
+            '<p class="text-muted small mb-2">' +
+            '<i class="bi bi-building"></i> ' + champ.assigned_brand + ' • ' +
+            '<span class="text-capitalize">' + champ.title_type + '</span>' +
+            '</p>' +
+            '<div class="mb-2">' +
+            '<small class="text-muted">Champion:</small><br>' +
+            '<span class="fw-bold">' + championDisplay + '</span>' +
+            '</div>' +
+            '<div class="mb-2">' +
+            '<div class="d-flex justify-content-between align-items-center mb-1">' +
+            '<small class="text-muted">Prestige</small>' +
+            '<small class="fw-bold">' + prestige + '</small>' +
+            '</div>' +
+            '<div class="prestige-bar">' +
+            '<div class="prestige-fill ' + prestigeClass + '" style="width: ' + prestige + '%"></div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '<div class="card-footer bg-transparent py-2">' +
+            '<div class="d-flex justify-content-between">' +
+            '<button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); showChampionshipDetail(\'' + champId + '\')">' +
+            '<i class="bi bi-eye"></i> Details</button>' +
+            actionsHtml +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+    }
+
+    function renderCustomChampionshipsGrid() {
+        var grid = document.getElementById('customChampionshipsGrid');
+        
+        if (customChampionships.length === 0) {
+            grid.innerHTML = 
+                '<div class="col-12 text-center py-5 text-muted">' +
+                '<i class="bi bi-star fs-1"></i>' +
+                '<p class="mt-2">No custom championships created yet</p>' +
+                '<button class="btn btn-success" onclick="showCreateChampionshipModal()">' +
+                '<i class="bi bi-plus-circle"></i> Create Your First Championship</button>' +
+                '</div>';
+            return;
+        }
+        
+        var html = '';
+        customChampionships.forEach(function(champ) {
+            html += renderChampionshipCard(champ);
+        });
+        
+        grid.innerHTML = html;
+    }
+
+    function renderRetiredChampionshipsGrid() {
+        var grid = document.getElementById('retiredChampionshipsGrid');
+        
+        if (retiredChampionships.length === 0) {
+            grid.innerHTML = 
+                '<div class="col-12 text-center py-5 text-muted">' +
+                '<i class="bi bi-archive fs-1"></i>' +
+                '<p class="mt-2">No retired championships</p>' +
+                '</div>';
+            return;
+        }
+        
+        var html = '';
+        retiredChampionships.forEach(function(champ) {
+            var champId = champ.id || champ.title_id;
+            var typeLabel = champ.is_custom ? 'CUSTOM' : 'DEFAULT';
+            var typeBadge = champ.is_custom ? 'custom-badge' : 'default-badge';
+            
+            html += '<div class="col-md-6 col-lg-4">' +
+                '<div class="card h-100 opacity-75">' +
+                '<div class="card-body">' +
+                '<h6 class="card-title">' + champ.name + '</h6>' +
+                '<div class="mb-2">' +
+                '<span class="retired-badge me-1">RETIRED</span>' +
+                '<span class="' + typeBadge + '">' + typeLabel + '</span>' +
+                '</div>' +
+                '<p class="text-muted small">' + champ.assigned_brand + ' • ' + champ.title_type + '</p>' +
+                '<p class="small">' + (champ.description || 'No description') + '</p>' +
+                '</div>' +
+                '<div class="card-footer bg-transparent">' +
+                '<div class="btn-group btn-group-sm w-100">' +
+                '<button class="btn btn-outline-success" onclick="reactivateChampionship(\'' + champId + '\')">' +
+                '<i class="bi bi-arrow-counterclockwise"></i> Reactivate</button>' +
+                '<button class="btn btn-outline-danger" onclick="showDeleteChampionshipModal(\'' + champId + '\', \'' + escapeHtml(champ.name) + '\', ' + (champ.is_custom ? 'true' : 'false') + ')">' +
+                '<i class="bi bi-trash"></i> Delete</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+        });
+        
+        grid.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    function renderSituations() {
+        var list = document.getElementById('situationsList');
+        var issues = situations.filter(function(s) { return s.situation_type !== 'normal'; });
+        
+        if (issues.length === 0) {
+            list.innerHTML = 
+                '<div class="text-center py-4 text-muted">' +
+                '<i class="bi bi-check-circle fs-1 text-success"></i>' +
+                '<p class="mt-2">All championships are in good standing</p>' +
+                '</div>';
+            return;
+        }
+        
+        var html = '';
+        issues.forEach(function(sit) {
+            var severityClass = sit.alerts.length >= 2 ? 'situation-critical' : 'situation-warning';
+            
+            var alertsHtml = '';
+            if (sit.alerts.length > 0) {
+                alertsHtml = '<div class="mt-2">';
+                sit.alerts.forEach(function(alert) {
+                    alertsHtml += '<div class="alert alert-warning py-1 px-2 mb-1 small">' + alert + '</div>';
+                });
+                alertsHtml += '</div>';
+            }
+            
+            var actionsHtml = '';
+            if (sit.recommended_actions.length > 0) {
+                actionsHtml = '<div class="mt-2"><strong class="small">Recommended Actions:</strong><ul class="mb-0 small">';
+                sit.recommended_actions.forEach(function(action) {
+                    actionsHtml += '<li>' + action + '</li>';
+                });
+                actionsHtml += '</ul></div>';
+            }
+            
+            html += '<div class="card situation-card ' + severityClass + ' mb-3">' +
+                '<div class="card-body">' +
+                '<div class="d-flex justify-content-between align-items-start">' +
+                '<div>' +
+                '<h5 class="card-title">' + sit.title_name + '</h5>' +
+                '<p class="text-muted mb-2">' +
+                '<span class="badge bg-secondary">' + sit.tier.toUpperCase() + '</span> ' +
+                '<span class="badge ' + (sit.has_issues ? 'bg-warning' : 'bg-success') + '">' + sit.situation_type.replace(/_/g, ' ').toUpperCase() + '</span>' +
+                '</p>' +
+                '</div>' +
+                '<button class="btn btn-sm btn-primary" onclick="handleSituation(\'' + sit.title_id + '\')">' +
+                'Handle <i class="bi bi-arrow-right"></i>' +
+                '</button>' +
+                '</div>' +
+                alertsHtml +
+                actionsHtml +
+                '</div>' +
+                '</div>';
+        });
+        
+        list.innerHTML = html;
+    }
+
+    function renderAlerts() {
+        var alertsDiv = document.getElementById('situationAlerts');
+        
+        var criticalIssues = situations.filter(function(s) {
+            return s.situation_type === 'defense_overdue' || 
+                   s.situation_type === 'champion_contract_expired' ||
+                   s.situation_type === 'vacant';
+        });
+        
+        if (criticalIssues.length === 0) {
+            alertsDiv.innerHTML = '';
+            return;
+        }
+        
+        var html = '';
+        criticalIssues.slice(0, 3).forEach(function(issue) {
+            html += '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                '<strong><i class="bi bi-exclamation-octagon"></i> ' + issue.title_name + ':</strong> ' +
+                (issue.alerts[0] || issue.situation_type.replace(/_/g, ' ')) +
+                '<button type="button" class="btn btn-sm btn-danger ms-3" onclick="handleSituation(\'' + issue.title_id + '\')">' +
+                'Handle Now</button>' +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                '</div>';
+        });
+        
+        alertsDiv.innerHTML = html;
+    }
+
+    // Find championship by ID in all arrays
+    function findChampionship(titleId) {
+        var champ = championships.find(function(c) { return (c.id || c.title_id) === titleId; });
+        if (!champ) {
+            champ = customChampionships.find(function(c) { return (c.id || c.title_id) === titleId; });
+        }
+        if (!champ) {
+            champ = retiredChampionships.find(function(c) { return (c.id || c.title_id) === titleId; });
+        }
+        return champ;
+    }
+
+    // Show championship detail modal - with management options for ALL championships
+    async function showChampionshipDetail(titleId) {
+        var champ = findChampionship(titleId);
+        if (!champ) return;
+        
+        var champId = champ.id || champ.title_id;
+        
+        var modal = new bootstrap.Modal(document.getElementById('championshipDetailModal'));
+        document.getElementById('championshipDetailTitle').textContent = champ.name;
+        
+        var stats = null;
+        var extended = null;
+        var calendarInfo = null;
+        
+        try {
+            var responses = await Promise.all([
+                fetch('/api/championships/' + champId + '/statistics'),
+                fetch('/api/championships/' + champId + '/extended'),
+                fetch('/api/calendar/current')
+            ]);
+            
+            var statsData = await responses[0].json();
+            if (statsData.success) stats = statsData.statistics;
+            
+            var extData = await responses[1].json();
+            if (extData.success) extended = extData.championship;
+
+            var calendarData = await responses[2].json();
+            if (calendarData.success) calendarInfo = calendarData;
+        } catch (error) {
+            console.error('Error loading details:', error);
+        }
+        
+        var body = document.getElementById('championshipDetailBody');
+        
+        var isRetired = champ.retired || (extended && extended.retired);
+        var isCustom = champ.is_custom || (extended && extended.is_custom);
+        var hasChampion = !champ.is_vacant;
+        
+        var championHtml = champ.is_vacant ?
+            '<div class="alert alert-warning mb-0"><i class="bi bi-exclamation-triangle"></i> VACANT</div>' :
+            '<h5 class="mb-0">' + (champ.current_holder_display || champ.current_holder_name || 'Unknown') + '</h5>';
+        
+        var extendedHtml = '';
+        if (extended) {
+            extendedHtml = '<h6 class="mt-3">Extended Info</h6>' +
+                '<table class="table table-sm">' +
+                '<tr><td>Division:</td><td class="text-capitalize">' + (extended.division || 'Open') + '</td></tr>' +
+                '<tr><td>Weight Class:</td><td class="text-capitalize">' + (extended.weight_class || 'Open').replace('_', ' ') + '</td></tr>' +
+                '<tr><td>Type:</td><td>' + (isCustom ? '<span class="badge bg-info">Custom</span>' : '<span class="badge bg-primary">Default</span>') + '</td></tr>' +
+                '<tr><td>Status:</td><td>' + (isRetired ? '<span class="badge bg-secondary">Retired</span>' : '<span class="badge bg-success">Active</span>') + '</td></tr>' +
+                '</table>';
+            
+            if (extended.description) {
+                extendedHtml += '<p class="text-muted"><em>' + extended.description + '</em></p>';
+            }
+        }
+        
+        var statsHtml = '';
+        if (stats) {
+            statsHtml = '<h6>Statistics</h6>' +
+                '<div class="row text-center">' +
+                '<div class="col-4"><div class="h4 mb-0">' + (stats.total_reigns || 0) + '</div><small class="text-muted">Total Reigns</small></div>' +
+                '<div class="col-4"><div class="h4 mb-0">' + (stats.unique_champions || 0) + '</div><small class="text-muted">Unique Champions</small></div>' +
+                '<div class="col-4"><div class="h4 mb-0">' + (stats.total_defenses || 0) + '</div><small class="text-muted">Total Defenses</small></div>' +
+                '</div>';
+            
+            if (stats.longest_reign) {
+                statsHtml += '<div class="mt-3"><strong>Longest Reign:</strong> ' + stats.longest_reign.champion + ' (' + stats.longest_reign.days + ' days)</div>';
+            }
+            if (stats.most_reigns) {
+                statsHtml += '<div><strong>Most Reigns:</strong> ' + stats.most_reigns.champion + ' (' + stats.most_reigns.count + 'x)</div>';
+            }
+            if (stats.average_match_rating > 0) {
+                statsHtml += '<div><strong>Avg Match Rating:</strong> ' + stats.average_match_rating.toFixed(2) + ' ★</div>';
+            }
+        }
+        
+        var historyHtml = '';
+        if (champ.history && champ.history.length > 0) {
+            var currentYear = calendarInfo ? calendarInfo.current_year : null;
+            var currentWeek = calendarInfo ? calendarInfo.current_week : null;
+            var computeCurrentDays = function(reign) {
+                if (currentYear == null || currentWeek == null || reign.won_date_year == null || reign.won_date_week == null) {
+                    return null;
+                }
+                var weeksHeld = ((currentYear - reign.won_date_year) * 52) + (currentWeek - reign.won_date_week);
+                return Math.max(0, weeksHeld * 7);
+            };
+            var formatWonAt = function(reign) {
+                var showName = reign.won_at_show_name || 'Unknown Event';
+                if (reign.won_date_year == null || reign.won_date_week == null) return showName;
+                return showName + ' (Year ' + reign.won_date_year + ', Week ' + reign.won_date_week + ')';
+            };
+
+            historyHtml = '<h6 class="mt-3">Recent Title History</h6>' +
+                '<div class="table-responsive"><table class="table table-sm"><thead><tr>' +
+                '<th>Champion</th><th>Won At</th><th>Days Held</th></tr></thead><tbody>';
+            var recentReigns = champ.history.slice(-5).reverse();
+            recentReigns.forEach(function(reign) {
+                var rowClass = reign.is_interim ? 'table-info' : '';
+                var isCurrentHolder = !champ.is_vacant &&
+                    String(champ.current_holder_id || '') === String(reign.wrestler_id || '');
+                var daysHeldText = '';
+                if (reign.days_held != null && reign.days_held !== '') {
+                    daysHeldText = reign.days_held + ' days';
+                } else if (isCurrentHolder) {
+                    var currentDays = computeCurrentDays(reign);
+                    daysHeldText = currentDays == null ? 'Current' : 'Current (' + currentDays + ' days)';
+                } else {
+                    daysHeldText = '—';
+                }
+                historyHtml += '<tr class="' + rowClass + '">' +
+                    '<td>' + reign.wrestler_name + (reign.is_interim ? ' <span class="badge bg-info">Interim</span>' : '') + '</td>' +
+                    '<td>' + formatWonAt(reign) + '</td>' +
+                    '<td>' + daysHeldText + '</td>' +
+                    '</tr>';
+            });
+            historyHtml += '</tbody></table></div>';
+        }
+        
+        // Management section - available for ALL championships
+        var managementHtml = '<div class="management-section">' +
+            '<h6><i class="bi bi-gear"></i> Championship Management</h6>' +
+            '<div class="d-flex flex-wrap gap-2">';
+        
+        if (isCustom) {
+            managementHtml += '<button class="btn btn-sm btn-outline-primary" onclick="showEditChampionshipModal(\'' + champId + '\')">' +
+                '<i class="bi bi-pencil"></i> Edit</button>';
+        }
+        
+        if (!isRetired) {
+            managementHtml += '<button class="btn btn-sm btn-outline-warning" onclick="showRetireChampionshipModal(\'' + champId + '\', \'' + escapeHtml(champ.name) + '\', ' + hasChampion + ', ' + isCustom + ')">' +
+                '<i class="bi bi-archive"></i> Retire</button>';
+        } else {
+            managementHtml += '<button class="btn btn-sm btn-outline-success" onclick="reactivateChampionship(\'' + champId + '\')">' +
+                '<i class="bi bi-arrow-counterclockwise"></i> Reactivate</button>';
+        }
+        
+        managementHtml += '<button class="btn btn-sm btn-outline-danger" onclick="showDeleteChampionshipModal(\'' + champId + '\', \'' + escapeHtml(champ.name) + '\', ' + isCustom + ')">' +
+            '<i class="bi bi-trash"></i> Delete</button>';
+        
+        managementHtml += '</div></div>';
+
+        managementHtml += '<button class="btn btn-sm btn-outline-info" onclick="showTitleLineage(\'' + champId + '\')">' +
+            '<i class="bi bi-clock-history"></i> View Lineage</button>';
+        
+        body.innerHTML = '<div class="row">' +
+            '<div class="col-md-6">' +
+            '<h6>Championship Info</h6>' +
+            '<table class="table table-sm">' +
+            '<tr><td>Brand:</td><td><strong>' + champ.assigned_brand + '</strong></td></tr>' +
+            '<tr><td>Type:</td><td><strong>' + champ.title_type + '</strong></td></tr>' +
+            '<tr><td>Prestige:</td><td><strong>' + (champ.prestige || 50) + '/100</strong></td></tr>' +
+            '</table>' +
+            '<h6 class="mt-3">Current Champion</h6>' +
+            championHtml +
+            extendedHtml +
+            '</div>' +
+            '<div class="col-md-6">' +
+            statsHtml +
+            historyHtml +
+            '</div>' +
+            '</div>' +
+            managementHtml;
+        
+        modal.show();
+    }
+
+    // Show championship actions menu - with management options for ALL championships
+    function showChampionshipActions(titleId) {
+        var champ = findChampionship(titleId);
+        if (!champ) {
+            console.error('Championship not found:', titleId);
+            showToast('Championship not found', 'danger');
+            return;
+        }
+        
+        var champId = champ.id || champ.title_id;
+        var isCustom = champ.is_custom;
+        var isRetired = champ.retired;
+        
+        var modal = new bootstrap.Modal(document.getElementById('situationActionModal'));
+        document.getElementById('situationActionTitle').textContent = 'Actions: ' + champ.name;
+        
+        var interimHtml = '';
+        if (!champ.has_interim_champion) {
+            interimHtml = '<button class="list-group-item list-group-item-action" onclick="showInterimChampionModal(\'' + champId + '\')">' +
+                '<i class="bi bi-person-badge text-info"></i> Create Interim Champion</button>';
+        } else {
+            interimHtml = '<button class="list-group-item list-group-item-action" onclick="stripInterimChampion(\'' + champId + '\')">' +
+                '<i class="bi bi-person-x text-warning"></i> Strip Interim Champion</button>' +
+                '<button class="list-group-item list-group-item-action" onclick="showUnifyModal(\'' + champId + '\')">' +
+                '<i class="bi bi-arrow-left-right text-primary"></i> Unification Match Result</button>';
+        }
+        
+        // Title actions section
+        var titleActionsHtml = '<div class="list-group-item list-group-item-light"><strong class="small text-muted">TITLE ACTIONS</strong></div>' +
+            '<button class="list-group-item list-group-item-action" onclick="showRecordDefenseModal(\'' + champId + '\')">' +
+            '<i class="bi bi-shield-check text-success"></i> Record Title Defense</button>' +
+            interimHtml +
+            '<button class="list-group-item list-group-item-action" onclick="showVacateModal(\'' + champId + '\')">' +
+            '<i class="bi bi-exclamation-octagon text-danger"></i> Vacate Title</button>' +
+            '<button class="list-group-item list-group-item-action" onclick="analyzeChampionInjury(\'' + champId + '\')">' +
+            '<i class="bi bi-bandaid text-warning"></i> Analyze Champion Injury</button>';
+        
+        // Management section - available for ALL championships
+        var managementHtml = '<div class="list-group-item list-group-item-light"><strong class="small text-muted">CHAMPIONSHIP MANAGEMENT</strong></div>';
+        
+        if (isCustom) {
+            managementHtml += '<button class="list-group-item list-group-item-action" onclick="showEditChampionshipModal(\'' + champId + '\')">' +
+                '<i class="bi bi-pencil text-primary"></i> Edit Championship</button>';
+        }
+        
+        if (!isRetired) {
+            managementHtml += '<button class="list-group-item list-group-item-action" onclick="showRetireChampionshipModal(\'' + champId + '\', \'' + escapeHtml(champ.name) + '\', ' + !champ.is_vacant + ', ' + isCustom + ')">' +
+                '<i class="bi bi-archive text-warning"></i> Retire Championship</button>';
+        } else {
+            managementHtml += '<button class="list-group-item list-group-item-action" onclick="reactivateChampionship(\'' + champId + '\')">' +
+                '<i class="bi bi-arrow-counterclockwise text-success"></i> Reactivate Championship</button>';
+        }
+        
+        managementHtml += '<button class="list-group-item list-group-item-action list-group-item-danger" onclick="showDeleteChampionshipModal(\'' + champId + '\', \'' + escapeHtml(champ.name) + '\', ' + isCustom + ')">' +
+            '<i class="bi bi-trash text-danger"></i> Delete Championship</button>';
+        
+        var body = document.getElementById('situationActionBody');
+        body.innerHTML = '<div class="list-group">' + titleActionsHtml + managementHtml + '</div>';
+        
+        var footer = document.getElementById('situationActionFooter');
+        footer.innerHTML = '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>';
+        
+        modal.show();
+    }
+
+    function handleSituation(titleId) {
+        var situation = situations.find(function(s) { return s.title_id === titleId; });
+        if (!situation) return;
+        
+        if (situation.situation_type === 'vacant') {
+            showFillVacancyModal(titleId);
+        } else if (situation.situation_type === 'champion_injured') {
+            analyzeChampionInjury(titleId);
+        } else {
+            showChampionshipActions(titleId);
+        }
+    }
+
+    async function showDefenseSchedule() {
+        var modal = new bootstrap.Modal(document.getElementById('defenseScheduleModal'));
+        var body = document.getElementById('defenseScheduleBody');
+        
+        body.innerHTML = '<div class="text-center py-3"><div class="spinner-border"></div></div>';
+        modal.show();
+        
+        try {
+            var response = await fetch('/api/championships/defense-schedule');
+            var data = await response.json();
+            
+            if (data.success) {
+                var schedule = data.schedule || [];
+                
+                var tableHtml = '<table class="table table-hover"><thead><tr>' +
+                    '<th>Title</th><th>Champion</th><th>Days Since</th><th>Status</th></tr></thead><tbody>';
+                
+                schedule.forEach(function(item) {
+                    var status = item.status || {};
+                    var titleName = item.title_name || (item.championship && item.championship.name) || 'Unknown Title';
+                    var titleTier = item.title_tier || (item.championship && item.championship.tier) || '';
+                    var championName = item.champion_name || (item.champion && item.champion.name) || 'Unknown';
+                    var isInterim = item.is_interim != null ? item.is_interim : !!(item.champion && item.champion.is_interim);
+                    var daysSince = item.days_since_defense != null ? item.days_since_defense : (status.days_since_defense || 0);
+                    var urgencyLevel = item.urgency_level != null ? item.urgency_level : (status.urgency_level || 0);
+                    var urgencyLabel = item.urgency_label || status.urgency_label || 'Normal';
+                    var isOverdue = item.is_overdue != null ? item.is_overdue : !!status.is_overdue;
+                    var daysUntilRequired = item.days_until_required != null ? item.days_until_required : (status.days_until_required || 0);
+                    var rowClass = isOverdue ? 'table-danger' : (urgencyLevel >= 2 ? 'table-warning' : '');
+                    var interimBadge = isInterim ? '<span class="badge bg-info">Interim</span>' : '';
+                    var statusText = isOverdue ? '<br><small class="text-danger">OVERDUE!</small>' : 
+                        '<br><small class="text-muted">' + daysUntilRequired + ' days left</small>';
+                    
+                    tableHtml += '<tr class="' + rowClass + '">' +
+                        '<td>' + titleName + '<br><small class="text-muted">' + titleTier + '</small></td>' +
+                        '<td>' + championName + ' ' + interimBadge + '</td>' +
+                        '<td>' + daysSince + ' days</td>' +
+                        '<td><span class="urgency-' + urgencyLevel + '">' + urgencyLabel + '</span>' + statusText + '</td>' +
+                        '</tr>';
+                });
+                
+                tableHtml += '</tbody></table>';
+                
+                body.innerHTML = '<p class="text-muted mb-3">Current: Year ' + data.current_year + ', Week ' + data.current_week + '</p>' +
+                    '<div class="table-responsive">' + tableHtml + '</div>';
+            }
+        } catch (error) {
+            body.innerHTML = '<div class="alert alert-danger">Error loading schedule: ' + error.message + '</div>';
+        }
+    }
+
+    function populateFilters() {
+        var defenseFilter = document.getElementById('defensesTitleFilter');
+        var html = '<option value="">All Titles</option>';
+        championships.forEach(function(c) {
+            var champId = c.id || c.title_id;
+            html += '<option value="' + champId + '">' + c.name + '</option>';
+        });
+        defenseFilter.innerHTML = html;
+        
+        var sortedWrestlers = wrestlers.slice().sort(function(a, b) { return a.name.localeCompare(b.name); });
+        
+        var wrestlerSelects = ['grantShotWrestler', 'fillVacancyChampion', 'vacateAttacker'];
+        wrestlerSelects.forEach(function(id) {
+            var select = document.getElementById(id);
+            if (select) {
+                var firstOption = select.options[0].outerHTML;
+                var optionsHtml = firstOption;
+                sortedWrestlers.forEach(function(w) {
+                    optionsHtml += '<option value="' + w.id + '">' + w.name + ' (' + w.primary_brand + ')</option>';
+                });
+                select.innerHTML = optionsHtml;
+            }
+        });
+        
+        var titleSelect = document.getElementById('grantShotTitle');
+        if (titleSelect) {
+            var titleHtml = '<option value="">Select championship...</option>';
+            championships.forEach(function(c) {
+                var champId = c.id || c.title_id;
+                titleHtml += '<option value="' + champId + '">' + c.name + '</option>';
+            });
+            titleSelect.innerHTML = titleHtml;
+        }
+    }
+
+    async function loadDefenseHistory() {
+        var titleId = document.getElementById('defensesTitleFilter').value;
+        var tbody = document.getElementById('defensesTableBody');
+        
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border spinner-border-sm"></div></td></tr>';
+        
+        try {
+            if (!titleId) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Select a specific title to view its defense history</td></tr>';
+                return;
+            }
+            
+            var response = await fetch('/api/championships/' + titleId + '/defenses?limit=50');
+            var data = await response.json();
+            
+            if (data.success && data.defenses) {
+                if (data.defenses.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No defenses recorded</td></tr>';
+                    return;
+                }
+                
+                var html = '';
+                data.defenses.forEach(function(def) {
+                    var resultClass = def.result === 'retained' ? 'bg-success' : 'bg-danger';
+                    html += '<tr>' +
+                        '<td>' + data.title_name + '</td>' +
+                        '<td>' + def.champion_name + '</td>' +
+                        '<td>' + def.challenger_name + '</td>' +
+                        '<td><span class="badge ' + resultClass + '">' + def.result.toUpperCase() + '</span></td>' +
+                        '<td class="star-rating">' + def.star_rating.toFixed(2) + ' ★</td>' +
+                        '<td>' + def.show_name + '</td>' +
+                        '<td>Y' + def.year + ' W' + def.week + '</td>' +
+                        '</tr>';
+                });
+                tbody.innerHTML = html;
+            }
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error: ' + error.message + '</td></tr>';
+        }
+    }
+
+    function showVacateModal(titleId) {
+        closeAllModals();
+        document.getElementById('vacateTitleId').value = titleId;
+        var modal = new bootstrap.Modal(document.getElementById('vacateTitleModal'));
+        modal.show();
+    }
+
+    async function executeVacate() {
+        var titleId = document.getElementById('vacateTitleId').value;
+        var reason = document.getElementById('vacateReason').value;
+        var notes = document.getElementById('vacateNotes').value;
+        var attackerId = document.getElementById('vacateAttacker').value;
+        
+        try {
+            var response = await fetch('/api/championships/' + titleId + '/vacate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    reason: reason,
+                    notes: notes,
+                    attacker_id: attackerId || null
+                })
+            });
+            
+            var data = await response.json();
+            
+            if (data.success) {
+                showToast('Title vacated successfully', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('vacateTitleModal')).hide();
+                loadAllData();
+            } else {
+                showToast(data.error || 'Failed to vacate title', 'danger');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'danger');
+        }
+    }
+
+    async function showInterimChampionModal(titleId) {
+        closeAllModals();
+        document.getElementById('interimTitleId').value = titleId;
+        var list = document.getElementById('interimCandidatesList');
+        
+        list.innerHTML = '<div class="text-center py-3"><div class="spinner-border"></div></div>';
+        
+        var modal = new bootstrap.Modal(document.getElementById('interimChampionModal'));
+        modal.show();
+        
+        try {
+            var response = await fetch('/api/championships/' + titleId + '/interim-candidates');
+            var data = await response.json();
+            
+            if (data.success && data.candidates) {
+                var html = '';
+                data.candidates.forEach(function(cand) {
+                    html += '<button class="list-group-item list-group-item-action candidate-item" onclick="createInterimChampion(\'' + titleId + '\', \'' + cand.wrestler_id + '\')">' +
+                        '<div class="d-flex justify-content-between align-items-center">' +
+                        '<div><strong>' + cand.wrestler_name + '</strong><br><small class="text-muted">' + cand.role + ' • ' + cand.brand + '</small></div>' +
+                        '<div class="text-end"><span class="badge bg-primary">' + cand.score.toFixed(0) + ' pts</span><br><small>Pop: ' + cand.popularity + ' | Mom: ' + cand.momentum + '</small></div>' +
+                        '</div></button>';
+                });
+                list.innerHTML = html || '<div class="text-center text-muted py-3">No suitable candidates found</div>';
+            }
+        } catch (error) {
+            list.innerHTML = '<div class="alert alert-danger">Error: ' + error.message + '</div>';
+        }
+    }
+
+    async function createInterimChampion(titleId, wrestlerId) {
+        try {
+            var response = await fetch('/api/championships/' + titleId + '/interim', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ interim_champion_id: wrestlerId })
+            });
+            
+            var data = await response.json();
+            
+            if (data.success) {
+                showToast('Interim champion created!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('interimChampionModal')).hide();
+                loadAllData();
+            } else {
+                showToast(data.error || 'Failed to create interim champion', 'danger');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'danger');
+        }
+    }
+
+    async function stripInterimChampion(titleId) {
+        if (!confirm('Are you sure you want to strip the interim champion?')) return;
+        
+        try {
+            var response = await fetch('/api/championships/' + titleId + '/strip-interim', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            var data = await response.json();
+            
+            if (data.success) {
+                showToast('Interim champion stripped', 'success');
+                closeAllModals();
+                loadAllData();
+            } else {
+                showToast(data.error || 'Failed to strip interim champion', 'danger');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'danger');
+        }
+    }
+
+    function showFillVacancyModal(titleId) {
+        document.getElementById('fillVacancyTitleId').value = titleId;
+        document.getElementById('fillVacancyShow').value = 'Week Show';
+        var modal = new bootstrap.Modal(document.getElementById('fillVacancyModal'));
+        modal.show();
+    }
+
+    async function executeFillVacancy() {
+        var titleId = document.getElementById('fillVacancyTitleId').value;
+        var championId = document.getElementById('fillVacancyChampion').value;
+        var method = document.getElementById('fillVacancyMethod').value;
+        var showName = document.getElementById('fillVacancyShow').value;
+        
+        if (!championId) {
+            showToast('Please select a new champion', 'warning');
+            return;
+        }
+        
+        try {
+            var response = await fetch('/api/championships/' + titleId + '/fill-vacancy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    new_champion_id: championId,
+                    resolution_method: method,
+                    show_name: showName
+                })
+            });
+            
+            var data = await response.json();
+            
+            if (data.success) {
+                showToast(data.message || 'New champion crowned!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('fillVacancyModal')).hide();
+                loadAllData();
+            } else {
+                showToast(data.error || 'Failed to fill vacancy', 'danger');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'danger');
+        }
+    }
+
+    async function analyzeChampionInjury(titleId) {
+        closeAllModals();
+        
+        try {
+            var response = await fetch('/api/championships/' + titleId + '/analyze-injury');
+            var data = await response.json();
+            
+            if (data.success) {
+                var analysis = data.analysis;
+                
+                var modal = new bootstrap.Modal(document.getElementById('situationActionModal'));
+                document.getElementById('situationActionTitle').textContent = 'Injury Analysis';
+                
+                var optionsHtml = '';
+                analysis.available_options.forEach(function(opt) {
+                    var riskClass = opt.risk_level === 'low' ? 'success' : (opt.risk_level === 'medium' ? 'warning' : 'danger');
+                    var recommendedBadge = opt.recommended ? '<span class="badge bg-success ms-2">RECOMMENDED</span>' : '';
+                    
+                    optionsHtml += '<div class="list-group-item ' + (opt.recommended ? 'list-group-item-success' : '') + '">' +
+                        '<div class="d-flex justify-content-between align-items-start">' +
+                        '<div><strong>' + opt.decision.replace(/_/g, ' ').toUpperCase() + '</strong>' + recommendedBadge +
+                        '<br><small>' + opt.description + '</small></div>' +
+                        '<span class="badge bg-' + riskClass + '">' + opt.risk_level + ' risk</span>' +
+                        '</div>' +
+                        '<div class="mt-2 small">' +
+                        '<span class="text-success">✓ ' + opt.pros.join(', ') + '</span><br>' +
+                        '<span class="text-danger">✗ ' + opt.cons.join(', ') + '</span>' +
+                        '</div></div>';
+                });
+                
+                var ppvUrgency = analysis.ppv_urgency ? '<div class="alert alert-danger">' + analysis.ppv_urgency + '</div>' : '';
+                
+                var body = document.getElementById('situationActionBody');
+                body.innerHTML = '<div class="alert alert-info"><strong>' + analysis.champion_name + '</strong> - ' + analysis.title_name + '</div>' +
+                    '<div class="card mb-3"><div class="card-header">Injury Details</div><div class="card-body">' +
+                    '<p><strong>Severity:</strong> ' + analysis.injury.severity + '</p>' +
+                    '<p><strong>Description:</strong> ' + analysis.injury.description + '</p>' +
+                    '<p><strong>Expected Return:</strong> Week ' + analysis.injury.estimated_return_week + ' (' + analysis.injury.weeks_remaining + ' weeks)</p>' +
+                    '</div></div>' +
+                    '<div class="card mb-3"><div class="card-header">Analysis</div><div class="card-body">' +
+                    '<p>' + analysis.analysis_summary + '</p>' + ppvUrgency +
+                    '</div></div>' +
+                    '<div class="card"><div class="card-header">Options</div>' +
+                    '<div class="list-group list-group-flush">' + optionsHtml + '</div></div>';
+                
+                modal.show();
+            } else {
+                showToast(data.error || 'Champion is not injured', 'warning');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'danger');
+        }
+    }
+
+    function showGrantShotModal() {
+        populateFilters();
+        var modal = new bootstrap.Modal(document.getElementById('grantShotModal'));
+        modal.show();
+    }
+
+    async function grantTitleShot() {
+        var wrestlerId = document.getElementById('grantShotWrestler').value;
+        var titleId = document.getElementById('grantShotTitle').value;
+        var reason = document.getElementById('grantShotReason').value;
+        var expiresWeeks = parseInt(document.getElementById('grantShotExpires').value);
+        var notes = document.getElementById('grantShotNotes').value;
+        
+        if (!wrestlerId || !titleId) {
+            showToast('Please select both wrestler and championship', 'warning');
+            return;
+        }
+        
+        try {
+            var response = await fetch('/api/wrestlers/' + wrestlerId + '/grant-title-shot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title_id: titleId,
+                    reason: reason,
+                    expires_weeks: expiresWeeks,
+                    notes: notes
+                })
+            });
+            
+            var data = await response.json();
+            
+            if (data.success) {
+                showToast(data.message || 'Title shot granted!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('grantShotModal')).hide();
+                loadAllData();
+            } else {
+                showToast(data.error || 'Failed to grant title shot', 'danger');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'danger');
+        }
+    }
+
+    async function showEditChampionshipModal(titleId) {
+        closeAllModals();
+        document.getElementById('editChampId').value = titleId;
+        
+        try {
+            var response = await fetch('/api/championships/' + titleId + '/extended');
+            var data = await response.json();
+            
+            if (data.success) {
+                var champ = data.championship;
+                document.getElementById('editChampDescription').value = champ.description || '';
+                
+                if (champ.defense_requirements) {
+                    document.getElementById('editMaxDays').value = champ.defense_requirements.max_days_between_defenses || 30;
+                    document.getElementById('editMinDefenses').value = champ.defense_requirements.min_defenses_per_year || 12;
+                }
+            }
+            
+            var modal = new bootstrap.Modal(document.getElementById('editChampionshipModal'));
+            modal.show();
+        } catch (error) {
+            showToast('Error loading championship: ' + error.message, 'danger');
+        }
+    }
+
+    async function saveChampionshipEdit() {
+        var titleId = document.getElementById('editChampId').value;
+        
+        var updateData = {
+            description: document.getElementById('editChampDescription').value,
+            defense_requirements: {
+                max_days_between_defenses: parseInt(document.getElementById('editMaxDays').value),
+                min_defenses_per_year: parseInt(document.getElementById('editMinDefenses').value)
+            }
+        };
+        
+        try {
+            var response = await fetch('/api/championships/' + titleId + '/update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updateData)
+            });
+            
+            var data = await response.json();
+            
+            if (data.success) {
+                showToast('Championship updated!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('editChampionshipModal')).hide();
+                loadAllData();
+            } else {
+                showToast(data.error || 'Failed to update championship', 'danger');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'danger');
+        }
+    }
+
+    // Show retire championship modal - works for ALL championships
+    function showRetireChampionshipModal(titleId, titleName, hasChampion, isCustom) {
+        closeAllModals();
+        
+        document.getElementById('retireChampId').value = titleId;
+        document.getElementById('retireChampName').textContent = titleName;
+        document.getElementById('retireChampIsCustom').value = isCustom ? 'true' : 'false';
+        
+        var championWarning = document.getElementById('retireChampionWarning');
+        var defaultWarning = document.getElementById('retireDefaultWarning');
+        
+        championWarning.style.display = hasChampion ? 'block' : 'none';
+        defaultWarning.style.display = isCustom ? 'none' : 'block';
+        
+        var modal = new bootstrap.Modal(document.getElementById('retireChampionshipModal'));
+        modal.show();
+    }
+
+    // Execute retire - works for ALL championships
+    async function executeRetireChampionship() {
+        var titleId = document.getElementById('retireChampId').value;
+        var reason = document.getElementById('retireReason').value;
+        var notes = document.getElementById('retireNotes').value;
+        
+        try {
+            var response = await fetch('/api/championships/' + titleId + '/retire', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    reason: reason + (notes ? ': ' + notes : '')
+                })
+            });
+            
+            var data = await response.json();
+            
+            if (data.success) {
+                showToast(data.message || 'Championship retired', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('retireChampionshipModal')).hide();
+                loadAllData();
+            } else {
+                showToast(data.error || 'Failed to retire championship', 'danger');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'danger');
+        }
+    }
+
+    // Reactivate - works for ALL championships
+    async function reactivateChampionship(titleId) {
+        try {
+            var response = await fetch('/api/championships/' + titleId + '/reactivate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            var data = await response.json();
+            
+            if (data.success) {
+                showToast(data.message || 'Championship reactivated', 'success');
+                closeAllModals();
+                loadAllData();
+            } else {
+                showToast(data.error || 'Failed to reactivate championship', 'danger');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'danger');
+        }
+    }
+
+    // Show delete modal - works for ALL championships
+    function showDeleteChampionshipModal(titleId, titleName, isCustom) {
+        closeAllModals();
+        
+        document.getElementById('deleteChampId').value = titleId;
+        document.getElementById('deleteChampName').textContent = titleName;
+        document.getElementById('deleteChampIsCustom').value = isCustom ? 'true' : 'false';
+        document.getElementById('confirmDeleteCheck').checked = false;
+        document.getElementById('confirmDeleteBtn').disabled = true;
+        
+        var defaultWarning = document.getElementById('deleteDefaultWarning');
+        defaultWarning.style.display = isCustom ? 'none' : 'block';
+        
+        document.getElementById('confirmDeleteCheck').onchange = function() {
+            document.getElementById('confirmDeleteBtn').disabled = !this.checked;
+        };
+        
+        var modal = new bootstrap.Modal(document.getElementById('deleteChampionshipModal'));
+        modal.show();
+    }
+
+
+
+    async function showTitleLineage(titleId) {
+        var modal = new bootstrap.Modal(document.getElementById('titleLineageModal'));
+        var statsDiv = document.getElementById('lineageStats');
+        var tbody = document.getElementById('lineageTableBody');
+    
+        // Show loading
+        statsDiv.innerHTML = '<div class="col-12 text-center"><div class="spinner-border"></div></div>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border spinner-border-sm"></div> Loading...</td></tr>';
+    
+        modal.show();
+    
+        try {
+            // Load lineage and statistics
+            var [lineageResponse, statsResponse] = await Promise.all([
+                fetch('/api/championships/' + titleId + '/lineage'),
+                fetch('/api/championships/' + titleId + '/statistics')
+            ]);
+        
+            var lineageData = await lineageResponse.json();
+            var statsData = await statsResponse.json();
+        
+            if (lineageData.success && statsData.success) {
+                document.getElementById('lineageTitle').textContent = lineageData.title_name + ' - Title Lineage';
+            
+                // Display statistics
+                var stats = statsData.statistics;
+                var statsHtml = 
+                    '<div class="col-md-3">' +
+                    '<div class="card text-center">' +
+                    '<div class="card-body">' +
+                    '<h4 class="mb-0">' + stats.total_reigns + '</h4>' +
+                    '<small class="text-muted">Total Reigns</small>' +
+                    '</div></div></div>' +
+                    '<div class="col-md-3">' +
+                    '<div class="card text-center">' +
+                    '<div class="card-body">' +
+                    '<h4 class="mb-0">' + stats.unique_champions + '</h4>' +
+                    '<small class="text-muted">Unique Champions</small>' +
+                    '</div></div></div>' +
+                    '<div class="col-md-3">' +
+                    '<div class="card text-center">' +
+                    '<div class="card-body">' +
+                    '<h4 class="mb-0">' + stats.total_defenses + '</h4>' +
+                    '<small class="text-muted">Total Defenses</small>' +
+                    '</div></div></div>' +
+                    '<div class="col-md-3">' +
+                    '<div class="card text-center">' +
+                    '<div class="card-body">' +
+                    '<h4 class="mb-0">' + stats.average_match_rating + ' ★</h4>' +
+                    '<small class="text-muted">Avg Match Rating</small>' +
+                    '</div></div></div>';
+            
+                if (stats.longest_reign) {
+                    statsHtml += '<div class="col-12 mt-3"><div class="alert alert-info mb-0">' +
+                        '<strong>Longest Reign:</strong> ' + stats.longest_reign.wrestler_name + 
+                        ' (' + stats.longest_reign.days + ' days)</div></div>';
+                }
+            
+                statsDiv.innerHTML = statsHtml;
+            
+                // Display lineage
+                var lineageHtml = '';
+                var reignNumber = lineageData.total_reigns;
+            
+                                lineageData.lineage.forEach(function(reign) {
+                    var rowClass = reign.is_current ? 'table-success' : '';
+                    var lostAt = reign.lost_at_show_name || '<em>Current</em>';
+                    var defenses = reign.successful_defenses || 0;
+                    var currentBadge = reign.is_current ? '<span class="badge bg-success ms-2">CURRENT</span>' : '';
+                    var interimBadge = reign.is_interim ? '<span class="badge bg-info ms-2">INTERIM</span>' : '';
+                    
+                    lineageHtml += '<tr class="' + rowClass + '">' +
+                        '<td><strong>' + reignNumber + '</strong></td>' +
+                        '<td>' + reign.wrestler_name + currentBadge + interimBadge + '</td>' +
+                        '<td>' + reign.won_at_show_name + '<br><small class="text-muted">Y' + reign.won_date_year + ' W' + reign.won_date_week + '</small></td>' +
+                        '<td>' + lostAt + (reign.lost_date_year ? '<br><small class="text-muted">Y' + reign.lost_date_year + ' W' + reign.lost_date_week + '</small>' : '') + '</td>' +
+                        '<td><strong>' + reign.days_held + '</strong> days</td>' +
+                        '<td>' + defenses + '</td>' +
+                        '<td><button class="btn btn-sm btn-outline-primary" onclick="showReignDetails(\'' + titleId + '\', \'' + reign.wrestler_id + '\', ' + reign.won_date_year + ', ' + reign.won_date_week + ')">' +
+                        '<i class="bi bi-info-circle"></i></button></td>' +
+                        '</tr>';
+                    
+                    reignNumber--;
+                });
+            
+            tbody.innerHTML = lineageHtml || '<tr><td colspan="7" class="text-center text-muted">No title history</td></tr>';
+        }
+    } catch (error) {
+        statsDiv.innerHTML = '<div class="col-12"><div class="alert alert-danger">Error loading lineage: ' + error.message + '</div></div>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading data</td></tr>';
+    }
+}
+
+async function showReignDetails(titleId, wrestlerId, year, week) {
+    var modal = new bootstrap.Modal(document.getElementById('reignDetailsModal'));
+    var body = document.getElementById('reignDetailsBody');
+    
+    body.innerHTML = '<div class="text-center py-3"><div class="spinner-border"></div></div>';
+    modal.show();
+    
+    try {
+        var response = await fetch('/api/championships/' + titleId + '/reign/' + wrestlerId + '/' + year + '/' + week);
+        var data = await response.json();
+        
+        if (data.success) {
+            var stats = data.statistics;
+            
+            var html = '<div class="row mb-3">' +
+                '<div class="col-md-6">' +
+                '<h6>Defense Record</h6>' +
+                '<table class="table table-sm">' +
+                '<tr><td>Total Defenses:</td><td><strong>' + stats.total_defenses + '</strong></td></tr>' +
+                '<tr><td>Successful:</td><td><strong>' + stats.successful_defenses + '</strong></td></tr>' +
+                '<tr><td>Clean Wins:</td><td><strong>' + stats.clean_wins + '</strong></td></tr>' +
+                '<tr><td>Dirty Wins:</td><td><strong>' + stats.dirty_wins + '</strong></td></tr>' +
+                '</table></div>' +
+                '<div class="col-md-6">' +
+                '<h6>Match Quality</h6>' +
+                '<table class="table table-sm">' +
+                '<tr><td>Average Rating:</td><td><strong>' + stats.average_match_rating + ' ★</strong></td></tr>' +
+                '<tr><td>Highest:</td><td><strong>' + (stats.highest_rated_defense || 'N/A') + ' ★</strong></td></tr>' +
+                '<tr><td>Lowest:</td><td><strong>' + (stats.lowest_rated_defense || 'N/A') + ' ★</strong></td></tr>' +
+                '<tr><td>Total Match Time:</td><td><strong>' + stats.total_match_time + ' mins</strong></td></tr>' +
+                '</table></div></div>';
+            
+            if (stats.notable_victories && stats.notable_victories.length > 0) {
+                html += '<h6>Notable Victories</h6><ul class="list-group mb-3">';
+                stats.notable_victories.forEach(function(victory) {
+                    html += '<li class="list-group-item">' + victory + '</li>';
+                });
+                html += '</ul>';
+            }
+            
+            body.innerHTML = html;
+        }
+    } catch (error) {
+        body.innerHTML = '<div class="alert alert-danger">Error loading reign details: ' + error.message + '</div>';
+    }
+}
+
+// Add to the window exports at the bottom of the script
+window.showTitleLineage = showTitleLineage;
+window.showReignDetails = showReignDetails;
+
+    // Execute delete - works for ALL championships
+    async function executeDeleteChampionship() {
+        var titleId = document.getElementById('deleteChampId').value;
+        
+        if (!document.getElementById('confirmDeleteCheck').checked) {
+            showToast('Please confirm the deletion', 'warning');
+            return;
+        }
+        
+        try {
+            var response = await fetch('/api/championships/' + titleId + '/delete', {
+                method: 'DELETE'
+            });
+            
+            var data = await response.json();
+            
+            if (data.success) {
+                showToast(data.message || 'Championship deleted', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('deleteChampionshipModal')).hide();
+                loadAllData();
+            } else {
+                showToast(data.error || 'Failed to delete championship', 'danger');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'danger');
+        }
+    }
+
+    // Helper to close all modals
+    function closeAllModals() {
+        var modals = ['championshipDetailModal', 'situationActionModal', 'retireChampionshipModal', 'deleteChampionshipModal', 'editChampionshipModal'];
+        modals.forEach(function(id) {
+            var modal = bootstrap.Modal.getInstance(document.getElementById(id));
+            if (modal) modal.hide();
+        });
+    }
+
+    // Toast notification
+    function showToast(message, type) {
+        type = type || 'info';
+        var toastContainer = document.getElementById('toastContainer') || createToastContainer();
+        
+        var toastId = 'toast-' + Date.now();
+        var bgClass = {
+            'success': 'bg-success',
+            'danger': 'bg-danger',
+            'warning': 'bg-warning text-dark',
+            'info': 'bg-info'
+        }[type] || 'bg-info';
+        
+        var toastHtml = '<div id="' + toastId + '" class="toast ' + bgClass + ' text-white" role="alert">' +
+            '<div class="toast-body d-flex justify-content-between align-items-center">' +
+            message +
+            '<button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast"></button>' +
+            '</div></div>';
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        
+        var toastEl = document.getElementById(toastId);
+        var toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 3000 });
+        toast.show();
+        
+        toastEl.addEventListener('hidden.bs.toast', function() { toastEl.remove(); });
+    }
+
+    function createToastContainer() {
+        var container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '1100';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    // Export functions to global scope
+    window.refreshAllData = refreshAllData;
+    window.showDefenseSchedule = showDefenseSchedule;
+    window.showChampionshipDetail = showChampionshipDetail;
+    window.showChampionshipActions = showChampionshipActions;
+    window.handleSituation = handleSituation;
+    window.showFillVacancyModal = showFillVacancyModal;
+    window.showVacateModal = showVacateModal;
+    window.executeVacate = executeVacate;
+    window.showInterimChampionModal = showInterimChampionModal;
+    window.createInterimChampion = createInterimChampion;
+    window.stripInterimChampion = stripInterimChampion;
+    window.executeFillVacancy = executeFillVacancy;
+    window.analyzeChampionInjury = analyzeChampionInjury;
+    window.showGrantShotModal = showGrantShotModal;
+    window.grantTitleShot = grantTitleShot;
+    window.loadDefenseHistory = loadDefenseHistory;
+    window.showCreateChampionshipModal = showCreateChampionshipModal;
+    window.selectPreset = selectPreset;
+    window.clearPreset = clearPreset;
+    window.updatePrestigeDisplay = updatePrestigeDisplay;
+    window.onTitleTypeChange = onTitleTypeChange;
+    window.toggleTagTeamSize = toggleTagTeamSize;
+    window.updateBeltPreview = updateBeltPreview;
+    window.validateChampionship = validateChampionship;
+    window.createChampionship = createChampionship;
+    window.filterChampionships = filterChampionships;
+    window.showEditChampionshipModal = showEditChampionshipModal;
+    window.saveChampionshipEdit = saveChampionshipEdit;
+    window.showRetireChampionshipModal = showRetireChampionshipModal;
+    window.executeRetireChampionship = executeRetireChampionship;
+    window.reactivateChampionship = reactivateChampionship;
+    window.showDeleteChampionshipModal = showDeleteChampionshipModal;
+    window.executeDeleteChampionship = executeDeleteChampionship;
+
+})();
+</script>

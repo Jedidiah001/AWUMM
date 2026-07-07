@@ -1,0 +1,635 @@
+<!-- locker_room.html — Steps 260-265: Locker Room & Morale Hub -->
+<!-- Drop into frontend/templates/locker_room.html -->
+<!-- Accessible via loadView('locker_room') from office.js sidebar -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="bi bi-house-heart-fill"></i> Locker Room</h2>
+        <p class="text-muted mb-0">Morale intelligence, crisis management & creative seeds</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" onclick="refreshLockerRoom()">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+        </button>
+        <button class="btn btn-warning" onclick="runWeeklyMoraleTick()">
+            <i class="bi bi-lightning-fill"></i> Run Weekly Morale Tick
+        </button>
+    </div>
+</div>
+
+<!-- Crisis Tier Banner -->
+<div id="crisisBanner" class="mb-4" style="display:none;"></div>
+
+<!-- Weekly Digest -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center"
+                 style="background:linear-gradient(135deg,#1a1a2e,#16213e); color:#fff;">
+                <span><i class="bi bi-journal-text"></i> <strong>Weekly Morale Digest</strong></span>
+                <small id="digestWeekLabel" class="text-muted">—</small>
+            </div>
+            <div class="card-body" id="digestBody">
+                <div class="text-center text-muted py-3">
+                    <div class="spinner-border spinner-border-sm"></div> Loading digest…
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stat Strip -->
+<div class="row g-3 mb-4" id="moraleStatStrip">
+    <div class="col-6 col-md-3">
+        <div class="card text-center border-0 shadow-sm">
+            <div class="card-body py-3">
+                <div class="fs-2 fw-bold text-danger" id="statMiserable">—</div>
+                <div class="small text-muted">Miserable (≤20)</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center border-0 shadow-sm">
+            <div class="card-body py-3">
+                <div class="fs-2 fw-bold text-warning" id="statUnhappy">—</div>
+                <div class="small text-muted">Unhappy (21-40)</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center border-0 shadow-sm">
+            <div class="card-body py-3">
+                <div class="fs-2 fw-bold text-success" id="statHappy">—</div>
+                <div class="small text-muted">Happy / Ecstatic</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center border-0 shadow-sm">
+            <div class="card-body py-3">
+                <div class="fs-2 fw-bold text-info" id="statAvgMorale">—</div>
+                <div class="small text-muted">Avg Morale</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main columns: Alerts | Storyline Seeds -->
+<div class="row g-4 mb-4">
+
+    <!-- Left: Office Alerts -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header d-flex justify-content-between align-items-center bg-dark text-white">
+                <span><i class="bi bi-bell-fill text-warning"></i> <strong>Office Alerts</strong></span>
+                <span class="badge bg-danger" id="alertBadge">0</span>
+            </div>
+            <div class="card-body p-0" id="officeAlertList" style="max-height:520px; overflow-y:auto;">
+                <div class="text-center text-muted py-4">
+                    <div class="spinner-border spinner-border-sm"></div> Loading alerts…
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Storyline Seeds -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header d-flex justify-content-between align-items-center bg-dark text-white">
+                <span><i class="bi bi-lightbulb-fill text-warning"></i> <strong>Creative Seeds</strong></span>
+                <button class="btn btn-sm btn-outline-light" onclick="scanStorylineSeeds()">
+                    <i class="bi bi-search"></i> Scan
+                </button>
+            </div>
+            <div class="card-body p-0" id="storylineSeedList" style="max-height:520px; overflow-y:auto;">
+                <div class="text-center text-muted py-4">
+                    <div class="spinner-border spinner-border-sm"></div> Loading seeds…
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recovery Needed -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white d-flex justify-content-between">
+                <span><i class="bi bi-heart-pulse-fill text-danger"></i> <strong>Needs Recovery</strong></span>
+                <a href="#" onclick="loadView('morale_recovery')" class="text-decoration-none text-light small">
+                    Open Recovery Dashboard →
+                </a>
+            </div>
+            <div class="card-body p-0" id="recoveryNeededList">
+                <div class="text-center text-muted py-4">
+                    <div class="spinner-border spinner-border-sm"></div> Loading…
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Morale Events tick result toast area -->
+<div id="tickToastArea" class="position-fixed bottom-0 end-0 p-3" style="z-index:1100;"></div>
+
+<!-- Wrestler Quick-Action Modal -->
+<div class="modal fade" id="quickActionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="qaModalTitle">Recovery Options</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="qaModalBody">
+                <div class="text-center py-3"><div class="spinner-border"></div></div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+// ============================================================
+// Locker Room Hub — Steps 260-265
+// ============================================================
+
+const BASE = '';
+let _currentWrestlerId = null;
+
+// --- Init ---
+(function init() {
+    refreshLockerRoom();
+})();
+
+// Expose to window so inline onclick attributes work after executeScripts() wraps this block
+window.refreshLockerRoom     = function() { refreshLockerRoom(); };
+window.runWeeklyMoraleTick   = function() { runWeeklyMoraleTick(); };
+window.openQuickActionModal  = function(id) { openQuickActionModal(id); };
+window.scanStorylineSeeds    = function() { scanStorylineSeeds(); };
+
+function refreshLockerRoom() {
+    loadDigest();
+    loadOfficeAlerts();
+    loadStorylineSeeds();
+    loadRecoveryNeeded();
+}
+
+// --- Step 264: Weekly Digest ---
+async function loadDigest() {
+    try {
+        const res = await fetch(`${BASE}/api/morale-events/digest`);
+        const d = await res.json();
+        if (d.error) throw new Error(d.error);
+
+        document.getElementById('digestWeekLabel').textContent =
+            `Year ${d.year}, Week ${d.week}`;
+
+        // Stats
+        document.getElementById('statMiserable').textContent  = d.miserable_count;
+        document.getElementById('statUnhappy').textContent    = d.unhappy_count;
+        document.getElementById('statHappy').textContent      = d.happy_count;
+        document.getElementById('statAvgMorale').textContent  = d.avg_morale;
+
+        // Crisis banner
+        renderCrisisBanner(d.crisis_tier);
+
+        // Narrative lines
+        const body = document.getElementById('digestBody');
+        if (!d.narrative_lines || d.narrative_lines.length === 0) {
+            body.innerHTML = '<p class="text-muted mb-0">No narrative data available.</p>';
+            return;
+        }
+        body.innerHTML = d.narrative_lines.map(line =>
+            `<p class="mb-2">${escHtml(line)}</p>`
+        ).join('');
+
+    } catch (e) {
+        document.getElementById('digestBody').innerHTML =
+            `<p class="text-danger">Failed to load digest: ${escHtml(e.message)}</p>`;
+    }
+}
+
+function renderCrisisBanner(tier) {
+    const banner = document.getElementById('crisisBanner');
+    const configs = {
+        meltdown: { cls: 'alert-danger',  icon: '🔥', label: 'MELTDOWN',  text: 'The promotion is in a full-scale meltdown. Immediate executive action required.' },
+        crisis:   { cls: 'alert-warning', icon: '⚠️', label: 'CRISIS',    text: 'A locker room crisis is escalating. Performance and morale are suffering across the board.' },
+        tension:  { cls: 'alert-info',    icon: '📉', label: 'TENSION',   text: 'Early tension signs detected. Use recovery tools before this becomes a crisis.' },
+        none:     null,
+    };
+    const cfg = configs[tier];
+    if (!cfg) { banner.style.display = 'none'; return; }
+    banner.style.display = 'block';
+    banner.innerHTML = `
+        <div class="alert ${cfg.cls} d-flex align-items-center gap-3 mb-0">
+            <span class="fs-3">${cfg.icon}</span>
+            <div>
+                <strong>Locker Room ${cfg.label}</strong><br>
+                <span class="small">${escHtml(cfg.text)}</span>
+            </div>
+        </div>`;
+}
+
+// --- Step 263: Office Alerts ---
+async function loadOfficeAlerts() {
+    try {
+        const res = await fetch(`${BASE}/api/morale-events/office-alerts`);
+        const d = await res.json();
+        if (d.error) throw new Error(d.error);
+
+        const container = document.getElementById('officeAlertList');
+        const badge = document.getElementById('alertBadge');
+        const critical = d.critical_count + d.urgent_count;
+        badge.textContent = critical;
+        badge.className = `badge ${critical > 0 ? 'bg-danger' : 'bg-secondary'}`;
+
+        if (!d.alerts || d.alerts.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-success py-5">
+                    <i class="bi bi-check-circle-fill fs-1"></i>
+                    <div class="mt-2">No active alerts. Locker room is healthy.</div>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = d.alerts.map(a => renderAlertCard(a)).join('');
+    } catch (e) {
+        document.getElementById('officeAlertList').innerHTML =
+            `<p class="text-danger p-3">Failed: ${escHtml(e.message)}</p>`;
+    }
+}
+
+function renderAlertCard(a) {
+    const colors = {
+        critical: { border: '#dc3545', bg: '#2a0a0a', badge: 'danger',  icon: '🔴' },
+        urgent:   { border: '#fd7e14', bg: '#2a1500', badge: 'warning', icon: '🟠' },
+        warning:  { border: '#ffc107', bg: '#1f1a00', badge: 'warning', icon: '🟡' },
+        info:     { border: '#0dcaf0', bg: '#001a1f', badge: 'info',    icon: '🔵' },
+    };
+    const c = colors[a.priority] || colors.info;
+    const actionBtn = a.action_url
+        ? `<a href="#" class="btn btn-sm btn-outline-light mt-2"
+             onclick="handleAlertAction('${escAttr(a.action_url)}', '${escAttr(a.wrestler_id || '')}'); return false;">
+             ${escHtml(a.action_label || 'View')}</a>`
+        : '';
+    const dismissBtn = a.alert_id
+        ? `<button class="btn btn-sm btn-outline-secondary mt-2 ms-1"
+              onclick="dismissAlert('${escAttr(a.alert_id)}', this)">Dismiss</button>`
+        : '';
+    return `
+        <div class="p-3 border-bottom" style="background:${c.bg}; border-left:4px solid ${c.border} !important;">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="fw-semibold text-white">${c.icon} ${escHtml(a.title)}</div>
+                    <div class="small text-muted mt-1">${escHtml(a.body)}</div>
+                    <div class="mt-1">${actionBtn}${dismissBtn}</div>
+                </div>
+                <span class="badge bg-${c.badge} ms-2 flex-shrink-0">${a.priority.toUpperCase()}</span>
+            </div>
+        </div>`;
+}
+
+async function dismissAlert(alertId, btn) {
+    btn.disabled = true;
+    btn.textContent = '…';
+    try {
+        await fetch(`${BASE}/api/morale-events/office-alerts/${alertId}/dismiss`, { method: 'POST' });
+        btn.closest('.p-3').style.opacity = '0.4';
+    } catch(e) { btn.disabled = false; btn.textContent = 'Dismiss'; }
+}
+
+function handleAlertAction(url, wrestlerId) {
+    if (wrestlerId && url.includes('/menu')) {
+        openQuickActionModal(wrestlerId);
+    } else {
+        showToast('ℹ️', 'Navigate to: ' + url, 'info');
+    }
+}
+
+// --- Step 261: Storyline Seeds ---
+async function loadStorylineSeeds() {
+    try {
+        const res = await fetch(`${BASE}/api/morale-events/storylines?status=pending`);
+        const d = await res.json();
+        if (d.error) throw new Error(d.error);
+
+        const container = document.getElementById('storylineSeedList');
+        if (!d.seeds || d.seeds.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-lightbulb fs-1"></i>
+                    <div class="mt-2">No pending creative seeds. Click Scan to generate.</div>
+                </div>`;
+            return;
+        }
+        container.innerHTML = d.seeds.map(s => renderSeedCard(s)).join('');
+    } catch (e) {
+        document.getElementById('storylineSeedList').innerHTML =
+            `<p class="text-danger p-3">Failed: ${escHtml(e.message)}</p>`;
+    }
+}
+
+function renderSeedCard(s) {
+    const urgencyColors = { critical: 'danger', high: 'warning', medium: 'info', low: 'secondary' };
+    const typeIcons = {
+        unhappy_shift:      '😈',
+        veteran_mentors_rookie: '🎓',
+        locker_room_revolt:     '⚔️',
+        redemption_arc:         '✨',
+        departure_angle:        '🚪',
+        brand_civil_war:        '🔥',
+    };
+    const color = urgencyColors[s.urgency] || 'secondary';
+    const icon = typeIcons[s.storyline_type] || '🎭';
+    return `
+        <div class="p-3 border-bottom" style="background:#111827;">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+                <div class="fw-semibold text-white">${icon} ${escHtml(s.title)}</div>
+                <span class="badge bg-${color} ms-2">${s.urgency.toUpperCase()}</span>
+            </div>
+            <div class="small text-muted mb-2">${escHtml(s.logline)}</div>
+            <div class="small text-light mb-2" style="white-space:pre-line;">${escHtml(s.full_outline)}</div>
+            <div class="d-flex gap-2 flex-wrap">
+                <span class="badge bg-secondary">${escHtml(s.primary_wrestler_name)}</span>
+                <span class="badge bg-dark border border-secondary">${s.suggested_duration_weeks}w</span>
+                <span class="badge bg-dark border border-secondary">
+                    Morale @ trigger: ${s.morale_trigger}
+                </span>
+            </div>
+            <div class="mt-2 d-flex gap-2">
+                <button class="btn btn-sm btn-success" onclick="acceptSeed('${escAttr(s.seed_id)}', this)">
+                    ✅ Accept
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="rejectSeed('${escAttr(s.seed_id)}', this)">
+                    ❌ Reject
+                </button>
+            </div>
+        </div>`;
+}
+
+async function scanStorylineSeeds() {
+    showToast('🔍', 'Scanning roster for creative seeds…', 'info');
+    try {
+        const res = await fetch(`${BASE}/api/morale-events/storylines/scan`, { method: 'POST' });
+        const d = await res.json();
+        if (d.error) throw new Error(d.error);
+        showToast('💡', `${d.seeds_saved} new creative seed(s) generated.`, 'success');
+        loadStorylineSeeds();
+    } catch (e) {
+        showToast('❌', 'Scan failed: ' + e.message, 'danger');
+    }
+}
+
+async function acceptSeed(seedId, btn) {
+    btn.disabled = true;
+    try {
+        await fetch(`${BASE}/api/morale-events/storylines/${seedId}/accept`, { method: 'POST' });
+        showToast('✅', 'Creative seed accepted! Add it to your booking plan.', 'success');
+        btn.closest('.p-3').style.opacity = '0.5';
+    } catch(e) { btn.disabled = false; }
+}
+
+async function rejectSeed(seedId, btn) {
+    btn.disabled = true;
+    try {
+        await fetch(`${BASE}/api/morale-events/storylines/${seedId}/reject`, { method: 'POST' });
+        btn.closest('.p-3').style.opacity = '0.3';
+    } catch(e) { btn.disabled = false; }
+}
+
+// --- Recovery Needed ---
+async function loadRecoveryNeeded() {
+    try {
+        const res = await fetch(`${BASE}/api/recovery/summary`);
+        const d = await res.json();
+        if (d.error) throw new Error(d.error);
+
+        const container = document.getElementById('recoveryNeededList');
+        const wrestlers = d.needs_recovery || [];
+
+        if (wrestlers.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-success py-4">
+                    <i class="bi bi-emoji-smile fs-2"></i>
+                    <div class="mt-2 small">All wrestlers above morale threshold.</div>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0 small">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>Wrestler</th><th>Brand</th><th>Role</th>
+                            <th>Morale</th><th>Available</th><th>Helped?</th><th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${wrestlers.map(w => `
+                            <tr>
+                                <td class="fw-semibold">${escHtml(w.wrestler_name)}</td>
+                                <td><span class="badge bg-secondary">${escHtml(w.brand)}</span></td>
+                                <td>${escHtml(w.role)}</td>
+                                <td>${moraleBadge(w.morale)}</td>
+                                <td><span class="badge bg-info">${w.available_recoveries} tools</span></td>
+                                <td>${w.helped_this_year
+                                    ? '<span class="text-success">✅</span>'
+                                    : '<span class="text-danger">❌</span>'}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-light"
+                                        onclick="openQuickActionModal('${escAttr(w.wrestler_id)}')">
+                                        Recover
+                                    </button>
+                                </td>
+                            </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    } catch(e) {
+        document.getElementById('recoveryNeededList').innerHTML =
+            `<p class="text-danger p-3">Failed: ${escHtml(e.message)}</p>`;
+    }
+}
+
+// --- Step 262+263: Weekly Morale Tick ---
+async function runWeeklyMoraleTick() {
+    showToast('⚙️', 'Running weekly morale tick…', 'info');
+    try {
+        const res = await fetch(`${BASE}/api/morale-events/weekly-tick`, { method: 'POST' });
+        const d = await res.json();
+        if (d.error) throw new Error(d.error);
+
+        showToast(
+            d.crisis_tier === 'meltdown' ? '🔥' :
+            d.crisis_tier === 'crisis'   ? '⚠️' : '✅',
+            `Tick complete. Crisis: ${d.crisis_tier}. Seeds: ${d.storyline_seeds_generated}. Alerts: ${d.office_alerts}.`,
+            d.crisis_tier === 'meltdown' ? 'danger' :
+            d.crisis_tier === 'crisis'   ? 'warning' : 'success',
+        );
+        setTimeout(() => refreshLockerRoom(), 600);
+    } catch(e) {
+        showToast('❌', 'Tick failed: ' + e.message, 'danger');
+    }
+}
+
+// --- Quick Action Modal ---
+async function openQuickActionModal(wrestlerId) {
+    _currentWrestlerId = wrestlerId;
+    document.getElementById('qaModalTitle').textContent = 'Recovery Options';
+    document.getElementById('qaModalBody').innerHTML =
+        '<div class="text-center py-3"><div class="spinner-border"></div></div>';
+    new bootstrap.Modal(document.getElementById('quickActionModal')).show();
+
+    try {
+        const [menuRes, moraleRes] = await Promise.all([
+            fetch(`${BASE}/api/recovery/wrestler/${wrestlerId}/menu`),
+            fetch(`${BASE}/api/morale/wrestler/${wrestlerId}`),
+        ]);
+        const menu = await menuRes.json();
+        const morale = await moraleRes.json();
+        if (menu.error) throw new Error(menu.error);
+
+        document.getElementById('qaModalTitle').textContent =
+            `Recovery: ${menu.wrestler_name} (Morale: ${menu.morale})`;
+
+        const availableItems = (menu.menu || []).filter(m => m.available);
+        const lockedItems    = (menu.menu || []).filter(m => !m.available);
+
+        const behaviorList = (morale.active_behaviors || []).map(b =>
+            `<span class="badge bg-danger me-1">${escHtml(b.label)}</span>`
+        ).join('') || '<span class="text-muted">None</span>';
+
+        document.getElementById('qaModalBody').innerHTML = `
+            <div class="mb-3">
+                <div class="small text-muted mb-1">Active behaviors:</div>
+                <div>${behaviorList}</div>
+            </div>
+            <hr class="border-secondary">
+            <div class="row g-2">
+                ${availableItems.map(m => renderRecoveryOption(m, wrestlerId)).join('')}
+            </div>
+            ${lockedItems.length ? `
+                <hr class="border-secondary">
+                <div class="small text-muted">On cooldown:</div>
+                <div class="d-flex flex-wrap gap-2 mt-1">
+                    ${lockedItems.map(m =>
+                        `<span class="badge bg-secondary">
+                            ${escHtml(m.label)} (${m.cooldown_weeks_remaining}w)
+                        </span>`
+                    ).join('')}
+                </div>` : ''}`;
+    } catch(e) {
+        document.getElementById('qaModalBody').innerHTML =
+            `<p class="text-danger">Error: ${escHtml(e.message)}</p>`;
+    }
+}
+
+function renderRecoveryOption(m, wrestlerId) {
+    const icons = {
+        private_meeting:        '🤝',
+        push_adjustment:        '📈',
+        contract_renegotiation: '💰',
+        creative_input:         '🎭',
+        time_off:               '😴',
+        mentorship_role:        '🎓',
+    };
+    const icon = icons[m.recovery_type] || '✅';
+    const recommended = m.recommended
+        ? '<span class="badge bg-success ms-1">Recommended</span>' : '';
+    return `
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-body py-2 d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="fw-semibold">${icon} ${escHtml(m.label)}</span>
+                        ${recommended}
+                    </div>
+                    <button class="btn btn-sm btn-outline-light"
+                        onclick="executeQuickRecovery('${escAttr(wrestlerId)}', '${escAttr(m.recovery_type)}')">
+                        Apply
+                    </button>
+                </div>
+            </div>
+        </div>`;
+}
+
+async function executeQuickRecovery(wrestlerId, recoveryType) {
+    const endpointMap = {
+        private_meeting:        { url: `/api/recovery/wrestler/${wrestlerId}/meeting`,   body: { approach: 'listen' } },
+        push_adjustment:        { url: `/api/recovery/wrestler/${wrestlerId}/push`,       body: { push_type: 'midcard' } },
+        contract_renegotiation: { url: `/api/recovery/wrestler/${wrestlerId}/renegotiate`, body: { tool: 'salary_raise', salary_raise: 1500 } },
+        creative_input:         { url: `/api/recovery/wrestler/${wrestlerId}/creative`,   body: { input_type: 'storyline_direction' } },
+        time_off:               { url: `/api/recovery/wrestler/${wrestlerId}/time-off`,   body: { off_type: 'lighter_schedule' } },
+        mentorship_role:        null,   // needs mentor/mentee pair — redirect
+    };
+
+    if (recoveryType === 'mentorship_role') {
+        showToast('🎓', 'Use the full Recovery Dashboard to assign mentorship pairings.', 'info');
+        return;
+    }
+
+    const cfg = endpointMap[recoveryType];
+    if (!cfg) return;
+
+    try {
+        const res = await fetch(cfg.url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cfg.body),
+        });
+        const d = await res.json();
+        if (d.error) throw new Error(d.error);
+
+        const event = d.event || {};
+        const change = event.morale_change || d.morale_gain || 0;
+        const sign = change >= 0 ? '+' : '';
+        showToast('✅', `${recoveryType.replace(/_/g,' ')} applied. Morale ${sign}${change}.`, 'success');
+        bootstrap.Modal.getInstance(document.getElementById('quickActionModal')).hide();
+        setTimeout(() => refreshLockerRoom(), 400);
+    } catch(e) {
+        showToast('❌', 'Recovery failed: ' + e.message, 'danger');
+    }
+}
+
+// --- Utilities ---
+function moraleBadge(m) {
+    let cls, label;
+    if      (m <= 20) { cls = 'bg-danger';  label = `${m} 💀`; }
+    else if (m <= 40) { cls = 'bg-warning text-dark'; label = `${m} 😠`; }
+    else if (m <= 50) { cls = 'bg-secondary'; label = `${m} 😐`; }
+    else if (m <= 69) { cls = 'bg-primary';   label = `${m} 🙂`; }
+    else if (m <= 89) { cls = 'bg-success';   label = `${m} 😊`; }
+    else              { cls = 'bg-success';   label = `${m} 🌟`; }
+    return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function escHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function escAttr(str) {
+    if (!str) return '';
+    return String(str).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+}
+
+function showToast(icon, msg, type) {
+    const id = `toast_${Date.now()}`;
+    const colors = { success:'#198754', danger:'#dc3545', warning:'#ffc107', info:'#0dcaf0' };
+    const bg = colors[type] || '#333';
+    const el = document.createElement('div');
+    el.id = id;
+    el.style.cssText = `background:${bg};color:#fff;padding:12px 18px;border-radius:8px;
+        margin-top:8px;box-shadow:0 4px 12px rgba(0,0,0,0.4);max-width:380px;`;
+    el.innerHTML = `${icon} ${escHtml(msg)}`;
+    document.getElementById('tickToastArea').appendChild(el);
+    setTimeout(() => el.remove(), 5000);
+}
+})();
+</script>

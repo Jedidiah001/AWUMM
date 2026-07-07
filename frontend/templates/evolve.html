@@ -1,0 +1,295 @@
+<style>
+  .evolve-page { color:#E8E8E8; }
+  .evolve-page .subtle { color:#B3B3B3; }
+  .evolve-page .card { background:#111 !important; border-color:#2d2d2d !important; }
+  .evolve-page code { color:#F0CE6A; }
+</style>
+
+<div class="container-fluid p-4 evolve-page">
+  <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+    <div>
+      <h2 class="mb-1">Evolve Development Center</h2>
+      <div class="subtle">Steps 171-182: performance center, roster, trainers, curriculum, progression, tryouts, shows, call-ups, send-downs, injuries, excursions.</div>
+    </div>
+    <div class="d-flex gap-2">
+      <span class="badge text-bg-success" id="evolveLiveBadge">Live Sync ON</span>
+      <span class="small subtle align-self-center" id="evolveLastSync">Never synced</span>
+      <button class="btn btn-outline-light btn-sm" id="evolveRefreshBtn">Refresh</button>
+      <button class="btn btn-warning btn-sm" id="runProgressionBtn">Run Weekly Progression</button>
+      <button class="btn btn-info btn-sm" id="runDevShowBtn">Run Evolve Show</button>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3" id="evolveSummary"></div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-12 col-lg-6">
+      <div class="card p-3 h-100">
+        <h5>Performance Center</h5>
+        <div class="row g-2">
+          <div class="col-6"><input class="form-control form-control-sm" id="pcFacility" type="number" min="1" placeholder="Facility Level"></div>
+          <div class="col-6"><input class="form-control form-control-sm" id="pcCost" type="number" min="0" placeholder="Monthly Cost"></div>
+          <div class="col-4"><input class="form-control form-control-sm" id="pcTraining" type="number" min="0" max="100" step="0.1" placeholder="Training"></div>
+          <div class="col-4"><input class="form-control form-control-sm" id="pcMedical" type="number" min="0" max="100" step="0.1" placeholder="Medical"></div>
+          <div class="col-4"><input class="form-control form-control-sm" id="pcScouting" type="number" min="0" max="100" step="0.1" placeholder="Scouting"></div>
+          <div class="col-12 d-grid"><button class="btn btn-sm btn-primary" id="saveCenterBtn">Save Center</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card p-3 h-100">
+        <h5>Try-Out System</h5>
+        <div class="subtle mb-2">Discover non-wrestling backgrounds and add prospects to Evolve.</div>
+        <div class="input-group input-group-sm mb-2">
+          <span class="input-group-text">Tryout Count</span>
+          <input class="form-control" id="tryoutCount" type="number" min="1" max="20" value="5">
+          <button class="btn btn-success" id="holdTryoutBtn">Hold Tryouts</button>
+        </div>
+        <div id="tryoutResult" class="small subtle"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-xl-7">
+      <div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="mb-0">Developmental Roster</h5>
+          <button class="btn btn-sm btn-outline-light" id="quickAddProspectBtn">Quick Add Prospect</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-dark table-striped table-hover table-sm mb-0" id="evolveRosterTable">
+            <thead>
+              <tr><th>Name</th><th>Status</th><th>Readiness</th><th>Trainer</th><th>Actions</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-5">
+      <div class="card p-3 mb-3">
+        <h5>Trainer Staff</h5>
+        <div class="input-group input-group-sm mb-2">
+          <input class="form-control" id="trainerName" placeholder="Trainer name">
+          <input class="form-control" id="trainerSpecialty" placeholder="Specialty (e.g. technique)">
+          <button class="btn btn-outline-info" id="addTrainerBtn">Hire</button>
+        </div>
+        <div id="trainerList" class="small"></div>
+      </div>
+
+      <div class="card p-3 mb-3">
+        <h5>Training Curriculum</h5>
+        <div class="input-group input-group-sm mb-2">
+          <input class="form-control" id="curriculumName" placeholder="Curriculum name">
+          <button class="btn btn-outline-warning" id="addCurriculumBtn">Create</button>
+        </div>
+        <div class="subtle small mb-2">Creates a balanced curriculum (you can extend via API with custom focus/intensity).</div>
+        <div id="curriculumList" class="small"></div>
+      </div>
+
+      <div class="card p-3">
+        <h5>Recent Evolve Events</h5>
+        <div id="eventLog" style="max-height:260px;overflow:auto" class="small"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  let roster = [];
+  let trainers = [];
+  let curricula = [];
+  let activeCurriculumId = '';
+  let syncInterval = null;
+  let centerAutosaveTimer = null;
+  let isSyncing = false;
+
+  function fmt(n){ return Number(n||0).toLocaleString(); }
+  function esc(s){ return String(s ?? ''); }
+
+  async function api(url, opts){
+    const r = await fetch(url, opts);
+    const j = await r.json().catch(()=>({ok:false,error:'Invalid JSON'}));
+    if(!r.ok || j.ok===false) throw new Error(j.error || `HTTP ${r.status}`);
+    return j;
+  }
+
+  async function loadDashboard(){
+    const data = await api('/api/evolve/dashboard');
+    const center = data.center || {};
+    activeCurriculumId = center.active_curriculum_id || '';
+
+    document.getElementById('pcFacility').value = center.facility_level ?? 1;
+    document.getElementById('pcCost').value = center.monthly_cost ?? 0;
+    document.getElementById('pcTraining').value = center.training_quality ?? 50;
+    document.getElementById('pcMedical').value = center.medical_quality ?? 50;
+    document.getElementById('pcScouting').value = center.scouting_quality ?? 50;
+
+    const s = data.summary || {};
+    document.getElementById('evolveSummary').innerHTML = `
+      <div class="col-6 col-md-3"><div class="card p-2"><div class="subtle small">Prospects</div><div class="h4 mb-0">${fmt(s.roster_count)}</div></div></div>
+      <div class="col-6 col-md-3"><div class="card p-2"><div class="subtle small">Trainees</div><div class="h4 mb-0">${fmt(s.trainee_count)}</div></div></div>
+      <div class="col-6 col-md-3"><div class="card p-2"><div class="subtle small">Call-Up Ready</div><div class="h4 mb-0">${fmt(s.callup_ready)}</div></div></div>
+      <div class="col-6 col-md-3"><div class="card p-2"><div class="subtle small">Trainers</div><div class="h4 mb-0">${fmt(s.trainer_count)}</div></div></div>`;
+
+    const events = data.recent_events || [];
+    document.getElementById('eventLog').innerHTML = events.length ? events.map(e=>`
+      <div class="mb-2"><code>${esc(e.event_type)}</code> <span class="subtle">${esc(e.created_at)}</span></div>
+    `).join('') : '<div class="subtle">No events yet.</div>';
+  }
+
+  async function loadRoster(){
+    const data = await api('/api/evolve/roster');
+    roster = data.roster || [];
+    const trainerMap = Object.fromEntries(trainers.map(t=>[t.trainer_id, t]));
+    document.querySelector('#evolveRosterTable tbody').innerHTML = roster.map(r=>`
+      <tr>
+        <td>${esc(r.wrestler_name)}</td>
+        <td><code>${esc(r.status)}</code></td>
+        <td>${Number(r.readiness_score||0).toFixed(1)}</td>
+        <td>${esc((trainerMap[r.assigned_trainer_id]||{}).name || '-')}</td>
+        <td>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-success" onclick="window.evolveCallUp('${r.prospect_id}')">Call-Up</button>
+            <button class="btn btn-outline-secondary" onclick="window.evolveSendDown('${r.prospect_id}')">Send-Down</button>
+            <button class="btn btn-outline-info" onclick="window.evolveExcursion('${r.prospect_id}')">Excursion</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async function loadTrainers(){
+    const data = await api('/api/evolve/trainers');
+    trainers = data.trainers || [];
+    document.getElementById('trainerList').innerHTML = trainers.length ? trainers.map(t=>`
+      <div class="d-flex justify-content-between border-bottom border-secondary py-1">
+        <span>${esc(t.name)} <span class="subtle">(${esc(t.specialty)})</span></span>
+        <span>
+          <span class="subtle me-2">${Number(t.coaching_rating||0).toFixed(1)}</span>
+          ${t.veteran_status ? '<span class="badge bg-warning text-dark">Veteran</span>' : `<button class="btn btn-xs btn-outline-warning" onclick="window.evolveVeteran('${t.trainer_id}')">Make Veteran</button>`}
+        </span>
+      </div>
+    `).join('') : '<div class="subtle">No trainers hired.</div>';
+  }
+
+  async function loadCurricula(){
+    const data = await api('/api/evolve/curricula');
+    curricula = data.curricula || [];
+    document.getElementById('curriculumList').innerHTML = curricula.length ? curricula.map(c=>`
+      <div class="d-flex justify-content-between border-bottom border-secondary py-1">
+        <span>${esc(c.curriculum_name)} ${c.curriculum_id===activeCurriculumId?'<span class="badge bg-primary">Active</span>':''}</span>
+        <button class="btn btn-xs btn-outline-light" onclick="window.evolveAssignCurriculum('${c.curriculum_id}')">Activate</button>
+      </div>
+    `).join('') : '<div class="subtle">No curricula configured.</div>';
+  }
+
+  async function refreshAll(){
+    if (isSyncing) return;
+    isSyncing = true;
+    await Promise.all([loadDashboard(), loadTrainers(), loadCurricula()]);
+    await loadRoster();
+    document.getElementById('evolveLastSync').textContent = `Synced ${new Date().toLocaleTimeString()}`;
+    isSyncing = false;
+  }
+
+  async function saveCenterRealtime(){
+    await api('/api/evolve/performance-center',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      brand_name:'Evolve',
+      facility_level:Number(document.getElementById('pcFacility').value||1),
+      monthly_cost:Number(document.getElementById('pcCost').value||0),
+      training_quality:Number(document.getElementById('pcTraining').value||50),
+      medical_quality:Number(document.getElementById('pcMedical').value||50),
+      scouting_quality:Number(document.getElementById('pcScouting').value||50)
+    })});
+  }
+
+  window.evolveCallUp = async (id)=>{ await api('/api/evolve/call-up',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prospect_id:id})}); await refreshAll(); };
+  window.evolveSendDown = async (id)=>{ await api('/api/evolve/send-down',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prospect_id:id})}); await refreshAll(); };
+  window.evolveExcursion = async (id)=>{ const destination = prompt('Excursion destination?', 'Japan') || 'Japan'; await api('/api/evolve/excursions/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prospect_id:id,destination,weeks:8})}); await refreshAll(); };
+  window.evolveVeteran = async (trainer_id)=>{ await api('/api/evolve/trainers/transition-veteran',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({trainer_id})}); await refreshAll(); };
+  window.evolveAssignCurriculum = async (curriculum_id)=>{ await api('/api/evolve/curricula/assign',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({curriculum_id})}); await refreshAll(); };
+
+  document.getElementById('evolveRefreshBtn').addEventListener('click', refreshAll);
+  document.getElementById('runProgressionBtn').addEventListener('click', async ()=>{
+    const r = await api('/api/evolve/progression/run',{method:'POST'});
+    alert(`Progression processed: ${r.processed}, injuries: ${r.injuries.length}`);
+    await refreshAll();
+  });
+  document.getElementById('runDevShowBtn').addEventListener('click', async ()=>{
+    const r = await api('/api/evolve/shows/run',{method:'POST'});
+    alert(`Evolve show ran with ${r.matches.length} matches.`);
+    await refreshAll();
+  });
+  document.getElementById('holdTryoutBtn').addEventListener('click', async ()=>{
+    const count = Number(document.getElementById('tryoutCount').value || 5);
+    const r = await api('/api/evolve/tryouts/hold',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({count})});
+    document.getElementById('tryoutResult').textContent = `Created ${r.created.length} tryout prospects.`;
+    await refreshAll();
+  });
+  document.getElementById('saveCenterBtn').addEventListener('click', async ()=>{
+    await saveCenterRealtime();
+    await refreshAll();
+  });
+
+  ['pcFacility','pcCost','pcTraining','pcMedical','pcScouting'].forEach((id)=>{
+    const el = document.getElementById(id);
+    el?.addEventListener('input', ()=>{
+      clearTimeout(centerAutosaveTimer);
+      centerAutosaveTimer = setTimeout(async ()=>{
+        try{
+          await saveCenterRealtime();
+          document.getElementById('evolveLastSync').textContent = `Auto-saved ${new Date().toLocaleTimeString()}`;
+        }catch(e){
+          console.error('Realtime save failed', e);
+        }
+      }, 700);
+    });
+  });
+
+  document.getElementById('addTrainerBtn').addEventListener('click', async ()=>{
+    const name = document.getElementById('trainerName').value.trim();
+    const specialty = document.getElementById('trainerSpecialty').value.trim() || 'general';
+    if(!name) return alert('Trainer name is required');
+    await api('/api/evolve/trainers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,specialty,coaching_rating:55,salary:4000})});
+    document.getElementById('trainerName').value='';
+    await refreshAll();
+  });
+
+  document.getElementById('addCurriculumBtn').addEventListener('click', async ()=>{
+    const curriculum_name = document.getElementById('curriculumName').value.trim();
+    if(!curriculum_name) return alert('Curriculum name is required');
+    await api('/api/evolve/curricula',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      curriculum_name,
+      focus:{athleticism:1.1, psychology:1.0, charisma:0.95, technique:1.15},
+      intensity:1.0,
+      injury_risk_modifier:1.0
+    })});
+    document.getElementById('curriculumName').value='';
+    await refreshAll();
+  });
+
+  document.getElementById('quickAddProspectBtn').addEventListener('click', async ()=>{
+    const wrestler_name = prompt('Prospect name?');
+    if(!wrestler_name) return;
+    await api('/api/evolve/roster',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wrestler_name})});
+    await refreshAll();
+  });
+
+  refreshAll().catch(err=>{
+    console.error(err);
+    alert(`Evolve page failed to load: ${err.message}`);
+  });
+
+  // Real-time sync polling
+  syncInterval = setInterval(()=>{ refreshAll().catch(console.error); }, 10000);
+  window.viewCleanup = function(){
+    if (syncInterval) clearInterval(syncInterval);
+    if (centerAutosaveTimer) clearTimeout(centerAutosaveTimer);
+  };
+})();
+</script>

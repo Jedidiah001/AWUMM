@@ -1,0 +1,977 @@
+<!-- ══════════════════════════════════════════════════════════════════════════
+     AWUM — Morale Management Dashboard   (Steps 224-244)
+     Place at: frontend/templates/morale.html
+     Loaded via: loadView('morale') from index.html
+═══════════════════════════════════════════════════════════════════════════ -->
+<style>
+/* ── Tokens (inherit from index.html :root, re-declare for safety) ───────── */
+:root {
+    --gold:#D4AF37; --gold-lt:#F0CE6A; --gold-dk:#9A7D1A;
+    --red:#C0392B; --red-lt:#E74C3C;
+    --bg:#080808; --bg2:#0F0F0F; --bg3:#161616; --bg4:#1C1C1C;
+    --border:#242424; --border-lt:#2E2E2E;
+    --txt:#E8E8E8; --txt-dim:#999; --txt-faint:#555;
+
+    /* Morale category colours */
+    --ecstatic:#00c851; --happy:#33b5e5; --content:#ffbb33;
+    --unhappy:#ff8800;  --miserable:#ff4444;
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.morale-wrap { padding: 1.5rem; }
+
+.morale-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; flex-wrap: wrap;
+    gap: 1rem; margin-bottom: 1.5rem;
+}
+.morale-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.9rem; font-weight: 900;
+    letter-spacing: -.01em; color: var(--txt);
+    line-height: 1.1;
+}
+.morale-title span { color: var(--gold); }
+.morale-subtitle { font-size: .8rem; color: var(--txt-faint); margin-top: .2rem; }
+
+.morale-controls {
+    display: flex; gap: .6rem; flex-wrap: wrap; align-items: center;
+}
+.ctrl-select {
+    background: var(--bg3); border: 1px solid var(--border-lt);
+    color: var(--txt); font-size: .8rem; padding: .4rem .75rem;
+    border-radius: 5px; font-family: 'Barlow', sans-serif;
+    cursor: pointer; outline: none;
+}
+.ctrl-select:focus { border-color: var(--gold); }
+
+/* ── KPI strip ───────────────────────────────────────────────────────────── */
+.morale-kpi {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 1px; background: var(--border);
+    border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--border); margin-bottom: 1.5rem;
+}
+.kpi-cell {
+    background: var(--bg3); padding: .9rem 1.1rem;
+    display: flex; flex-direction: column; gap: .15rem;
+}
+.kpi-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.7rem; font-weight: 900; line-height: 1;
+}
+.kpi-label {
+    font-size: .62rem; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--txt-faint);
+}
+
+/* ── Two-pane layout ─────────────────────────────────────────────────────── */
+.morale-grid {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 1.25rem;
+}
+
+/* ── Roster table panel ──────────────────────────────────────────────────── */
+.panel {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+}
+.panel-head {
+    background: var(--bg4); border-bottom: 1px solid var(--border);
+    padding: .7rem 1rem;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.panel-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .72rem; font-weight: 700; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--txt-dim);
+}
+.panel-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .62rem; font-weight: 800; letter-spacing: .08em;
+    text-transform: uppercase; padding: 2px 8px; border-radius: 10px;
+}
+.badge-critical { background: rgba(192,57,43,.25); color: var(--red-lt); }
+.badge-warning  { background: rgba(255,136,0,.2);  color: #ff8800; }
+.badge-ok       { background: rgba(0,200,81,.15);  color: #00c851; }
+
+/* Roster rows */
+.roster-scroll { max-height: 520px; overflow-y: auto; }
+.roster-row {
+    display: flex; align-items: center; gap: .75rem;
+    padding: .65rem 1rem; border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background .14s;
+}
+.roster-row:last-child { border-bottom: none; }
+.roster-row:hover { background: var(--bg4); }
+.roster-row.selected { background: rgba(212,175,55,.06); border-left: 2px solid var(--gold); }
+
+.rr-emoji { font-size: 1rem; width: 22px; text-align: center; flex-shrink: 0; }
+.rr-info  { flex: 1; min-width: 0; }
+.rr-name  {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .9rem; font-weight: 700; color: var(--txt);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rr-meta  { font-size: .68rem; color: var(--txt-faint); margin-top: 1px; }
+.rr-score { flex-shrink: 0; text-align: right; }
+.rr-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem; font-weight: 900;
+}
+.rr-trend { font-size: .6rem; color: var(--txt-faint); margin-top: 1px; }
+
+/* Morale bar */
+.morale-bar-wrap {
+    width: 56px; height: 4px; background: var(--border-lt);
+    border-radius: 2px; overflow: hidden; margin-top: 3px;
+}
+.morale-bar-fill { height: 100%; border-radius: 2px; transition: width .3s; }
+
+/* ── Detail panel (right) ────────────────────────────────────────────────── */
+.detail-panel {
+    display: flex; flex-direction: column; gap: .9rem;
+}
+
+.detail-card {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+}
+.detail-card-head {
+    background: var(--bg4); border-bottom: 1px solid var(--border);
+    padding: .6rem .85rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .66rem; font-weight: 700; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--txt-faint);
+    display: flex; align-items: center; gap: .4rem;
+}
+.detail-card-body { padding: .85rem; }
+
+/* Big morale score */
+.morale-big {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: .85rem;
+}
+.morale-big-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 3.5rem; font-weight: 900; line-height: 1;
+}
+.morale-big-info { flex: 1; }
+.morale-big-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem; font-weight: 700; color: var(--txt);
+}
+.morale-big-role { font-size: .72rem; color: var(--txt-faint); }
+.morale-big-cat  {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .75rem; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; margin-top: .15rem;
+}
+
+/* Component bars */
+.comp-row {
+    display: flex; align-items: center; gap: .6rem;
+    margin-bottom: .5rem;
+}
+.comp-row:last-child { margin-bottom: 0; }
+.comp-label {
+    font-size: .7rem; color: var(--txt-dim); width: 120px; flex-shrink: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.comp-track {
+    flex: 1; height: 5px; background: var(--border-lt);
+    border-radius: 3px; overflow: hidden;
+}
+.comp-fill { height: 100%; border-radius: 3px; transition: width .4s; }
+.comp-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .78rem; font-weight: 700; width: 28px;
+    text-align: right; flex-shrink: 0;
+}
+
+/* Negative factor pills */
+.neg-factors { display: flex; flex-direction: column; gap: .45rem; }
+.neg-factor {
+    display: flex; align-items: center; gap: .6rem;
+    background: rgba(255,68,68,.06);
+    border: 1px solid rgba(255,68,68,.14);
+    border-radius: 5px; padding: .45rem .65rem;
+}
+.neg-factor.severity-critical {
+    background: rgba(192,57,43,.12);
+    border-color: rgba(192,57,43,.3);
+}
+.neg-dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+.neg-info { flex: 1; min-width: 0; }
+.neg-label { font-size: .76rem; font-weight: 600; color: var(--txt); }
+.neg-score { font-size: .65rem; color: var(--txt-faint); margin-top: 1px; }
+
+/* Events feed */
+.event-row {
+    display: flex; align-items: flex-start; gap: .55rem;
+    padding: .4rem 0; border-bottom: 1px solid var(--border);
+}
+.event-row:last-child { border-bottom: none; }
+.event-delta {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .8rem; font-weight: 700; width: 36px;
+    flex-shrink: 0; text-align: right;
+}
+.event-desc { font-size: .72rem; color: var(--txt-dim); line-height: 1.35; }
+.event-comp { font-size: .62rem; color: var(--txt-faint); margin-top: 1px; }
+
+/* Action buttons */
+.action-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: .5rem; margin-bottom: .75rem;
+}
+.action-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .78rem; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase; padding: .55rem .5rem;
+    border-radius: 5px; border: 1px solid transparent;
+    cursor: pointer; transition: all .18s;
+    display: flex; align-items: center; justify-content: center; gap: .3rem;
+}
+.action-btn.positive {
+    background: rgba(0,200,81,.1); border-color: rgba(0,200,81,.25);
+    color: #00c851;
+}
+.action-btn.positive:hover {
+    background: rgba(0,200,81,.2); border-color: rgba(0,200,81,.4);
+}
+.action-btn.negative {
+    background: rgba(255,68,68,.08); border-color: rgba(255,68,68,.2);
+    color: var(--red-lt);
+}
+.action-btn.negative:hover {
+    background: rgba(255,68,68,.16); border-color: rgba(255,68,68,.35);
+}
+.action-btn.neutral {
+    background: rgba(212,175,55,.08); border-color: rgba(212,175,55,.2);
+    color: var(--gold);
+}
+.action-btn.neutral:hover {
+    background: rgba(212,175,55,.16); border-color: rgba(212,175,55,.35);
+}
+.action-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Toast */
+.morale-toast {
+    position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 2000;
+    background: var(--bg2); border: 1px solid var(--border-lt);
+    border-radius: 8px; padding: .75rem 1.1rem; min-width: 260px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.6);
+    transform: translateY(20px); opacity: 0;
+    transition: all .25s; pointer-events: none;
+    display: flex; align-items: center; gap: .65rem;
+}
+.morale-toast.show {
+    transform: translateY(0); opacity: 1; pointer-events: auto;
+}
+.toast-icon { font-size: 1.1rem; }
+.toast-msg  { font-size: .82rem; color: var(--txt); flex: 1; }
+.toast-delta {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .95rem; font-weight: 800;
+}
+
+/* Tabs */
+.tab-row { display: flex; gap: 2px; margin-bottom: 1rem; }
+.tab-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .75rem; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; padding: .35rem .75rem;
+    border-radius: 4px; border: 1px solid transparent;
+    background: transparent; color: var(--txt-faint); cursor: pointer;
+    transition: all .15s;
+}
+.tab-btn.active {
+    background: rgba(212,175,55,.1); border-color: rgba(212,175,55,.25);
+    color: var(--gold);
+}
+.tab-btn:hover:not(.active) {
+    color: var(--txt-dim); background: var(--bg4);
+}
+
+/* Confirm modal for negative events */
+.neg-event-grid { display: flex; flex-direction: column; gap: .4rem; }
+.neg-event-item {
+    background: var(--bg4); border: 1px solid var(--border);
+    border-radius: 5px; padding: .5rem .75rem; cursor: pointer;
+    transition: all .15s; font-size: .78rem; color: var(--txt-dim);
+    display: flex; align-items: center; gap: .6rem;
+}
+.neg-event-item:hover { background: rgba(255,68,68,.08); border-color: rgba(255,68,68,.2); color: var(--txt); }
+.neg-event-step { font-size: .6rem; color: var(--txt-faint); white-space: nowrap; }
+.neg-event-delta { font-family:'Barlow Condensed',sans-serif; font-size: .85rem; font-weight:700; color: var(--red-lt); margin-left: auto; flex-shrink:0; }
+
+/* Concern pill strip */
+.concern-strip {
+    display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .5rem;
+}
+.concern-pill {
+    font-size: .66rem; font-weight: 600;
+    padding: 2px 8px; border-radius: 10px;
+    background: rgba(255,68,68,.1); border: 1px solid rgba(255,68,68,.2);
+    color: var(--red-lt);
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center; padding: 2.5rem 1rem; color: var(--txt-faint);
+}
+.empty-state i { font-size: 2rem; margin-bottom: .75rem; display: block; }
+.empty-state p { font-size: .82rem; }
+
+/* Responsive */
+@media (max-width: 900px) {
+    .morale-grid { grid-template-columns: 1fr; }
+    .morale-kpi  { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 560px) {
+    .morale-kpi  { grid-template-columns: repeat(2, 1fr); }
+    .action-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<!-- ══════════════════════ MARKUP ════════════════════════════════════════ -->
+<div class="morale-wrap">
+
+    <!-- Header -->
+    <div class="morale-header">
+        <div>
+            <div class="morale-title">Locker Room <span>Morale</span></div>
+            <div class="morale-subtitle">Steps 224-244 · Positive &amp; Negative influence tracking</div>
+        </div>
+        <div class="morale-controls">
+            <select class="ctrl-select" id="brandFilter">
+                <option value="">All Brands</option>
+                <option value="ROC Alpha">ROC Alpha</option>
+                <option value="ROC Velocity">ROC Velocity</option>
+                <option value="ROC Vanguard">ROC Vanguard</option>
+            </select>
+            <select class="ctrl-select" id="sortSelect">
+                <option value="morale_asc">Morale ↑ (at-risk first)</option>
+                <option value="morale_desc">Morale ↓ (happiest first)</option>
+                <option value="name">Name A–Z</option>
+                <option value="role">By Role</option>
+            </select>
+            <button class="action-btn neutral" onclick="refreshRoster()" style="padding:.45rem .85rem">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- KPI Strip -->
+    <div class="morale-kpi" id="moraleKpi">
+        <div class="kpi-cell"><div class="kpi-num" style="color:var(--txt-faint)">—</div><div class="kpi-label">Avg Morale</div></div>
+        <div class="kpi-cell"><div class="kpi-num" style="color:var(--ecstatic)">—</div><div class="kpi-label">Ecstatic / Happy</div></div>
+        <div class="kpi-cell"><div class="kpi-num" style="color:var(--content)">—</div><div class="kpi-label">Content</div></div>
+        <div class="kpi-cell"><div class="kpi-num" style="color:var(--unhappy)">—</div><div class="kpi-label">Unhappy</div></div>
+        <div class="kpi-cell"><div class="kpi-num" style="color:var(--miserable)">—</div><div class="kpi-label">Critical / Miserable</div></div>
+    </div>
+
+    <!-- Two-pane grid -->
+    <div class="morale-grid">
+
+        <!-- LEFT: roster list -->
+        <div class="panel">
+            <div class="panel-head">
+                <span class="panel-title"><i class="bi bi-people-fill me-1" style="color:var(--gold)"></i>Roster Morale</span>
+                <span class="panel-badge" id="rosterBadge">Loading…</span>
+            </div>
+
+            <!-- Tabs: All / Concerns -->
+            <div style="padding:.6rem 1rem .0rem; border-bottom:1px solid var(--border)">
+                <div class="tab-row">
+                    <button class="tab-btn active" id="tabAll"      onclick="switchTab('all')">All Wrestlers</button>
+                    <button class="tab-btn"         id="tabConcerns" onclick="switchTab('concerns')">⚠ Concerns</button>
+                    <button class="tab-btn"         id="tabCategories" onclick="switchTab('categories')">Categories</button>
+                </div>
+            </div>
+
+            <div class="roster-scroll" id="rosterBody">
+                <div class="empty-state">
+                    <span class="spinner-border spinner-border-sm" style="color:var(--gold)"></span>
+                    <p style="margin-top:.75rem">Loading roster…</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: detail panel -->
+        <div class="detail-panel" id="detailPanel">
+
+            <!-- Placeholder when nothing selected -->
+            <div class="detail-card" id="selectPrompt">
+                <div class="detail-card-body" style="padding:2rem 1rem; text-align:center">
+                    <i class="bi bi-person-bounding-box" style="font-size:2rem;color:var(--txt-faint);display:block;margin-bottom:.75rem"></i>
+                    <p style="font-size:.82rem;color:var(--txt-faint)">Select a wrestler from the roster to view their full morale breakdown.</p>
+                </div>
+            </div>
+
+            <!-- Detail cards (hidden until wrestler selected) -->
+            <div id="detailCards" style="display:none; flex-direction:column; gap:.9rem">
+
+                <!-- Score card -->
+                <div class="detail-card">
+                    <div class="detail-card-head"><i class="bi bi-heart-pulse"></i> Morale Status</div>
+                    <div class="detail-card-body">
+                        <div class="morale-big">
+                            <div class="morale-big-num" id="detailScore">—</div>
+                            <div class="morale-big-info">
+                                <div class="morale-big-name" id="detailName">—</div>
+                                <div class="morale-big-role" id="detailRole">—</div>
+                                <div class="morale-big-cat"  id="detailCat">—</div>
+                            </div>
+                        </div>
+                        <!-- Concern pills -->
+                        <div class="concern-strip" id="detailConcerns"></div>
+                    </div>
+                </div>
+
+                <!-- Components breakdown -->
+                <div class="detail-card">
+                    <div class="detail-card-head"><i class="bi bi-sliders"></i> Component Breakdown</div>
+                    <div class="detail-card-body" id="detailComponents">
+                        <div style="color:var(--txt-faint);font-size:.78rem">No data</div>
+                    </div>
+                </div>
+
+                <!-- Negative factors (Steps 237-244) -->
+                <div class="detail-card" id="negFactorsCard">
+                    <div class="detail-card-head" style="color:var(--red-lt)"><i class="bi bi-exclamation-triangle-fill"></i> Negative Influences (237-244)</div>
+                    <div class="detail-card-body" id="detailNegFactors">
+                        <p style="font-size:.75rem;color:var(--txt-faint)">No critical negative factors detected.</p>
+                    </div>
+                </div>
+
+                <!-- Recent events feed -->
+                <div class="detail-card">
+                    <div class="detail-card-head"><i class="bi bi-clock-history"></i> Recent Events</div>
+                    <div class="detail-card-body" id="detailEvents">
+                        <p style="font-size:.75rem;color:var(--txt-faint)">No recent events.</p>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="detail-card">
+                    <div class="detail-card-head"><i class="bi bi-lightning-fill" style="color:var(--gold)"></i> Management Actions</div>
+                    <div class="detail-card-body">
+                        <div style="font-size:.68rem;color:var(--txt-faint);margin-bottom:.6rem">Positive interventions (Steps 229-236)</div>
+                        <div class="action-grid" style="grid-template-columns:1fr 1fr 1fr">
+                            <button class="action-btn positive" onclick="doAppreciate('verbal_praise')"      title="Verbal praise (+8)"><i class="bi bi-chat-heart"></i> Praise</button>
+                            <button class="action-btn positive" onclick="doAppreciate('creative_meeting')"   title="Creative meeting (+8)"><i class="bi bi-people"></i> Meeting</button>
+                            <button class="action-btn positive" onclick="doAppreciate('public_recognition')" title="Public recognition (+12)"><i class="bi bi-star"></i> Recognise</button>
+                            <button class="action-btn positive" onclick="doAppreciate('performance_bonus')"  title="Bonus (+15)"><i class="bi bi-cash"></i> Bonus</button>
+                            <button class="action-btn positive" onclick="doAppreciate('featured_in_promo')"  title="Feature in promo (+10)"><i class="bi bi-camera-video"></i> Feature</button>
+                            <button class="action-btn positive" onclick="doAppreciate('promised_push')"      title="Promise push (+20 but risky!)"><i class="bi bi-trophy"></i> Promise</button>
+                        </div>
+
+                        <div style="font-size:.68rem;color:var(--txt-faint);margin:.75rem 0 .5rem">Negative events — Steps 237-244</div>
+                        <button class="action-btn negative" style="width:100%;margin-bottom:.4rem" onclick="openNegEventModal()">
+                            <i class="bi bi-dash-circle"></i> Apply Negative Event…
+                        </button>
+                        <button class="action-btn neutral" style="width:100%" onclick="openMeetingModal()">
+                            <i class="bi bi-person-lines-fill"></i> Conduct Morale Meeting…
+                        </button>
+                    </div>
+                </div>
+
+            </div><!-- /detailCards -->
+        </div><!-- /detailPanel -->
+    </div><!-- /morale-grid -->
+</div><!-- /morale-wrap -->
+
+<!-- ══════════════════════ NEGATIVE EVENT MODAL ═══════════════════════════ -->
+<div id="negEventModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:3000;align-items:center;justify-content:center">
+    <div style="background:var(--bg3);border:1px solid var(--border-lt);border-radius:10px;width:520px;max-width:96vw;max-height:85vh;overflow:hidden;display:flex;flex-direction:column">
+        <div style="background:var(--bg4);border-bottom:1px solid var(--border);padding:.85rem 1rem;display:flex;align-items:center;justify-content:space-between">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--red-lt)">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>Apply Negative Event
+            </div>
+            <button onclick="closeNegEventModal()" style="background:none;border:none;color:var(--txt-faint);font-size:1.1rem;cursor:pointer"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div style="padding:.75rem 1rem;overflow-y:auto;flex:1">
+            <p style="font-size:.75rem;color:var(--txt-faint);margin-bottom:.75rem">These simulate booking/management decisions that negatively impact <strong id="negModalName" style="color:var(--txt)">—</strong>. Each is tied to a specific Step (237-244).</p>
+            <div class="neg-event-grid" id="negEventList"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════ MEETING MODAL ═══════════════════════════════════ -->
+<div id="meetingModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:3000;align-items:center;justify-content:center">
+    <div style="background:var(--bg3);border:1px solid var(--border-lt);border-radius:10px;width:440px;max-width:96vw">
+        <div style="background:var(--bg4);border-bottom:1px solid var(--border);padding:.85rem 1rem;display:flex;align-items:center;justify-content:space-between">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)">
+                <i class="bi bi-person-lines-fill me-1"></i>Morale Meeting — <span id="meetingModalName">—</span>
+            </div>
+            <button onclick="closeMeetingModal()" style="background:none;border:none;color:var(--txt-faint);font-size:1.1rem;cursor:pointer"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div style="padding:1rem">
+            <p style="font-size:.78rem;color:var(--txt-dim);margin-bottom:1rem">Choose your response to their grievances:</p>
+            <div style="display:flex;flex-direction:column;gap:.5rem">
+                <button class="action-btn positive"  style="width:100%;justify-content:flex-start;gap:.6rem;padding:.65rem .85rem" onclick="doMeeting('acknowledge')">
+                    <i class="bi bi-chat-dots"></i><div style="text-align:left"><div>Acknowledge &amp; Listen</div><div style="font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;opacity:.7">+8 morale — feel heard</div></div>
+                </button>
+                <button class="action-btn positive"  style="width:100%;justify-content:flex-start;gap:.6rem;padding:.65rem .85rem" onclick="doMeeting('promise_push')">
+                    <i class="bi bi-trophy"></i><div style="text-align:left"><div>Promise a Push</div><div style="font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;opacity:.7">+20 morale, but breaks cause severe crash</div></div>
+                </button>
+                <button class="action-btn neutral"   style="width:100%;justify-content:flex-start;gap:.6rem;padding:.65rem .85rem" onclick="doMeeting('give_time_off')">
+                    <i class="bi bi-calendar-check"></i><div style="text-align:left"><div>Give Time Off</div><div style="font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;opacity:.7">+12 morale — resets burnout</div></div>
+                </button>
+                <button class="action-btn negative"  style="width:100%;justify-content:flex-start;gap:.6rem;padding:.65rem .85rem" onclick="doMeeting('ignore')">
+                    <i class="bi bi-x-circle"></i><div style="text-align:left"><div>Ignore the Request</div><div style="font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;opacity:.7">-10 morale — damages trust further</div></div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════ TOAST ══════════════════════════════════════════ -->
+<div class="morale-toast" id="moraleToast">
+    <span class="toast-icon" id="toastIcon">✅</span>
+    <span class="toast-msg"  id="toastMsg">Done</span>
+    <span class="toast-delta" id="toastDelta"></span>
+</div>
+
+<!-- ══════════════════════ SCRIPT ═════════════════════════════════════════ -->
+<script>
+(function() {
+
+/* ── State ──────────────────────────────────────────────────────────────── */
+let allWrestlers    = [];
+let selectedId      = null;
+let currentTab      = 'all';
+let toastTimer      = null;
+
+/* ── Colour helpers ─────────────────────────────────────────────────────── */
+const CAT_COLORS = {
+    Ecstatic:'#00c851', Happy:'#33b5e5', Content:'#ffbb33',
+    Unhappy:'#ff8800',  Miserable:'#ff4444',
+};
+function catColor(cat) { return CAT_COLORS[cat] || '#888'; }
+function scoreColor(s) {
+    if (s >= 90) return '#00c851';
+    if (s >= 70) return '#33b5e5';
+    if (s >= 50) return '#ffbb33';
+    if (s >= 30) return '#ff8800';
+    return '#ff4444';
+}
+function trendIcon(t) {
+    return t === 'Rising' ? '<i class="bi bi-arrow-up-short" style="color:#00c851"></i>'
+         : t === 'Falling'? '<i class="bi bi-arrow-down-short" style="color:#ff4444"></i>'
+         : '<i class="bi bi-dash" style="color:#666"></i>';
+}
+
+/* ── Toast ──────────────────────────────────────────────────────────────── */
+function showToast(msg, delta, icon='✅') {
+    const t = document.getElementById('moraleToast');
+    document.getElementById('toastMsg').textContent   = msg;
+    document.getElementById('toastIcon').textContent  = icon;
+    const dEl = document.getElementById('toastDelta');
+    if (delta !== undefined && delta !== null) {
+        const sign = delta > 0 ? '+' : '';
+        dEl.textContent  = `${sign}${delta}`;
+        dEl.style.color  = delta >= 0 ? '#00c851' : '#ff4444';
+    } else { dEl.textContent = ''; }
+    t.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ── API wrappers ───────────────────────────────────────────────────────── */
+async function apiGet(url) {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+}
+async function apiPost(url, body) {
+    const r = await fetch(url, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(body),
+    });
+    if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${r.status}`);
+    }
+    return r.json();
+}
+
+/* ── Load roster ────────────────────────────────────────────────────────── */
+async function loadRoster() {
+    const brand = document.getElementById('brandFilter').value;
+    const url   = '/api/morale/roster/summary' + (brand ? `?brand=${encodeURIComponent(brand)}` : '');
+    const data  = await apiGet(url);
+    allWrestlers = data.wrestlers || [];
+    renderKpi(data);
+    renderRoster();
+}
+
+function renderKpi(data) {
+    const bd  = data.category_breakdown || {};
+    const kpi = document.getElementById('moraleKpi');
+    const cells = kpi.querySelectorAll('.kpi-cell');
+    cells[0].querySelector('.kpi-num').textContent = Math.round(data.average_morale ?? 0);
+    cells[0].querySelector('.kpi-num').style.color = scoreColor(data.average_morale ?? 0);
+    cells[1].querySelector('.kpi-num').textContent = (bd.Ecstatic||0) + (bd.Happy||0);
+    cells[2].querySelector('.kpi-num').textContent = bd.Content  || 0;
+    cells[3].querySelector('.kpi-num').textContent = bd.Unhappy  || 0;
+    cells[4].querySelector('.kpi-num').textContent = (bd.Miserable||0);
+}
+
+function sortedWrestlers() {
+    const sort = document.getElementById('sortSelect').value;
+    const arr  = [...allWrestlers];
+    if (sort === 'morale_asc')  return arr.sort((a,b) => a.morale_score - b.morale_score);
+    if (sort === 'morale_desc') return arr.sort((a,b) => b.morale_score - a.morale_score);
+    if (sort === 'name')        return arr.sort((a,b) => a.name.localeCompare(b.name));
+    if (sort === 'role') {
+        const ord = ['Main Event','Upper Midcard','Midcard','Lower Midcard','Jobber'];
+        return arr.sort((a,b) => ord.indexOf(a.role) - ord.indexOf(b.role));
+    }
+    return arr;
+}
+
+function renderRoster() {
+    const body    = document.getElementById('rosterBody');
+    const badge   = document.getElementById('rosterBadge');
+    let wrestlers = sortedWrestlers();
+
+    if (currentTab === 'concerns') {
+        wrestlers = wrestlers.filter(w => w.morale_score < 50);
+    }
+
+    if (currentTab === 'categories') {
+        renderCategories(body, badge); return;
+    }
+
+    badge.textContent = `${wrestlers.length} wrestlers`;
+    badge.className   = 'panel-badge ' + (
+        wrestlers.some(w => w.morale_score < 30) ? 'badge-critical' :
+        wrestlers.some(w => w.morale_score < 50) ? 'badge-warning' : 'badge-ok'
+    );
+
+    if (!wrestlers.length) {
+        body.innerHTML = `<div class="empty-state"><i class="bi bi-emoji-smile"></i><p>No wrestlers match this filter.</p></div>`;
+        return;
+    }
+
+    body.innerHTML = wrestlers.map(w => {
+        const col     = catColor(w.category);
+        const concern = w.top_concern ? `<span class="concern-pill">${w.top_concern}</span>` : '';
+        const negBadge= w.negative_factors_count > 0
+            ? `<span style="font-size:.6rem;color:var(--red-lt);margin-left:3px">⚠ ${w.negative_factors_count}</span>` : '';
+        return `
+        <div class="roster-row ${w.wrestler_id === selectedId ? 'selected' : ''}"
+             onclick="selectWrestler('${w.wrestler_id}')">
+            <div class="rr-emoji">${w.category_emoji || '😐'}</div>
+            <div class="rr-info">
+                <div class="rr-name">${w.name}${negBadge}</div>
+                <div class="rr-meta">${w.role} · ${w.brand}</div>
+                ${concern}
+                <div class="morale-bar-wrap" style="margin-top:4px">
+                    <div class="morale-bar-fill" style="width:${w.morale_score}%;background:${col}"></div>
+                </div>
+            </div>
+            <div class="rr-score">
+                <div class="rr-num" style="color:${col}">${Math.round(w.morale_score)}</div>
+                <div class="rr-trend">${trendIcon(w.trend)}</div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderCategories(body, badge) {
+    apiGet('/api/morale/categories').then(data => {
+        const cats = data.categories || {};
+        badge.textContent = 'By category';
+        badge.className   = 'panel-badge badge-ok';
+        const order = ['Ecstatic','Happy','Content','Unhappy','Miserable'];
+        body.innerHTML = order.map(cat => {
+            const group   = cats[cat] || {wrestlers:[]};
+            if (!group.wrestlers.length) return '';
+            return `
+            <div style="padding:.5rem .85rem;border-bottom:1px solid var(--border)">
+                <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.35rem">
+                    <span style="font-size:.85rem">${group.emoji}</span>
+                    <span style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;color:${group.color}">${cat}</span>
+                    <span style="font-size:.65rem;color:var(--txt-faint)">(${group.wrestlers.length})</span>
+                </div>
+                ${group.wrestlers.map(w => `
+                <div class="roster-row" style="padding:.4rem .3rem" onclick="selectWrestler('${w.id}')">
+                    <div class="rr-info"><div class="rr-name" style="font-size:.82rem">${w.name}</div>
+                    <div class="rr-meta">${w.role}</div></div>
+                    <div class="rr-num" style="font-size:.9rem;color:${group.color}">${w.score}</div>
+                </div>`).join('')}
+            </div>`;
+        }).join('');
+    }).catch(() => { body.innerHTML = '<div class="empty-state"><p>Could not load categories.</p></div>'; });
+}
+
+/* ── Tabs ───────────────────────────────────────────────────────────────── */
+function switchTab(tab) {
+    currentTab = tab;
+    ['all','concerns','categories'].forEach(t => {
+        document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1))
+            ?.classList.toggle('active', t === tab);
+    });
+    renderRoster();
+}
+
+/* ── Select wrestler → load detail ─────────────────────────────────────── */
+async function selectWrestler(id) {
+    selectedId = id;
+    renderRoster(); // re-highlight
+
+    document.getElementById('selectPrompt').style.display  = 'none';
+    const dc = document.getElementById('detailCards');
+    dc.style.display = 'flex';
+
+    // Reset
+    document.getElementById('detailScore').textContent = '…';
+    document.getElementById('detailName').textContent  = '…';
+
+    try {
+        const [morale, negData] = await Promise.all([
+            apiGet(`/api/morale/${id}`),
+            apiGet(`/api/morale/${id}/negative-factors`),
+        ]);
+        renderDetail(morale, negData);
+    } catch(e) {
+        showToast('Failed to load morale detail: ' + e.message, null, '❌');
+    }
+}
+
+function renderDetail(m, neg) {
+    const col = m.category_color || catColor(m.category);
+
+    // Score + name
+    const scoreEl = document.getElementById('detailScore');
+    scoreEl.textContent  = Math.round(m.morale_score);
+    scoreEl.style.color  = col;
+    document.getElementById('detailName').textContent = m.wrestler_name;
+    document.getElementById('detailRole').textContent = `${m.role} · ${m.brand}`;
+    const catEl = document.getElementById('detailCat');
+    catEl.textContent  = `${m.category_emoji || ''} ${m.category}`;
+    catEl.style.color  = col;
+
+    // Concern pills
+    const concerns = (m.summary && m.summary.top_concerns) || [];
+    document.getElementById('detailConcerns').innerHTML =
+        concerns.map(c => `<span class="concern-pill">${c}</span>`).join('');
+
+    // Component bars
+    const comps = m.components || {};
+    const compLabels = {
+        push_satisfaction:          'Push / Utilisation',
+        championship_satisfaction:  'Title Opportunities',
+        win_loss_satisfaction:      'Win/Loss Record',
+        management_appreciation:    'Management Relation',
+        promo_satisfaction:         'Promo & Creative',
+        match_quality_satisfaction: 'Match Quality',
+        peer_respect:               'Locker Room',
+        merch_satisfaction:         'Merchandise',
+    };
+    const compOrder = Object.keys(compLabels);
+    document.getElementById('detailComponents').innerHTML =
+        compOrder.filter(k => k in comps).map(k => {
+            const score  = comps[k] ?? 50;
+            const barCol = scoreColor(score);
+            return `
+            <div class="comp-row">
+                <div class="comp-label">${compLabels[k]}</div>
+                <div class="comp-track"><div class="comp-fill" style="width:${score}%;background:${barCol}"></div></div>
+                <div class="comp-val" style="color:${barCol}">${Math.round(score)}</div>
+            </div>`;
+        }).join('');
+
+    // Negative factors (Steps 237-244)
+    const negFactors = (neg && neg.component_breakdown)
+        ? neg.component_breakdown.filter(c => c.status === 'critical' || c.status === 'bad')
+        : (m.negative_factors && m.negative_factors.negative_factors) || [];
+
+    const negEl = document.getElementById('detailNegFactors');
+    if (!negFactors.length) {
+        negEl.innerHTML = `<p style="font-size:.75rem;color:var(--txt-faint)">✅ No critical negative influences detected.</p>`;
+    } else {
+        negEl.innerHTML = `<div class="neg-factors">` +
+            negFactors.slice(0, 5).map(nf => {
+                const score    = nf.score !== undefined ? nf.score : nf.score;
+                const label    = nf.label || nf.component;
+                const severity = nf.severity || nf.status || 'high';
+                const dotCol   = severity === 'critical' ? '#ff4444' : '#ff8800';
+                const scoreVal = score !== undefined ? Math.round(score) : '—';
+                const driver   = nf.negative_driver || '';
+                return `
+                <div class="neg-factor ${severity === 'critical' ? 'severity-critical' : ''}">
+                    <div class="neg-dot" style="background:${dotCol}"></div>
+                    <div class="neg-info">
+                        <div class="neg-label">${label}</div>
+                        <div class="neg-score">${driver ? driver + ' · ' : ''}Score: ${scoreVal}/100</div>
+                    </div>
+                </div>`;
+            }).join('') + '</div>';
+    }
+
+    // Events feed
+    const events = m.recent_events || [];
+    const evEl   = document.getElementById('detailEvents');
+    if (!events.length) {
+        evEl.innerHTML = `<p style="font-size:.75rem;color:var(--txt-faint)">No recent morale events logged.</p>`;
+    } else {
+        evEl.innerHTML = events.slice(0,6).map(ev => {
+            const sign   = ev.delta >= 0 ? '+' : '';
+            const dcol   = ev.delta >= 0 ? '#00c851' : '#ff4444';
+            const comp   = ev.component ? ev.component.replace(/_/g,' ') : '';
+            return `
+            <div class="event-row">
+                <div class="event-delta" style="color:${dcol}">${sign}${ev.delta}</div>
+                <div>
+                    <div class="event-desc">${ev.description}</div>
+                    ${comp ? `<div class="event-comp">${comp}${ev.resulting_score ? ' · now ' + ev.resulting_score : ''}</div>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+}
+
+/* ── Management actions ─────────────────────────────────────────────────── */
+async function doAppreciate(eventType) {
+    if (!selectedId) return showToast('Select a wrestler first.', null, '⚠️');
+    try {
+        const r = await apiPost(`/api/morale/${selectedId}/appreciate`, {event_type: eventType});
+        showToast(`${r.wrestler_name}: ${r.description}`, r.morale_delta);
+        selectWrestler(selectedId);
+        loadRoster();
+    } catch(e) { showToast(e.message, null, '❌'); }
+}
+
+/* ── Meeting modal ──────────────────────────────────────────────────────── */
+function openMeetingModal() {
+    if (!selectedId) return;
+    const w = allWrestlers.find(x => x.wrestler_id === selectedId);
+    document.getElementById('meetingModalName').textContent = w ? w.name : '—';
+    document.getElementById('meetingModal').style.display = 'flex';
+}
+function closeMeetingModal() {
+    document.getElementById('meetingModal').style.display = 'none';
+}
+async function doMeeting(response) {
+    closeMeetingModal();
+    if (!selectedId) return;
+    try {
+        const r = await apiPost(`/api/morale/${selectedId}/meeting`, {response});
+        const delta = r.outcome && r.outcome.delta;
+        showToast(r.outcome ? r.outcome.message : 'Meeting completed.', delta);
+        if (r.outcome && r.outcome.warning) {
+            setTimeout(() => showToast('⚠ ' + r.outcome.warning, null, '⚠️'), 3500);
+        }
+        selectWrestler(selectedId);
+        loadRoster();
+    } catch(e) { showToast(e.message, null, '❌'); }
+}
+
+/* ── Negative event modal ────────────────────────────────────────────────── */
+const NEG_EVENTS = {
+    burial_clean_loss_to_lower:   {delta:-12, step:237, label:'Clean Loss to Lower-Ranked'},
+    ppv_removed_without_reason:   {delta:-18, step:237, label:'Removed from PPV Card'},
+    sudden_demotion:              {delta:-20, step:237, label:'Sudden Card Demotion'},
+    forced_character_change:      {delta:-20, step:238, label:'Forced Character Change'},
+    creative_control_violated:    {delta:-25, step:238, label:'Creative Control Ignored'},
+    stale_repetitive_booking:     {delta:-10, step:238, label:'Stale Repetitive Booking'},
+    missed_from_tv:               {delta:-15, step:239, label:'Not Booked on TV'},
+    overbooked_schedule:          {delta:-12, step:240, label:'Overbooked Schedule'},
+    fatigue_ignored:              {delta:-14, step:240, label:'Fatigue Complaints Ignored'},
+    pay_cut_issued:               {delta:-22, step:241, label:'Pay Cut Issued'},
+    peer_salary_leaked:           {delta:-14, step:241, label:'Peer Salary Disparity Revealed'},
+    raise_request_denied:         {delta:-16, step:241, label:'Raise Request Denied'},
+    title_shot_promise_broken:    {delta:-25, step:242, label:'Title Shot Promise Broken'},
+    push_promise_broken:          {delta:-22, step:242, label:'Push Promise Broken'},
+    ppv_slot_promise_broken:      {delta:-18, step:242, label:'PPV Slot Promise Broken'},
+    humiliation_segment:          {delta:-28, step:243, label:'On-Screen Humiliation Segment'},
+    public_dressing_down:         {delta:-24, step:243, label:'Public Dressing-Down'},
+    pulled_from_advertised_match: {delta:-20, step:243, label:'Pulled from Advertised Match'},
+    locker_room_altercation:      {delta:-18, step:244, label:'Locker Room Altercation'},
+    political_undermining:        {delta:-20, step:244, label:'Political Undermining'},
+    clique_exclusion:             {delta:-12, step:244, label:'Clique Exclusion'},
+};
+
+function openNegEventModal() {
+    if (!selectedId) return;
+    const w = allWrestlers.find(x => x.wrestler_id === selectedId);
+    document.getElementById('negModalName').textContent = w ? w.name : '—';
+
+    // Group by step
+    const groups = {};
+    Object.entries(NEG_EVENTS).forEach(([key, ev]) => {
+        if (!groups[ev.step]) groups[ev.step] = [];
+        groups[ev.step].push({key, ...ev});
+    });
+
+    document.getElementById('negEventList').innerHTML =
+        Object.entries(groups).map(([step, evs]) =>
+            `<div style="margin-bottom:.5rem">
+               <div style="font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--txt-faint);margin-bottom:.3rem">Step ${step}</div>
+               ${evs.map(ev => `
+               <div class="neg-event-item" onclick="applyNegEvent('${ev.key}')">
+                   <span>${ev.label}</span>
+                   <span class="neg-event-delta">${ev.delta}</span>
+               </div>`).join('')}
+             </div>`
+        ).join('');
+
+    document.getElementById('negEventModal').style.display = 'flex';
+}
+function closeNegEventModal() {
+    document.getElementById('negEventModal').style.display = 'none';
+}
+async function applyNegEvent(eventType) {
+    closeNegEventModal();
+    if (!selectedId) return;
+    try {
+        const r = await apiPost(`/api/morale/${selectedId}/negative-event`, {event_type: eventType});
+        showToast(`${r.wrestler_name}: ${r.description}`, r.morale_delta, '⚠️');
+        selectWrestler(selectedId);
+        loadRoster();
+    } catch(e) { showToast(e.message, null, '❌'); }
+}
+
+/* ── Refresh ────────────────────────────────────────────────────────────── */
+async function refreshRoster() {
+    try { await loadRoster(); }
+    catch(e) { showToast('Failed to load: ' + e.message, null, '❌'); }
+}
+
+/* ── Event listeners ────────────────────────────────────────────────────── */
+document.getElementById('brandFilter').addEventListener('change', refreshRoster);
+document.getElementById('sortSelect').addEventListener('change', renderRoster);
+
+// Close modals on backdrop click
+document.getElementById('negEventModal').addEventListener('click', function(e) {
+    if (e.target === this) closeNegEventModal();
+});
+document.getElementById('meetingModal').addEventListener('click', function(e) {
+    if (e.target === this) closeMeetingModal();
+});
+
+/* ── Expose to outer scope so onclick="" attrs work ─────────────────────── */
+window.selectWrestler    = selectWrestler;
+window.switchTab         = switchTab;
+window.doAppreciate      = doAppreciate;
+window.openMeetingModal  = openMeetingModal;
+window.closeMeetingModal = closeMeetingModal;
+window.doMeeting         = doMeeting;
+window.openNegEventModal = openNegEventModal;
+window.closeNegEventModal= closeNegEventModal;
+window.applyNegEvent     = applyNegEvent;
+window.refreshRoster     = refreshRoster;
+
+/* ── Init ───────────────────────────────────────────────────────────────── */
+refreshRoster();
+
+})();
+</script>

@@ -1,0 +1,55 @@
+{
+  "general_managers": [
+    {
+      "id": "gm_001",
+      "name": "Nicholas Sterling",
+      "nickname": "The Architect",
+      "brand": "ROC Alpha",
+      "personality_type": "balanced",
+      "traits": {
+        "prefers_workrate": true,
+        "values_loyalty": true,
+        "likes_surprises": false,
+        "favors_veterans": true
+      },
+      "description": "A strategic mind who values in-ring excellence and brand loyalty.",
+      "catchphrase": "Excellence is not negotiable."
+    },
+    {
+      "id": "gm_002",
+      "name": "Victoria Chase",
+      "nickname": "The Maverick",
+      "brand": "ROC Velocity",
+      "personality_type": "aggressive",
+      "traits": {
+        "prefers_workrate": false,
+        "values_loyalty": false,
+        "likes_surprises": true,
+        "favors_veterans": false
+      },
+      "description": "An unpredictable leader who loves chaos and fresh talent.",
+      "catchphrase": "Speed kills, and Velocity is lethal."
+    },
+    {
+      "id": "gm_003",
+      "name": "Marcus Blackwood",
+      "nickname": "The Vanguard",
+      "brand": "ROC Vanguard",
+      "personality_type": "builder",
+      "traits": {
+        "prefers_workrate": true,
+        "values_loyalty": false,
+        "likes_surprises": false,
+        "favors_veterans": false
+      },
+      "description": "A talent developer focused on building future stars.",
+      "catchphrase": "The future is forged in Vanguard."
+    }
+  ],
+  "personality_descriptions": {
+    "balanced": "Values a mix of talent, experience, and marketability",
+    "aggressive": "Prioritizes star power and immediate impact",
+    "builder": "Focuses on young talent with high potential",
+    "entertainment": "Values charisma and mic skills over pure wrestling"
+  }
+}

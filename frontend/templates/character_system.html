@@ -1,0 +1,292 @@
+<div class="container-fluid py-4 character-system">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div>
+            <h2 class="mb-1">Character Systems</h2>
+            <p class="text-muted mb-0">Alignment, gimmicks, entrances, moves, background, companions, and aging.</p>
+        </div>
+        <button class="btn btn-outline-primary" onclick="loadCharacterSystem()">Refresh</button>
+    </div>
+
+    <div id="characterAlert"></div>
+
+    <ul class="nav nav-tabs" id="characterTabs" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#characterRoster">Roster</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#characterTurn">Turn Planner</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#characterGimmick">Gimmicks</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#characterProduction">Production</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#characterMoves">Moves</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#characterBackground">Background</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#characterAging">Aging</button></li>
+    </ul>
+
+    <div class="tab-content border border-top-0 p-3 bg-white">
+        <div class="tab-pane fade show active" id="characterRoster">
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>Wrestler</th><th>Brand</th><th>Alignment</th><th>Gimmick Fit</th><th>Style</th><th>Home</th>
+                        </tr>
+                    </thead>
+                    <tbody id="characterRosterRows"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="characterTurn">
+            <div class="row g-3">
+                <div class="col-md-4"><label class="form-label">Wrestler</label><select id="turnWrestler" class="form-select"></select></div>
+                <div class="col-md-4"><label class="form-label">New Alignment</label><input type="range" id="turnAlignment" min="0" max="100" value="50" class="form-range" oninput="previewTurn()"><div id="turnAlignmentLabel" class="small text-muted"></div></div>
+                <div class="col-md-4"><label class="form-label">Build Quality (1-10)</label><input type="number" id="turnBuild" min="1" max="10" value="7" class="form-control" oninput="previewTurn()"></div>
+                <div class="col-md-4"><label class="form-label">Timing Score</label><input type="number" id="turnTiming" min="0" max="100" value="65" class="form-control" oninput="previewTurn()"></div>
+                <div class="col-md-4"><label class="form-label">Surprise Factor</label><input type="number" id="turnSurprise" min="0" max="100" value="70" class="form-control" oninput="previewTurn()"></div>
+                <div class="col-md-4 d-flex align-items-end"><button class="btn btn-primary w-100" onclick="executeTurn()">Execute Turn</button></div>
+                <div class="col-12"><div id="turnPreview" class="alert alert-secondary mb-0"></div></div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="characterGimmick">
+            <div class="row g-3">
+                <div class="col-md-4"><label class="form-label">Wrestler</label><select id="gimmickWrestler" class="form-select"></select></div>
+                <div class="col-md-4"><label class="form-label">Template</label><select id="gimmickTemplate" class="form-select"></select></div>
+                <div class="col-md-4 d-flex align-items-end"><button class="btn btn-primary w-100" onclick="assignGimmick()">Assign Gimmick</button></div>
+            </div>
+            <div id="gimmickTemplateGrid" class="row g-3 mt-2"></div>
+        </div>
+
+        <div class="tab-pane fade" id="characterProduction">
+            <div class="row g-3">
+                <div class="col-md-3"><label class="form-label">Wrestler</label><select id="entranceWrestler" class="form-select"></select></div>
+                <div class="col-md-3"><label class="form-label">Pyro</label><select id="entrancePyro" class="form-select"><option>none</option><option>basic</option><option>full</option><option>specialty</option></select></div>
+                <div class="col-md-3"><label class="form-label">Lighting</label><select id="entranceLighting" class="form-select"><option>standard</option><option>spotlight</option><option>color</option><option>choreographed</option></select></div>
+                <div class="col-md-3"><label class="form-label">Video</label><select id="entranceVideo" class="form-select"><option>none</option><option>simple</option><option>full</option></select></div>
+                <div class="col-md-3"><label class="form-label">Props</label><select id="entranceProps" class="form-select"><option>none</option><option>signature</option><option>elaborate</option></select></div>
+                <div class="col-md-3"><label class="form-label">Effects</label><select id="entranceEffects" class="form-select"><option>none</option><option>fog</option><option>laser</option><option>confetti</option></select></div>
+                <div class="col-md-3 d-flex align-items-end"><button class="btn btn-primary w-100" onclick="saveEntrance()">Save Entrance</button></div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="characterMoves">
+            <div class="row g-3">
+                <div class="col-md-3"><label class="form-label">Wrestler</label><select id="moveWrestler" class="form-select"></select></div>
+                <div class="col-md-3"><label class="form-label">Move Name</label><input id="moveName" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label">Family</label><select id="moveFamily" class="form-select"><option value="signature">Signature</option><option value="finisher">Finisher</option></select></div>
+                <div class="col-md-2"><label class="form-label">Move Type</label><select id="moveType" class="form-select"><option>primary</option><option>secondary</option></select></div>
+                <div class="col-md-2 d-flex align-items-end"><button class="btn btn-primary w-100" onclick="saveMove()">Save Move</button></div>
+                <div class="col-md-4"><label class="form-label">Catchphrase</label><input id="catchphraseText" maxlength="140" class="form-control"></div>
+                <div class="col-md-2 d-flex align-items-end"><button class="btn btn-outline-primary w-100" onclick="saveCatchphrase()">Save Phrase</button></div>
+                <div class="col-md-3"><label class="form-label">Entrance Companion</label><select id="companionWrestler" class="form-select"></select></div>
+                <div class="col-md-2"><label class="form-label">Role</label><select id="companionRole" class="form-select"><option>manager</option><option>valet</option><option>bodyguard</option><option>entourage</option></select></div>
+                <div class="col-md-2 d-flex align-items-end"><button class="btn btn-outline-primary w-100" onclick="saveCompanion()">Assign Companion</button></div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="characterBackground">
+            <div class="row g-3">
+                <div class="col-md-3"><label class="form-label">Wrestler</label><select id="profileWrestler" class="form-select"></select></div>
+                <div class="col-md-3"><label class="form-label">Primary Style</label><select id="profileStyle" class="form-select"><option>technical</option><option>brawler</option><option>high_flyer</option><option>powerhouse</option><option>striker</option><option>hybrid</option><option>specialist</option></select></div>
+                <div class="col-md-3"><label class="form-label">Nationality</label><input id="profileNationality" class="form-control"></div>
+                <div class="col-md-3"><label class="form-label">Kayfabe Hometown</label><input id="profileHometown" class="form-control"></div>
+                <div class="col-12"><button class="btn btn-primary" onclick="saveProfile()">Save Background</button></div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="characterAging">
+            <p class="text-muted">Runs the age progression engine and records every rating change to persistent rating history.</p>
+            <button class="btn btn-danger" onclick="runAgeProgression()">Run Age Progression</button>
+            <hr>
+            <div class="row g-3">
+                <div class="col-md-3"><label class="form-label">Wrestler</label><select id="evolutionWrestler" class="form-select"></select></div>
+                <div class="col-md-3"><label class="form-label">New Evolution State</label><input id="evolutionState" class="form-control" placeholder="Main Eventer, Veteran Mentor"></div>
+                <div class="col-md-4"><label class="form-label">Trigger Reason</label><input id="evolutionReason" class="form-control" placeholder="Title win, crowd rejection, comeback"></div>
+                <div class="col-md-2 d-flex align-items-end"><button class="btn btn-outline-primary w-100" onclick="saveEvolution()">Record Evolution</button></div>
+            </div>
+            <pre id="agingOutput" class="bg-light border rounded p-3 mt-3 small"></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+let characterState = { wrestlers: [], templates: [] };
+
+function apiCharacter(path, options) {
+    return fetch('/api/character-system' + path, Object.assign({
+        headers: { 'Content-Type': 'application/json' }
+    }, options || {})).then(async response => {
+        const contentType = response.headers.get('content-type') || '';
+        const data = contentType.includes('application/json')
+            ? await response.json()
+            : { message: await response.text() };
+        if (!response.ok || data.status === 'error') throw new Error(data.message || 'Request failed');
+        return data;
+    });
+}
+
+function showCharacterAlert(message, type = 'success') {
+    document.getElementById('characterAlert').innerHTML =
+        '<div class="alert alert-' + type + ' alert-dismissible fade show">' +
+        message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+}
+
+async function loadCharacterSystem() {
+    try {
+        const data = await apiCharacter('/overview');
+        characterState.wrestlers = data.wrestlers || [];
+        characterState.templates = data.gimmick_templates || [];
+        renderCharacterRoster();
+        hydrateCharacterSelects();
+        renderTemplateGrid();
+        previewTurn();
+    } catch (error) {
+        showCharacterAlert(error.message, 'danger');
+    }
+}
+
+function renderCharacterRoster() {
+    const rows = characterState.wrestlers.map(w => {
+        const color = w.alignment_percentage > 60 ? 'primary' : (w.alignment_percentage < 40 ? 'danger' : 'secondary');
+        return '<tr><td><strong>' + w.name + '</strong></td><td>' + w.primary_brand + '</td>' +
+            '<td><span class="badge bg-' + color + '">' + w.alignment_label + ' ' + w.alignment_percentage + '%</span></td>' +
+            '<td>' + (w.gimmick_effectiveness || 50) + '%</td>' +
+            '<td>' + (w.primary_wrestling_style || 'hybrid') + '</td>' +
+            '<td>' + (w.kayfabe_hometown || w.nationality || '-') + '</td></tr>';
+    }).join('');
+    document.getElementById('characterRosterRows').innerHTML = rows || '<tr><td colspan="6">No active wrestlers found.</td></tr>';
+}
+
+function hydrateCharacterSelects() {
+    const wrestlerOptions = characterState.wrestlers.map(w => '<option value="' + w.id + '">' + w.name + '</option>').join('');
+    ['turnWrestler', 'gimmickWrestler', 'entranceWrestler', 'moveWrestler', 'profileWrestler', 'companionWrestler', 'evolutionWrestler'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = wrestlerOptions;
+    });
+    const templateOptions = characterState.templates.map(t => '<option value="' + t.id + '">' + t.name + '</option>').join('');
+    document.getElementById('gimmickTemplate').innerHTML = templateOptions;
+}
+
+function renderTemplateGrid() {
+    document.getElementById('gimmickTemplateGrid').innerHTML = characterState.templates.map(t =>
+        '<div class="col-md-3"><div class="border rounded p-3 h-100"><strong>' + t.name +
+        '</strong><div class="small text-muted">' + (t.description || '') + '</div>' +
+        '<span class="badge bg-light text-dark mt-2">' + (t.recommended_wrestling_style || 'hybrid') + '</span></div></div>'
+    ).join('');
+}
+
+function alignmentName(value) {
+    value = Number(value);
+    if (value >= 40 && value <= 60) return 'Tweener';
+    return value > 60 ? 'Face' : 'Heel';
+}
+
+function previewTurn() {
+    const value = Number(document.getElementById('turnAlignment').value || 50);
+    document.getElementById('turnAlignmentLabel').textContent = alignmentName(value) + ' (' + value + '%)';
+    const timing = Number(document.getElementById('turnTiming').value || 0);
+    const build = Number(document.getElementById('turnBuild').value || 1) * 10;
+    const surprise = Number(document.getElementById('turnSurprise').value || 0);
+    const impact = Math.round((timing * 0.3) + (build * 0.4) + (surprise * 0.3));
+    document.getElementById('turnPreview').textContent = 'Projected turn impact: ' + impact + '/100';
+}
+
+async function executeTurn() {
+    const wrestlerId = document.getElementById('turnWrestler').value;
+    const payload = {
+        new_alignment: Number(document.getElementById('turnAlignment').value),
+        timing_score: Number(document.getElementById('turnTiming').value),
+        build_score: Number(document.getElementById('turnBuild').value),
+        surprise_factor: Number(document.getElementById('turnSurprise').value)
+    };
+    const data = await apiCharacter('/wrestlers/' + wrestlerId + '/turn', { method: 'POST', body: JSON.stringify(payload) });
+    showCharacterAlert('Turn executed. Impact ' + data.impact.impact_score + ', overness change ' + data.impact.overness_change + '.');
+    loadCharacterSystem();
+}
+
+async function assignGimmick() {
+    const wrestlerId = document.getElementById('gimmickWrestler').value;
+    const templateId = document.getElementById('gimmickTemplate').value;
+    const data = await apiCharacter('/wrestlers/' + wrestlerId + '/gimmick', { method: 'POST', body: JSON.stringify({ template_id: templateId }) });
+    showCharacterAlert('Gimmick assigned. Effectiveness: ' + data.effectiveness + '%.');
+    loadCharacterSystem();
+}
+
+async function saveEntrance() {
+    const wrestlerId = document.getElementById('entranceWrestler').value;
+    const settings = {
+        pyro: document.getElementById('entrancePyro').value,
+        lighting: document.getElementById('entranceLighting').value,
+        video: document.getElementById('entranceVideo').value,
+        props: document.getElementById('entranceProps').value,
+        effects: document.getElementById('entranceEffects').value
+    };
+    const data = await apiCharacter('/wrestlers/' + wrestlerId + '/entrance', { method: 'POST', body: JSON.stringify({ name: 'Main Entrance', settings }) });
+    showCharacterAlert('Entrance saved. Weekly cost $' + data.weekly_cost + ', boost +' + data.presentation_boost + '.');
+}
+
+async function saveMove() {
+    const wrestlerId = document.getElementById('moveWrestler').value;
+    await apiCharacter('/wrestlers/' + wrestlerId + '/moves', { method: 'POST', body: JSON.stringify({
+        move_name: document.getElementById('moveName').value,
+        move_family: document.getElementById('moveFamily').value,
+        move_type: document.getElementById('moveType').value
+    }) });
+    showCharacterAlert('Move saved.');
+}
+
+async function saveCatchphrase() {
+    const wrestlerId = document.getElementById('moveWrestler').value;
+    await apiCharacter('/wrestlers/' + wrestlerId + '/catchphrases', { method: 'POST', body: JSON.stringify({
+        phrase_text: document.getElementById('catchphraseText').value
+    }) });
+    showCharacterAlert('Catchphrase saved.');
+}
+
+async function saveCompanion() {
+    const wrestlerId = document.getElementById('moveWrestler').value;
+    await apiCharacter('/wrestlers/' + wrestlerId + '/companions', { method: 'POST', body: JSON.stringify({
+        companion_id: document.getElementById('companionWrestler').value,
+        role: document.getElementById('companionRole').value,
+        interference_tendency: 25
+    }) });
+    showCharacterAlert('Entrance companion assigned.');
+}
+
+async function saveProfile() {
+    const wrestlerId = document.getElementById('profileWrestler').value;
+    await apiCharacter('/wrestlers/' + wrestlerId + '/profile', { method: 'PUT', body: JSON.stringify({
+        primary_wrestling_style: document.getElementById('profileStyle').value,
+        nationality: document.getElementById('profileNationality').value,
+        kayfabe_hometown: document.getElementById('profileHometown').value
+    }) });
+    showCharacterAlert('Character background saved.');
+    loadCharacterSystem();
+}
+
+async function runAgeProgression() {
+    const data = await apiCharacter('/age-progression/run', { method: 'POST', body: '{}' });
+    document.getElementById('agingOutput').textContent = JSON.stringify(data.updates.slice(0, 50), null, 2);
+    showCharacterAlert('Age progression complete. Recorded ' + data.updates.length + ' rating changes.');
+}
+
+async function saveEvolution() {
+    try {
+        const wrestlerId = document.getElementById('evolutionWrestler').value;
+        const newState = (document.getElementById('evolutionState').value || '').trim();
+        if (!newState) {
+            showCharacterAlert('Enter a New Evolution State before recording evolution.', 'warning');
+            return;
+        }
+        await apiCharacter('/wrestlers/' + wrestlerId + '/evolution', { method: 'POST', body: JSON.stringify({
+            new_state: newState,
+            trigger_reason: document.getElementById('evolutionReason').value,
+            readiness_score: 70
+        }) });
+        showCharacterAlert('Character evolution event recorded.');
+        document.getElementById('evolutionState').value = '';
+        document.getElementById('evolutionReason').value = '';
+    } catch (error) {
+        showCharacterAlert(error.message, 'danger');
+    }
+}
+
+loadCharacterSystem();
+</script>

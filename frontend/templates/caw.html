@@ -1,0 +1,817 @@
+<!-- CAW (Create-A-Wrestler) View -->
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="caw-header mb-4">
+        <div class="caw-header-content">
+            <h2><i class="bi bi-person-plus-fill"></i> Create-A-Wrestler</h2>
+            <p class="lead">Design your custom superstar and add them to the roster</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column: CAW Form -->
+        <div class="col-lg-8">
+            <div class="card caw-form-card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil-square"></i> Wrestler Designer
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="cawForm">
+                        <!-- Quick Actions -->
+                        <div class="quick-actions mb-4">
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="loadPreset()">
+                                <i class="bi bi-bookmark-star"></i> Load Preset
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="randomizeAttributes()">
+                                <i class="bi bi-shuffle"></i> Randomize Stats
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-sm" onclick="resetForm()">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset Form
+                            </button>
+                        </div>
+
+                        <!-- Basic Information -->
+                        <div class="form-section">
+                            <h6 class="section-title">
+                                <i class="bi bi-person-badge"></i> Basic Information
+                            </h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="cawName" class="form-label">
+                                        <i class="bi bi-file-text"></i> Wrestler Name *
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        id="cawName" 
+                                        name="name"
+                                        placeholder="Enter wrestler name"
+                                        required
+                                        maxlength="50"
+                                        oninput="updatePreview()"
+                                    >
+                                    <div class="form-text">2-50 characters, letters only</div>
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label for="cawAge" class="form-label">
+                                        <i class="bi bi-calendar"></i> Age *
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        class="form-control" 
+                                        id="cawAge" 
+                                        name="age"
+                                        min="18" 
+                                        max="55" 
+                                        value="25"
+                                        required
+                                        oninput="updatePreview()"
+                                    >
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label for="cawGender" class="form-label">
+                                        <i class="bi bi-gender-ambiguous"></i> Gender *
+                                    </label>
+                                    <select 
+                                        class="form-select" 
+                                        id="cawGender" 
+                                        name="gender"
+                                        required
+                                        onchange="updatePreview()"
+                                    >
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="cawBrand" class="form-label">
+                                        <i class="bi bi-flag"></i> Brand *
+                                    </label>
+                                    <select 
+                                        class="form-select" 
+                                        id="cawBrand" 
+                                        name="primary_brand"
+                                        required
+                                        onchange="updatePreview()"
+                                    >
+                                        <option value="ROC Alpha">ROC Alpha</option>
+                                        <option value="ROC Velocity">ROC Velocity</option>
+                                        <option value="ROC Vanguard">ROC Vanguard</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="cawRole" class="form-label">
+                                        <i class="bi bi-star"></i> Role *
+                                    </label>
+                                    <select 
+                                        class="form-select" 
+                                        id="cawRole" 
+                                        name="role"
+                                        required
+                                        onchange="updatePreview(); recalculateSalary();"
+                                    >
+                                        <option value="Main Event">Main Event</option>
+                                        <option value="Upper Midcard">Upper Midcard</option>
+                                        <option value="Midcard" selected>Midcard</option>
+                                        <option value="Lower Midcard">Lower Midcard</option>
+                                        <option value="Jobber">Jobber</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Attributes Section -->
+                        <div class="form-section">
+                            <h6 class="section-title">
+                                <i class="bi bi-graph-up"></i> Attributes (0-100)
+                            </h6>
+                            
+                            <div class="attributes-grid">
+                                <!-- Brawling -->
+                                <div class="attribute-item">
+                                    <label class="attribute-label">
+                                        <i class="bi bi-shield-fill-exclamation"></i> Brawling
+                                    </label>
+                                    <div class="attribute-controls">
+                                        <input 
+                                            type="range" 
+                                            class="form-range" 
+                                            id="cawBrawling" 
+                                            name="brawling"
+                                            min="0" 
+                                            max="100" 
+                                            value="50"
+                                            oninput="updateAttributeDisplay(this); updatePreview(); recalculateSalary();"
+                                        >
+                                        <input 
+                                            type="number" 
+                                            class="form-control attribute-number" 
+                                            value="50"
+                                            min="0"
+                                            max="100"
+                                            id="cawBrawlingNum"
+                                            oninput="syncRangeFromNumber('cawBrawling', this.value); updatePreview(); recalculateSalary();"
+                                        >
+                                    </div>
+                                    <div class="attribute-bar">
+                                        <div class="attribute-fill" id="barBrawling" style="width: 50%"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Technical -->
+                                <div class="attribute-item">
+                                    <label class="attribute-label">
+                                        <i class="bi bi-tools"></i> Technical
+                                    </label>
+                                    <div class="attribute-controls">
+                                        <input 
+                                            type="range" 
+                                            class="form-range" 
+                                            id="cawTechnical" 
+                                            name="technical"
+                                            min="0" 
+                                            max="100" 
+                                            value="50"
+                                            oninput="updateAttributeDisplay(this); updatePreview(); recalculateSalary();"
+                                        >
+                                        <input 
+                                            type="number" 
+                                            class="form-control attribute-number" 
+                                            value="50"
+                                            min="0"
+                                            max="100"
+                                            id="cawTechnicalNum"
+                                            oninput="syncRangeFromNumber('cawTechnical', this.value); updatePreview(); recalculateSalary();"
+                                        >
+                                    </div>
+                                    <div class="attribute-bar">
+                                        <div class="attribute-fill" id="barTechnical" style="width: 50%"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Speed -->
+                                <div class="attribute-item">
+                                    <label class="attribute-label">
+                                        <i class="bi bi-lightning-fill"></i> Speed
+                                    </label>
+                                    <div class="attribute-controls">
+                                        <input 
+                                            type="range" 
+                                            class="form-range" 
+                                            id="cawSpeed" 
+                                            name="speed"
+                                            min="0" 
+                                            max="100" 
+                                            value="50"
+                                            oninput="updateAttributeDisplay(this); updatePreview(); recalculateSalary();"
+                                        >
+                                        <input 
+                                            type="number" 
+                                            class="form-control attribute-number" 
+                                            value="50"
+                                            min="0"
+                                            max="100"
+                                            id="cawSpeedNum"
+                                            oninput="syncRangeFromNumber('cawSpeed', this.value); updatePreview(); recalculateSalary();"
+                                        >
+                                    </div>
+                                    <div class="attribute-bar">
+                                        <div class="attribute-fill" id="barSpeed" style="width: 50%"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Mic -->
+                                <div class="attribute-item">
+                                    <label class="attribute-label">
+                                        <i class="bi bi-mic-fill"></i> Mic Skills
+                                    </label>
+                                    <div class="attribute-controls">
+                                        <input 
+                                            type="range" 
+                                            class="form-range" 
+                                            id="cawMic" 
+                                            name="mic"
+                                            min="0" 
+                                            max="100" 
+                                            value="50"
+                                            oninput="updateAttributeDisplay(this); updatePreview(); recalculateSalary();"
+                                        >
+                                        <input 
+                                            type="number" 
+                                            class="form-control attribute-number" 
+                                            value="50"
+                                            min="0"
+                                            max="100"
+                                            id="cawMicNum"
+                                            oninput="syncRangeFromNumber('cawMic', this.value); updatePreview(); recalculateSalary();"
+                                        >
+                                    </div>
+                                    <div class="attribute-bar">
+                                        <div class="attribute-fill" id="barMic" style="width: 50%"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Psychology -->
+                                <div class="attribute-item">
+                                    <label class="attribute-label">
+                                        <i class="bi bi-brain"></i> Psychology
+                                    </label>
+                                    <div class="attribute-controls">
+                                        <input 
+                                            type="range" 
+                                            class="form-range" 
+                                            id="cawPsychology" 
+                                            name="psychology"
+                                            min="0" 
+                                            max="100" 
+                                            value="50"
+                                            oninput="updateAttributeDisplay(this); updatePreview(); recalculateSalary();"
+                                        >
+                                        <input 
+                                            type="number" 
+                                            class="form-control attribute-number" 
+                                            value="50"
+                                            min="0"
+                                            max="100"
+                                            id="cawPsychologyNum"
+                                            oninput="syncRangeFromNumber('cawPsychology', this.value); updatePreview(); recalculateSalary();"
+                                        >
+                                    </div>
+                                    <div class="attribute-bar">
+                                        <div class="attribute-fill" id="barPsychology" style="width: 50%"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Stamina -->
+                                <div class="attribute-item">
+                                    <label class="attribute-label">
+                                        <i class="bi bi-battery-charging"></i> Stamina
+                                    </label>
+                                    <div class="attribute-controls">
+                                        <input 
+                                            type="range" 
+                                            class="form-range" 
+                                            id="cawStamina" 
+                                            name="stamina"
+                                            min="0" 
+                                            max="100" 
+                                            value="50"
+                                            oninput="updateAttributeDisplay(this); updatePreview(); recalculateSalary();"
+                                        >
+                                        <input 
+                                            type="number" 
+                                            class="form-control attribute-number" 
+                                            value="50"
+                                            min="0"
+                                            max="100"
+                                            id="cawStaminaNum"
+                                            oninput="syncRangeFromNumber('cawStamina', this.value); updatePreview(); recalculateSalary();"
+                                        >
+                                    </div>
+                                    <div class="attribute-bar">
+                                        <div class="attribute-fill" id="barStamina" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contract & Career -->
+                        <div class="form-section">
+                            <h6 class="section-title">
+                                <i class="bi bi-file-earmark-text"></i> Contract & Career
+                            </h6>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="cawSalary" class="form-label">
+                                        <i class="bi bi-cash-stack"></i> Salary per Show *
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input 
+                                            type="number" 
+                                            class="form-control" 
+                                            id="cawSalary" 
+                                            name="salary_per_show"
+                                            min="1000" 
+                                            max="100000" 
+                                            value="5000"
+                                            step="500"
+                                            required
+                                        >
+                                    </div>
+                                    <div class="form-text">
+                                        Suggested: <span id="suggestedSalary" class="text-primary fw-bold">$5,000</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="cawContractWeeks" class="form-label">
+                                        <i class="bi bi-calendar-range"></i> Contract Length *
+                                    </label>
+                                    <select 
+                                        class="form-select" 
+                                        id="cawContractWeeks" 
+                                        name="contract_weeks"
+                                        required
+                                    >
+                                        <option value="52" selected>1 Year (52 weeks)</option>
+                                        <option value="104">2 Years (104 weeks)</option>
+                                        <option value="156">3 Years (156 weeks)</option>
+                                        <option value="208">4 Years (208 weeks)</option>
+                                        <option value="260">5 Years (260 weeks)</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="cawExperience" class="form-label">
+                                        <i class="bi bi-award"></i> Years Experience
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        class="form-control" 
+                                        id="cawExperience" 
+                                        name="years_experience"
+                                        min="0" 
+                                        max="30" 
+                                        value="5"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    id="cawMajorStar" 
+                                    name="is_major_superstar"
+                                >
+                                <label class="form-check-label" for="cawMajorStar">
+                                    <i class="bi bi-star-fill text-warning"></i> 
+                                    <strong>Major Superstar</strong>
+                                    <span class="text-muted">(Eligible for surprise returns after retirement)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-circle"></i> Create Wrestler
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-lg" onclick="loadView('roster')">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Preview Card -->
+        <div class="col-lg-4">
+            <div class="card preview-card shadow-lg sticky-top">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-eye"></i> Live Preview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Wrestler Preview -->
+                    <div class="wrestler-preview">
+                        <div class="preview-name" id="previewName">Wrestler Name</div>
+                        <div class="preview-meta" id="previewMeta">Age 25 • Male</div>
+                        
+                        <div class="preview-badges mt-3">
+                            <span class="badge preview-badge" id="previewBrand">ROC Alpha</span>
+                            
+                            <span class="badge preview-badge" id="previewRole">Midcard</span>
+                        </div>
+
+                        <div class="preview-overall mt-4">
+                            <div class="overall-label">Overall Rating</div>
+                            <div class="overall-value" id="previewOverall">50</div>
+                            <div class="overall-bar">
+                                <div class="overall-fill" id="overallBar" style="width: 50%"></div>
+                            </div>
+                        </div>
+
+                        <div class="preview-stats mt-4">
+                            <div class="stat-row">
+                                <span class="stat-label"><i class="bi bi-shield-fill-exclamation"></i> Brawling</span>
+                                <span class="stat-value" id="previewBrawling">50</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label"><i class="bi bi-tools"></i> Technical</span>
+                                <span class="stat-value" id="previewTechnical">50</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label"><i class="bi bi-lightning-fill"></i> Speed</span>
+                                <span class="stat-value" id="previewSpeed">50</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label"><i class="bi bi-mic-fill"></i> Mic</span>
+                                <span class="stat-value" id="previewMic">50</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label"><i class="bi bi-brain"></i> Psychology</span>
+                                <span class="stat-value" id="previewPsychology">50</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label"><i class="bi bi-battery-charging"></i> Stamina</span>
+                                <span class="stat-value" id="previewStamina">50</span>
+                            </div>
+                        </div>
+
+                        <div class="preview-contract mt-4">
+                            <div class="contract-info">
+                                <i class="bi bi-cash-stack"></i>
+                                <span id="previewSalary">$5,000</span> per show
+                            </div>
+                            <div class="contract-info">
+                                <i class="bi bi-calendar-range"></i>
+                                <span id="previewContract">1 Year</span> contract
+                            </div>
+                            <div class="contract-info">
+                                <i class="bi bi-award"></i>
+                                <span id="previewExperience">5</span> years experience
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Tips Card -->
+            <div class="card tips-card mt-3">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-lightbulb"></i> Quick Tips</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="tips-list">
+                        <li><strong>Balanced Build:</strong> Set all stats to 65 for an all-rounder</li>
+                        <li><strong>Use Presets:</strong> Click "Load Preset" for template builds</li>
+                        <li><strong>Role Matters:</strong> Higher roles increase salary suggestions</li>
+                        <li><strong>Overall Rating:</strong> Calculated based on role and stats</li>
+                        <li><strong>Major Superstar:</strong> Only mark for future legends</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preset Selection Modal -->
+<div class="modal fade" id="presetModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-bookmark-star"></i> Load Preset Template
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="presetGrid">
+                    <!-- Presets loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    let presets = {};
+    
+    // Load presets on page load
+    async function loadPresetsData() {
+        try {
+            const response = await getAPI('/api/caw/presets');
+            presets = response.presets;
+            console.log('✅ Loaded CAW presets:', Object.keys(presets).length);
+        } catch (error) {
+            console.error('Failed to load presets:', error);
+        }
+    }
+    
+    // Update attribute display (range slider + number input sync)
+    window.updateAttributeDisplay = function(slider) {
+        const value = slider.value;
+        const name = slider.name;
+        const numberId = 'caw' + name.charAt(0).toUpperCase() + name.slice(1) + 'Num';
+        const barId = 'bar' + name.charAt(0).toUpperCase() + name.slice(1);
+        
+        // Update number input
+        document.getElementById(numberId).value = value;
+        
+        // Update visual bar
+        const bar = document.getElementById(barId);
+        if (bar) {
+            bar.style.width = value + '%';
+            
+            // Color based on value
+            if (value >= 80) {
+                bar.style.background = 'linear-gradient(90deg, #28a745, #20c997)';
+            } else if (value >= 60) {
+                bar.style.background = 'linear-gradient(90deg, #17a2b8, #20c997)';
+            } else if (value >= 40) {
+                bar.style.background = 'linear-gradient(90deg, #ffc107, #fd7e14)';
+            } else {
+                bar.style.background = 'linear-gradient(90deg, #dc3545, #c82333)';
+            }
+        }
+    }
+    
+    // Sync range slider from number input
+    window.syncRangeFromNumber = function(rangerId, value) {
+        const slider = document.getElementById(rangerId);
+        slider.value = value;
+        updateAttributeDisplay(slider);
+    }
+    
+    // Update live preview
+    window.updatePreview = async function() {
+        const formData = getFormData();
+        
+        // Update basic info
+        document.getElementById('previewName').textContent = formData.name || 'Wrestler Name';
+        document.getElementById('previewMeta').textContent = `Age ${formData.age} • ${formData.gender}`;
+        document.getElementById('previewBrand').textContent = formData.primary_brand;
+        
+        document.getElementById('previewRole').textContent = formData.role;
+        
+        // Update stats
+        document.getElementById('previewBrawling').textContent = formData.brawling;
+        document.getElementById('previewTechnical').textContent = formData.technical;
+        document.getElementById('previewSpeed').textContent = formData.speed;
+        document.getElementById('previewMic').textContent = formData.mic;
+        document.getElementById('previewPsychology').textContent = formData.psychology;
+        document.getElementById('previewStamina').textContent = formData.stamina;
+        
+        // Update contract
+        document.getElementById('previewSalary').textContent = '$' + parseInt(formData.salary_per_show).toLocaleString();
+        const years = Math.floor(formData.contract_weeks / 52);
+        document.getElementById('previewContract').textContent = `${years} Year${years !== 1 ? 's' : ''}`;
+        document.getElementById('previewExperience').textContent = formData.years_experience;
+        
+        // Calculate overall
+        try {
+            const response = await postAPI('/api/caw/calculate-overall', formData);
+            const overall = response.overall_rating;
+            
+            document.getElementById('previewOverall').textContent = overall;
+            
+            const overallBar = document.getElementById('overallBar');
+            overallBar.style.width = overall + '%';
+            
+            if (overall >= 80) {
+                overallBar.style.background = 'linear-gradient(90deg, #28a745, #20c997)';
+            } else if (overall >= 60) {
+                overallBar.style.background = 'linear-gradient(90deg, #17a2b8, #20c997)';
+            } else if (overall >= 40) {
+                overallBar.style.background = 'linear-gradient(90deg, #ffc107, #fd7e14)';
+            } else {
+                overallBar.style.background = 'linear-gradient(90deg, #dc3545, #c82333)';
+            }
+        } catch (error) {
+            console.error('Failed to calculate overall:', error);
+        }
+    }
+    
+    // Recalculate suggested salary
+    window.recalculateSalary = async function() {
+        const formData = getFormData();
+        
+        try {
+            const response = await postAPI('/api/caw/calculate-overall', formData);
+            const suggested = response.suggested_salary;
+            
+            document.getElementById('suggestedSalary').textContent = '$' + suggested.toLocaleString();
+        } catch (error) {
+            console.error('Failed to calculate salary:', error);
+        }
+    }
+    
+    // Get form data as object
+    function getFormData() {
+        return {
+            name: document.getElementById('cawName').value,
+            age: parseInt(document.getElementById('cawAge').value),
+            gender: document.getElementById('cawGender').value,
+            role: document.getElementById('cawRole').value,
+            primary_brand: document.getElementById('cawBrand').value,
+            brawling: parseInt(document.getElementById('cawBrawling').value),
+            technical: parseInt(document.getElementById('cawTechnical').value),
+            speed: parseInt(document.getElementById('cawSpeed').value),
+            mic: parseInt(document.getElementById('cawMic').value),
+            psychology: parseInt(document.getElementById('cawPsychology').value),
+            stamina: parseInt(document.getElementById('cawStamina').value),
+            salary_per_show: parseInt(document.getElementById('cawSalary').value),
+            contract_weeks: parseInt(document.getElementById('cawContractWeeks').value),
+            years_experience: parseInt(document.getElementById('cawExperience').value),
+            is_major_superstar: document.getElementById('cawMajorStar').checked
+        };
+    }
+    
+    // Load preset
+    window.loadPreset = function() {
+        const modal = new bootstrap.Modal(document.getElementById('presetModal'));
+        
+        // Populate preset grid
+        const grid = document.getElementById('presetGrid');
+        grid.innerHTML = '';
+        
+        for (const [key, preset] of Object.entries(presets)) {
+            const card = document.createElement('div');
+            card.className = 'col-md-6 mb-3';
+            card.innerHTML = `
+                <div class="preset-card" onclick="applyPreset('${key}')">
+                    <h6>${key.replace('_', ' ').toUpperCase()}</h6>
+                    <p class="small text-muted">${preset.description}</p>
+                    <div class="preset-stats">
+                        <span>BRW: ${preset.brawling}</span>
+                        <span>TEC: ${preset.technical}</span>
+                        <span>SPD: ${preset.speed}</span>
+                        <span>MIC: ${preset.mic}</span>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        }
+        
+        modal.show();
+    }
+    
+    // Apply preset
+    window.applyPreset = function(presetKey) {
+        const preset = presets[presetKey];
+        
+        if (!preset) return;
+        
+        // Apply attributes
+        document.getElementById('cawBrawling').value = preset.brawling;
+        updateAttributeDisplay(document.getElementById('cawBrawling'));
+        
+        document.getElementById('cawTechnical').value = preset.technical;
+        updateAttributeDisplay(document.getElementById('cawTechnical'));
+        
+        document.getElementById('cawSpeed').value = preset.speed;
+        updateAttributeDisplay(document.getElementById('cawSpeed'));
+        
+        document.getElementById('cawMic').value = preset.mic;
+        updateAttributeDisplay(document.getElementById('cawMic'));
+        
+        document.getElementById('cawPsychology').value = preset.psychology;
+        updateAttributeDisplay(document.getElementById('cawPsychology'));
+        
+        document.getElementById('cawStamina').value = preset.stamina;
+        updateAttributeDisplay(document.getElementById('cawStamina'));
+        
+        // Apply role if specified
+        if (preset.role) {
+            document.getElementById('cawRole').value = preset.role;
+        }
+        
+                
+        updatePreview();
+        recalculateSalary();
+        
+        // Close modal
+        bootstrap.Modal.getInstance(document.getElementById('presetModal')).hide();
+    }
+    
+    // Randomize attributes
+    window.randomizeAttributes = function() {
+        const role = document.getElementById('cawRole').value;
+        
+        let min, max;
+        
+        if (role === 'Main Event') {
+            min = 65; max = 95;
+        } else if (role === 'Upper Midcard') {
+            min = 55; max = 85;
+        } else if (role === 'Midcard') {
+            min = 45; max = 75;
+        } else {
+            min = 35; max = 65;
+        }
+        
+        const attributes = ['cawBrawling', 'cawTechnical', 'cawSpeed', 'cawMic', 'cawPsychology', 'cawStamina'];
+        
+        attributes.forEach(attrId => {
+            const value = Math.floor(Math.random() * (max - min + 1)) + min;
+            const slider = document.getElementById(attrId);
+            slider.value = value;
+            updateAttributeDisplay(slider);
+        });
+        
+        updatePreview();
+        recalculateSalary();
+    }
+    
+    // Reset form
+    window.resetForm = function() {
+        document.getElementById('cawForm').reset();
+        
+        // Reset all sliders to 50
+        const sliders = document.querySelectorAll('input[type="range"]');
+        sliders.forEach(slider => {
+            slider.value = 50;
+            updateAttributeDisplay(slider);
+        });
+        
+        updatePreview();
+    }
+    
+    // Form submission
+    document.getElementById('cawForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = getFormData();
+        
+        console.log('🎨 Creating wrestler:', formData);
+        
+        // Show loading
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating...';
+        submitBtn.disabled = true;
+        
+        try {
+            const response = await postAPI('/api/caw/create', formData);
+            
+            console.log('✅ Wrestler created:', response);
+            
+            // Show success message
+            alert(`✅ ${response.wrestler.name} has been added to the roster!`);
+            
+            // Redirect to roster view
+            loadView('roster');
+            
+        } catch (error) {
+            console.error('❌ Creation failed:', error);
+            alert('Failed to create wrestler: ' + error.message);
+            
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+    
+    // Initialize
+    loadPresetsData();
+    updatePreview();
+    
+    // Initialize all attribute displays
+    const sliders = document.querySelectorAll('input[type="range"]');
+    sliders.forEach(slider => updateAttributeDisplay(slider));
+})();
+</script>

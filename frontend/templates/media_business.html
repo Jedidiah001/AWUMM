@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWUM - Media & Business</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">AWUM</a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/booking">Booking</a>
+            <a class="nav-link" href="/feuds">Feuds</a>
+            <a class="nav-link active" href="/media-business">Media & Business</a>
+            <a class="nav-link" href="/finance">Finance</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h1 class="h3 mb-1"><i class="bi bi-broadcast"></i> Media, Ratings & Business</h1>
+            <div class="text-muted">Ratings trends, network health, social reach, streaming value, and press strategy.</div>
+        </div>
+        <button class="btn btn-primary" onclick="loadMediaBusiness()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+    </div>
+
+    <div class="row g-3 mb-4" id="businessMetricCards"></div>
+
+    <div class="row g-3">
+        <div class="col-xl-5">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white">Recent TV Ratings</div>
+                <div class="card-body" id="ratingsPanel">Loading...</div>
+            </div>
+        </div>
+        <div class="col-xl-3">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white">Network Relationship</div>
+                <div class="card-body" id="networkPanel">Loading...</div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white">Social Platforms</div>
+                <div class="card-body" id="socialPanel">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">Digital Content Strategy</div>
+                <div class="card-body">
+                    <form id="contentForm" class="row g-2">
+                        <div class="col-md-5"><input class="form-control" name="title" placeholder="Content title" required></div>
+                        <div class="col-md-4">
+                            <select class="form-select" name="content_type">
+                                <option value="highlight_reel">Highlight reel</option>
+                                <option value="exclusive_interview">Exclusive interview</option>
+                                <option value="documentary_short">Documentary short</option>
+                                <option value="direct_to_camera">Direct-to-camera</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3"><button class="btn btn-success w-100" type="submit">Produce</button></div>
+                    </form>
+                    <div class="small text-muted mt-2">Content is persisted to the library and updates social metrics.</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">Press Conference</div>
+                <div class="card-body">
+                    <form id="pressForm" class="row g-2">
+                        <div class="col-md-5"><input class="form-control" name="announcement" placeholder="Announcement" required></div>
+                        <div class="col-md-4">
+                            <select class="form-select" name="conference_type">
+                                <option value="major_match_announcement">Major match</option>
+                                <option value="contract_signing">Contract signing</option>
+                                <option value="milestone_announcement">Milestone</option>
+                                <option value="crisis_management">Crisis management</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3"><button class="btn btn-info w-100" type="submit">Stage</button></div>
+                    </form>
+                    <div class="small text-muted mt-2">Coverage feeds mainstream awareness and event interest.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+async function api(endpoint, options) {
+    const response = await fetch(endpoint, Object.assign({
+        headers: {'Content-Type': 'application/json'}
+    }, options || {}));
+    const data = await response.json();
+    if (!data.success) throw new Error(data.error || 'Request failed');
+    return data.data;
+}
+
+function fmtNumber(value) {
+    return Number(value || 0).toLocaleString();
+}
+
+function metricCard(label, value, tone) {
+    return '<div class="col-sm-6 col-xl-3"><div class="card border-' + tone + '"><div class="card-body">' +
+        '<div class="text-muted small">' + label + '</div><div class="h4 mb-0">' + value + '</div></div></div></div>';
+}
+
+async function loadMediaBusiness() {
+    try {
+        const dashboard = await api('/api/media-business/dashboard');
+        const metrics = dashboard.business_metrics || {};
+        document.getElementById('businessMetricCards').innerHTML =
+            metricCard('Mainstream Awareness', Number(metrics.mainstream_awareness || 0).toFixed(1), 'primary') +
+            metricCard('Sponsor Appeal', Number(metrics.sponsorship_attractiveness || 0).toFixed(1), 'success') +
+            metricCard('Streaming Appeal', Number(metrics.streaming_attractiveness || 0).toFixed(1), 'info') +
+            metricCard('Valuation', '$' + fmtNumber(metrics.valuation_estimate), 'warning');
+
+        document.getElementById('ratingsPanel').innerHTML = (dashboard.ratings || []).map(function(rating) {
+            return '<div class="d-flex justify-content-between border-bottom py-2"><span>' +
+                rating.show_name + '<br><small class="text-muted">Y' + rating.year + ' W' + rating.week + '</small></span>' +
+                '<strong>' + fmtNumber(rating.total_viewership) + '</strong></div>';
+        }).join('') || '<div class="text-muted">No ratings recorded yet.</div>';
+
+        const network = dashboard.network || {};
+        document.getElementById('networkPanel').innerHTML =
+            '<div class="display-6">' + Number(network.relationship_score || 0).toFixed(1) + '</div>' +
+            '<span class="badge bg-secondary">' + (network.relationship_level || 'unknown') + '</span>' +
+            '<hr><div class="small text-muted">' + (network.network_name || 'Network') + '</div>';
+
+        document.getElementById('socialPanel').innerHTML = (dashboard.social_platforms || []).map(function(platform) {
+            return '<div class="d-flex justify-content-between border-bottom py-2"><span>' +
+                platform.platform.replace(/_/g, ' ') + '<br><small class="text-muted">' +
+                (Number(platform.engagement_rate || 0) * 100).toFixed(2) + '% engagement</small></span>' +
+                '<strong>' + fmtNumber(platform.follower_count) + '</strong></div>';
+        }).join('');
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+function formData(form) {
+    return Object.fromEntries(new FormData(form).entries());
+}
+
+document.getElementById('contentForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    await api('/api/media-business/content', {method: 'POST', body: JSON.stringify(formData(event.target))});
+    event.target.reset();
+    loadMediaBusiness();
+});
+
+document.getElementById('pressForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const data = formData(event.target);
+    data.significance_score = 70;
+    await api('/api/media-business/press-conferences', {method: 'POST', body: JSON.stringify(data)});
+    event.target.reset();
+    loadMediaBusiness();
+});
+
+loadMediaBusiness();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

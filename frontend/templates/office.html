@@ -1,0 +1,958 @@
+<!-- Office View - Main Dashboard with Enhanced UI -->
+
+<!-- Enhanced Office Header -->
+<div class="office-header mb-4">
+    <div class="office-header-content">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h2>
+                    <i class="bi bi-building"></i> Command Center
+                </h2>
+                <p class="lead">Welcome back, boss. Here's what's happening in your promotion.</p>
+                
+                <div class="quick-stats">
+                    <div class="quick-stat">
+                        <i class="bi bi-calendar-week"></i>
+                        <span>Year <strong id="headerYear">1</strong>, Week <strong id="headerWeek">1</strong></span>
+                    </div>
+                    <div class="quick-stat">
+                        <i class="bi bi-cash-stack"></i>
+                        <span id="headerBalance">$1,000,000</span>
+                    </div>
+                    <div class="quick-stat">
+                        <i class="bi bi-people-fill"></i>
+                        <span><strong id="headerRoster">0</strong> Wrestlers</span>
+                    </div>
+                    <div class="quick-stat alert-stat" id="headerAlertStat" style="display:none;">
+                        <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                        <span><strong id="headerAlertCount">0</strong> Alerts</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <div class="d-none d-lg-block">
+                    <span class="badge bg-light text-dark px-3 py-2 fs-6">
+                        <i class="bi bi-gem me-2"></i>Premium Mode
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ENHANCEMENT E: Contract Alerts Widget -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Contract Alerts
+                    <span class="badge bg-danger" id="alertBadgeCritical">0</span>
+                    <span class="badge bg-warning text-dark" id="alertBadgeWarning">0</span>
+                    <button class="btn btn-sm btn-dark float-end" onclick="refreshContractAlerts()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </h6>
+            </div>
+            <div class="card-body" id="contractAlertsBody">
+                <div class="text-center">
+                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                    <span class="ms-2">Loading alerts...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CONTRACT ALERTS SECTION (Legacy - Enhanced) -->
+<div id="contractAlertsSection" style="display:none;">
+    <div class="contract-alerts-card">
+        <div class="contract-alerts-header">
+            <h5>
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                Contract Alerts
+            </h5>
+            <span class="alert-count" id="alertCountBadge">0 Expiring</span>
+        </div>
+        <div class="contract-alerts-body">
+            <div id="contractAlertsList">
+                <!-- Alerts will be inserted here -->
+            </div>
+            <div class="mt-3 text-center">
+                <a href="#" onclick="loadView('contracts'); return false;" class="btn btn-outline-danger">
+                    <i class="bi bi-file-earmark-text me-2"></i> Manage All Contracts
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard Grid -->
+<div class="row g-4 mb-4">
+    <!-- Universe Status Card -->
+    <div class="col-lg-6">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header universe">
+                <i class="bi bi-globe2"></i>
+                <h5>Universe Status</h5>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Promotion</div>
+                        <div class="stat-value highlight" id="officePromotion">Ring of Champions</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Balance</div>
+                        <div class="stat-value money" id="officeBalance">$1,000,000</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Year</div>
+                        <div class="stat-value" id="officeYear">1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Week</div>
+                        <div class="stat-value" id="officeWeek">1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Total Roster</div>
+                        <div class="stat-value" id="officeTotalRoster">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Active Feuds</div>
+                        <div class="stat-value" id="officeActiveFeud">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Next Show Card -->
+    <div class="col-lg-6">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header next-show">
+                <i class="bi bi-calendar-event"></i>
+                <h5>Next Show</h5>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="next-show-title" id="officeNextShowName">
+                    <i class="bi bi-tv me-2"></i>ROC Alpha Weekly
+                </div>
+                
+                <div class="show-details-grid">
+                    <div class="show-detail-item">
+                        <i class="bi bi-tag-fill"></i>
+                        <div>
+                            <div class="label">Brand</div>
+                            <div class="value" id="officeNextShowBrand">ROC Alpha</div>
+                        </div>
+                    </div>
+                    <div class="show-detail-item">
+                        <i class="bi bi-collection-play"></i>
+                        <div>
+                            <div class="label">Type</div>
+                            <div class="value" id="officeNextShowType">Weekly TV</div>
+                        </div>
+                    </div>
+                    <div class="show-detail-item">
+                        <i class="bi bi-calendar3"></i>
+                        <div>
+                            <div class="label">Day</div>
+                            <div class="value" id="officeNextShowDay">Monday</div>
+                        </div>
+                    </div>
+                    <div class="show-detail-item">
+                        <i class="bi bi-hash"></i>
+                        <div>
+                            <div class="label">Week</div>
+                            <div class="value" id="officeNextShowWeek">1</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="show-preview-box">
+                    <div class="preview-row">
+                        <span class="preview-label">
+                            <i class="bi bi-person-check me-2"></i>Available Wrestlers
+                        </span>
+                        <span class="preview-value" id="availableWrestlers">0</span>
+                    </div>
+                    <div class="preview-row">
+                        <span class="preview-label">
+                            <i class="bi bi-fire me-2"></i>Hot Feuds
+                        </span>
+                        <span class="preview-value" id="hotFeudsCount">0</span>
+                    </div>
+                </div>
+                
+                <button class="btn-generate-card" id="generateCardBtn">
+                    <i class="bi bi-magic"></i>
+                    Generate Show Card
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Next PPV/PLE Featured Card -->
+<div class="row mb-4" id="nextPPVCard" style="display:none;">
+    <div class="col-12">
+        <div class="ppv-card-featured">
+            <div class="ppv-featured-header">
+                <i class="bi bi-star-fill"></i>
+                <h5>Next Premium Live Event</h5>
+            </div>
+            <div class="ppv-featured-body">
+                <div class="ppv-featured-content">
+                    <div class="ppv-info">
+                        <div class="ppv-name" id="nextPPVName">Victory Dome</div>
+                        <div class="ppv-details-grid">
+                            <div class="ppv-detail-item">
+                                <div class="label">Scheduled Week</div>
+                                <div class="value" id="nextPPVWeek">Week 52</div>
+                            </div>
+                            <div class="ppv-detail-item">
+                                <div class="label">Brand</div>
+                                <div class="value" id="nextPPVBrand">Cross-Brand</div>
+                            </div>
+                            <div class="ppv-detail-item">
+                                <div class="label">Event Tier</div>
+                                <div class="value" id="nextPPVTier">
+                                    <span class="ppv-tier-badge major">MAJOR</span>
+                                </div>
+                            </div>
+                            <div class="ppv-detail-item">
+                                <div class="label">Shows Until</div>
+                                <div class="value" id="nextPPVShowsAway">0 shows away</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ppv-countdown-circle">
+                        <div class="ppv-countdown-content">
+                            <div class="ppv-countdown-number" id="nextPPVCountdown">0</div>
+                            <div class="ppv-countdown-label">Shows</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add this button in the office view where appropriate -->
+<button class="btn btn-warning" onclick="loadView('draft')">
+    <i class="bi bi-arrow-left-right me-2"></i>
+    Initiate Brand Draft
+</button>
+
+<!-- Upcoming PPVs Timeline -->
+<div class="row">
+    <div class="col-12">
+        <div class="ppv-timeline-card">
+            <div class="ppv-timeline-header">
+                <i class="bi bi-calendar3"></i>
+                <h5>Upcoming Events Calendar</h5>
+            </div>
+            <div class="ppv-timeline-body">
+                <div id="upcomingPPVsTimeline" class="ppv-timeline-list">
+                    <div class="text-center py-4">
+                        <div class="loading-skeleton" style="width: 100%; height: 60px; margin-bottom: 0.5rem;"></div>
+                        <div class="loading-skeleton" style="width: 100%; height: 60px; margin-bottom: 0.5rem;"></div>
+                        <div class="loading-skeleton" style="width: 100%; height: 60px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    if (typeof window.viewCleanup === 'function') {
+        window.viewCleanup();
+    }
+
+    let alertBadgeInterval = null;
+    let contractAlertsInterval = null;
+
+    function byId(id) {
+        return document.getElementById(id);
+    }
+
+    function setText(id, value) {
+        const el = byId(id);
+        if (el) el.textContent = value;
+        return el;
+    }
+
+    function setHTML(id, value) {
+        const el = byId(id);
+        if (el) el.innerHTML = value;
+        return el;
+    }
+
+    async function fetchAPI(endpoint, options) {
+        if (typeof window.fetchAPI === 'function') {
+            return window.fetchAPI(endpoint, options);
+        }
+
+        const response = await fetch(endpoint, Object.assign({
+            headers: { 'Content-Type': 'application/json' }
+        }, options || {}));
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || data.message || ('HTTP ' + response.status));
+        }
+        return data;
+    }
+    
+    // ========================================================================
+    // ENHANCEMENT E: Contract Alerts Widget (Dashboard API Version)
+    // ========================================================================
+    
+    async function loadContractAlertsDashboard() {
+        const container = document.getElementById('contractAlertsBody');
+        if (!container) return;
+
+        try {
+            const response = await fetchAPI('/api/contracts/alerts/dashboard');
+            renderContractAlertsDashboard(response);
+        } catch (error) {
+            console.error('Error loading contract alerts:', error);
+            container.innerHTML = 
+                '<div class="alert alert-danger mb-0">Failed to load contract alerts</div>';
+        }
+    }
+    
+    function renderContractAlertsDashboard(data) {
+        const criticalBadge = document.getElementById('alertBadgeCritical');
+        const warningBadge = document.getElementById('alertBadgeWarning');
+        const container = document.getElementById('contractAlertsBody');
+        if (!criticalBadge || !warningBadge || !container) return;
+
+        const summary = data.summary;
+        const alerts = data.alerts;
+        
+        // Update badges
+        criticalBadge.textContent = summary.critical_count;
+        warningBadge.textContent = summary.warnings_count;
+        
+        // Update header alert indicator
+        const headerAlertStat = document.getElementById('headerAlertStat');
+        const headerAlertCount = document.getElementById('headerAlertCount');
+        if (headerAlertStat && headerAlertCount) {
+            const totalAlerts = summary.total_alerts || 0;
+            if (totalAlerts > 0) {
+                headerAlertCount.textContent = totalAlerts;
+                headerAlertStat.style.display = 'flex';
+            } else {
+                headerAlertStat.style.display = 'none';
+            }
+        }
+        
+        if (summary.total_alerts === 0) {
+            container.innerHTML = `
+                <div class="text-center text-success py-3">
+                    <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+                    <p class="mb-0 mt-2">No contract alerts at this time!</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        
+        // Render critical alerts
+        if (alerts.critical && alerts.critical.length > 0) {
+            html += '<h6 class="text-danger mb-2"><i class="bi bi-exclamation-circle-fill me-1"></i> Critical</h6>';
+            alerts.critical.forEach(alert => {
+                html += renderSingleAlertDashboard(alert, 'danger');
+            });
+        }
+        
+        // Render warnings
+        if (alerts.warnings && alerts.warnings.length > 0) {
+            if (html) html += '<hr class="my-2">';
+            html += '<h6 class="text-warning mb-2"><i class="bi bi-exclamation-triangle-fill me-1"></i> Warnings</h6>';
+            alerts.warnings.forEach(alert => {
+                html += renderSingleAlertDashboard(alert, 'warning');
+            });
+        }
+        
+        // Render opportunities
+        if (alerts.opportunities && alerts.opportunities.length > 0) {
+            if (html) html += '<hr class="my-2">';
+            html += '<h6 class="text-success mb-2"><i class="bi bi-lightbulb-fill me-1"></i> Opportunities</h6>';
+            alerts.opportunities.forEach(alert => {
+                html += renderSingleAlertDashboard(alert, 'success');
+            });
+        }
+        
+        // Render info
+        if (alerts.info && alerts.info.length > 0) {
+            if (html) html += '<hr class="my-2">';
+            html += '<h6 class="text-info mb-2"><i class="bi bi-info-circle-fill me-1"></i> Information</h6>';
+            alerts.info.forEach(alert => {
+                html += renderSingleAlertDashboard(alert, 'info');
+            });
+        }
+        
+        // Add quick action footer
+        html += `
+            <hr class="my-2">
+            <div class="d-flex gap-2 justify-content-end">
+                <button class="btn btn-sm btn-outline-secondary" onclick="loadView('contracts')">
+                    <i class="bi bi-file-earmark-text me-1"></i> All Contracts
+                </button>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+    }
+    
+    function renderSingleAlertDashboard(alert, variant) {
+        let detailsHtml = '';
+        
+        if (alert.wrestlers && alert.wrestlers.length > 0) {
+            const displayWrestlers = alert.wrestlers.slice(0, 3);
+            const remaining = alert.wrestlers.length - 3;
+            detailsHtml = `<small class="text-muted d-block mt-1">
+                ${displayWrestlers.join(', ')}${remaining > 0 ? ` +${remaining} more` : ''}
+            </small>`;
+        } else if (alert.details && alert.details.length > 0) {
+            const details = alert.details.slice(0, 3);
+            detailsHtml = '<ul class="mb-0 mt-1 ps-3" style="font-size: 0.85em;">';
+            details.forEach(detail => {
+                if (detail.wrestler_name) {
+                    const weeks = detail.weeks_remaining !== undefined ? ` (${detail.weeks_remaining}w)` : '';
+                    detailsHtml += `<li class="text-muted">${detail.wrestler_name}${weeks}</li>`;
+                }
+            });
+            if (alert.details.length > 3) {
+                detailsHtml += `<li class="text-muted">+${alert.details.length - 3} more...</li>`;
+            }
+            detailsHtml += '</ul>';
+        }
+        
+        const costInfo = alert.estimated_cost 
+            ? `<span class="badge bg-secondary ms-2">Est: $${alert.estimated_cost.toLocaleString()}</span>` 
+            : '';
+        
+        const savingsInfo = alert.potential_savings 
+            ? `<span class="badge bg-success ms-2">Save: $${alert.potential_savings.toLocaleString()}</span>` 
+            : '';
+        
+        const actionUrl = alert.action_url || '#';
+        const actionText = alert.action || 'View';
+        const icon = alert.icon || '';
+        
+        return `
+            <div class="alert alert-${variant} py-2 px-3 mb-2 d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <div class="fw-semibold" style="font-size: 0.9em;">
+                        ${icon} ${alert.title || 'Alert'}
+                        ${costInfo}${savingsInfo}
+                    </div>
+                    <p class="mb-0" style="font-size: 0.85em;">${alert.message || ''}</p>
+                    ${detailsHtml}
+                </div>
+                <div class="ms-2">
+                    <a href="${actionUrl}" class="btn btn-sm btn-outline-${variant}" 
+                       onclick="if(this.href.startsWith('#')) { loadView('contracts'); return false; }">
+                        ${actionText}
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+    
+    async function refreshContractAlerts() {
+        const container = document.getElementById('contractAlertsBody');
+        container.innerHTML = `
+            <div class="text-center py-3">
+                <div class="spinner-border spinner-border-sm" role="status"></div>
+                <span class="ms-2">Refreshing alerts...</span>
+            </div>
+        `;
+        await loadContractAlertsDashboard();
+    }
+
+    // ========================================================================
+    // LEGACY: Alert Badge and Contract Alerts Section
+    // ========================================================================
+    
+    async function loadAlertBadge() {
+        try {
+            const response = await fetchAPI('/api/alerts/contracts/summary');
+            const badge = document.getElementById('alertBadge');
+            const headerAlertStat = document.getElementById('headerAlertStat');
+            const headerAlertCount = document.getElementById('headerAlertCount');
+            
+            // Update navbar badge if it exists
+            if (badge) {
+                if (response.requires_action > 0) {
+                    badge.textContent = response.requires_action;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+            
+            // Update header quick stat alert indicator (if not already set by dashboard)
+            if (headerAlertStat && headerAlertCount && headerAlertStat.style.display === 'none') {
+                if (response.requires_action > 0) {
+                    headerAlertCount.textContent = response.requires_action;
+                    headerAlertStat.style.display = 'flex';
+                    headerAlertStat.style.cursor = 'pointer';
+                    headerAlertStat.onclick = function() {
+                        loadView('alerts');
+                    };
+                }
+            }
+            
+            return response;
+        } catch (error) {
+            console.error('Failed to load alert badge:', error);
+            return null;
+        }
+    }
+
+    // Legacy contract alerts for the collapsible section
+    async function loadContractAlertsLegacy() {
+        try {
+            const response = await fetchAPI('/api/contracts/expiring?weeks=4');
+            
+            if (response.total === 0) {
+                const emptySection = document.getElementById('contractAlertsSection');
+                if (emptySection) emptySection.style.display = 'none';
+                return;
+            }
+            
+            // Show alerts section with animation
+            const alertSection = document.getElementById('contractAlertsSection');
+            if (!alertSection) return;
+            alertSection.style.display = 'block';
+            alertSection.style.animation = 'slideDown 0.4s ease';
+            
+            // Update badge count
+            const alertCountBadge = document.getElementById('alertCountBadge');
+            if (alertCountBadge) alertCountBadge.textContent = `${response.total} Expiring`;
+            
+            let html = '';
+            
+            response.wrestlers.forEach((wrestler, index) => {
+                const isUrgent = wrestler.contract.weeks_remaining <= 2;
+                const weeksText = wrestler.contract.weeks_remaining === 1 ? '1 week' : `${wrestler.contract.weeks_remaining} weeks`;
+                
+                const roleIcon = wrestler.role === 'Main Event' ? '👑' : 
+                                 wrestler.role === 'Upper Midcard' ? '⭐' : 
+                                 wrestler.role === 'Midcard' ? '🎯' : '📍';
+                
+                // Escape wrestler name for safe use in onclick
+                const escapedName = wrestler.name.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                
+                html += `
+                    <div class="contract-alert-item ${isUrgent ? 'urgent' : ''}" style="animation: slideIn 0.3s ease ${index * 0.1}s both;">
+                        <div class="contract-alert-info">
+                            <div class="contract-alert-name">
+                                ${roleIcon} ${wrestler.name}
+                                <span class="contract-time-badge ${isUrgent ? 'danger' : 'warning'}">
+                                    ${isUrgent ? '⚠️ ' : ''}${weeksText}
+                                </span>
+                            </div>
+                            <div class="contract-alert-meta">
+                                ${wrestler.role} • ${wrestler.primary_brand} • 
+                                <strong>$${wrestler.contract.salary_per_show.toLocaleString()}</strong>/show
+                            </div>
+                        </div>
+                        <button class="btn-quick-extend" onclick="window.quickExtendContract('${wrestler.id}', '${escapedName}')">
+                            <i class="bi bi-arrow-repeat"></i>
+                            Extend
+                        </button>
+                    </div>
+                `;
+            });
+            
+            const alertList = document.getElementById('contractAlertsList');
+            if (alertList) alertList.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Failed to load contract alerts:', error);
+        }
+    }
+
+    // ========================================================================
+    // OFFICE DATA LOADING
+    // ========================================================================
+
+    async function loadOfficeData() {
+        try {
+            const state = await fetchAPI('/api/universe/state');
+            
+            // Update header quick stats
+            setText('headerYear', state.year);
+            setText('headerWeek', state.week);
+            setText('headerBalance', `$${state.balance.toLocaleString()}`);
+            setText('headerRoster', state.total_roster);
+            
+            // Update main stats
+            setText('officePromotion', state.promotion);
+            setText('officeYear', state.year);
+            setText('officeWeek', state.week);
+            
+            const balance = state.balance;
+            const balanceEl = setText('officeBalance', `$${balance.toLocaleString()}`);
+            if (balanceEl) {
+                balanceEl.className = balance >= 0 ? 'stat-value money' : 'stat-value money negative';
+            }
+            
+            setText('officeTotalRoster', state.total_roster);
+            setText('officeActiveFeud', state.active_feuds);
+            
+            // Current/Next Show
+            if (state.current_show) {
+                const show = state.current_show;
+                const showIcon = show.show_type.includes('ppv') ? '🎯' : '📺';
+                setHTML('officeNextShowName', `${showIcon} ${show.name}`);
+                setText('officeNextShowBrand', show.brand);
+                setText('officeNextShowType', show.show_type.replace('_', ' ').toUpperCase());
+                setText('officeNextShowDay', show.day_of_week);
+                setText('officeNextShowWeek', show.week);
+            }
+            
+            // Next PPV
+            if (state.next_ppv) {
+                loadNextPPVInfo();
+            }
+            
+            // Load show preview
+            loadShowPreview();
+            
+            // Load upcoming PPVs timeline
+            loadUpcomingPPVs();
+            
+            // Load contract alerts (new dashboard widget)
+            loadContractAlertsDashboard();
+            
+            // Load legacy contract alerts section
+            loadContractAlertsLegacy();
+            
+            // Load alert badge for navigation
+            loadAlertBadge();
+            
+        } catch (error) {
+            console.error('Failed to load office data:', error);
+            showErrorState();
+        }
+    }
+
+    // Load show preview
+    async function loadShowPreview() {
+        try {
+            const preview = await fetchAPI('/api/booking/preview-next');
+            
+            setText('availableWrestlers', preview.available_wrestlers);
+            setText('hotFeudsCount', preview.hot_feuds);
+            
+        } catch (error) {
+            console.error('Failed to load show preview:', error);
+        }
+    }
+
+    // Load next PPV info with enhanced display
+    async function loadNextPPVInfo() {
+        try {
+            const state = await fetchAPI('/api/universe/state');
+            
+            if (!state.next_ppv) return;
+            
+            const ppv = state.next_ppv;
+            
+            // Show the PPV card with animation
+            const ppvCard = document.getElementById('nextPPVCard');
+            if (!ppvCard) return;
+            ppvCard.style.display = 'block';
+            ppvCard.style.animation = 'fadeIn 0.5s ease';
+            
+            const nextPPVName = document.getElementById('nextPPVName');
+            const nextPPVWeek = document.getElementById('nextPPVWeek');
+            const nextPPVBrand = document.getElementById('nextPPVBrand');
+            if (nextPPVName) nextPPVName.textContent = ppv.name;
+            if (nextPPVWeek) nextPPVWeek.textContent = `Week ${ppv.week}`;
+            if (nextPPVBrand) nextPPVBrand.textContent = ppv.brand;
+            
+            // Tier badge with enhanced styling
+            const tierBadge = ppv.tier === 'major' ? 
+                '<span class="ppv-tier-badge major">⭐ MAJOR</span>' : 
+                '<span class="ppv-tier-badge minor">MINOR</span>';
+            const nextPPVTier = document.getElementById('nextPPVTier');
+            if (nextPPVTier) nextPPVTier.innerHTML = tierBadge;
+            
+            // Calculate shows away
+            const showsAway = Math.max(0, (ppv.week - state.week) * 3);
+            const nextPPVShowsAway = document.getElementById('nextPPVShowsAway');
+            const nextPPVCountdown = document.getElementById('nextPPVCountdown');
+            if (nextPPVShowsAway) nextPPVShowsAway.textContent = `${showsAway} shows away`;
+            if (nextPPVCountdown) nextPPVCountdown.textContent = showsAway;
+            
+        } catch (error) {
+            console.error('Failed to load next PPV:', error);
+        }
+    }
+
+    // Load upcoming PPVs timeline with enhanced UI
+    async function loadUpcomingPPVs() {
+        try {
+            const response = await fetchAPI('/api/calendar/upcoming-ppvs?count=8');
+            const ppvs = response.ppvs;
+            const timeline = byId('upcomingPPVsTimeline');
+            if (!timeline) return;
+            
+            if (!ppvs || ppvs.length === 0) {
+                timeline.innerHTML = `
+                    <div class="empty-timeline">
+                        <i class="bi bi-calendar-x"></i>
+                        <h5>No Upcoming Events</h5>
+                        <p>No PPV/PLE events scheduled at this time.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            ppvs.forEach((ppv, index) => {
+                const isMajor = ppv.tier === 'major';
+                const tierBadge = isMajor ? 
+                    '<span class="ppv-timeline-tier major">⭐ MAJOR</span>' : 
+                    '<span class="ppv-timeline-tier minor">MINOR</span>';
+                
+                const brandIcon = ppv.brand === 'Cross-Brand' ? '🌐' : 
+                                  ppv.brand.includes('Alpha') ? '🔵' : '🔴';
+                
+                html += `
+                    <div class="ppv-timeline-item ${isMajor ? 'major' : ''}" style="animation: slideIn 0.3s ease ${index * 0.1}s both;">
+                        <div class="ppv-timeline-week">
+                            <div class="week-label">Year ${ppv.year}</div>
+                            <div class="week-value">Week ${ppv.week}</div>
+                        </div>
+                        <div class="ppv-timeline-info">
+                            <div class="ppv-timeline-name">${isMajor ? '⭐ ' : ''}${ppv.name}</div>
+                            <div class="ppv-timeline-brand">${brandIcon} ${ppv.brand}</div>
+                        </div>
+                        ${tierBadge}
+                    </div>
+                `;
+            });
+            
+            timeline.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Failed to load upcoming PPVs:', error);
+        }
+    }
+
+    // ========================================================================
+    // CONTRACT ACTIONS
+    // ========================================================================
+
+    // Quick extend contract with better feedback
+    async function quickExtendContract(wrestlerId, wrestlerName) {
+        if (!confirm(`📝 Extend ${wrestlerName}'s contract by 1 year at current salary?`)) {
+            return;
+        }
+        
+        // Show loading state on button
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+        
+        try {
+            const response = await fetchAPI(`/api/contracts/${wrestlerId}/auto-extend`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ weeks: 52 })
+            });
+            
+            if (response.success) {
+                // Success animation
+                btn.innerHTML = '<i class="bi bi-check-lg"></i> Done!';
+                btn.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                btn.classList.remove('btn-outline-primary', 'btn-quick-extend');
+                btn.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    loadContractAlertsLegacy(); // Refresh legacy alerts
+                    loadContractAlertsDashboard(); // Refresh dashboard widget
+                    loadAlertBadge(); // Refresh alert badge
+                    loadOfficeData(); // Refresh balance
+                }, 1000);
+                
+            } else {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                alert(`❌ Failed: ${response.error || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Failed to extend contract:', error);
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+            alert(`❌ Error: ${error.message}`);
+        }
+    }
+
+    // ========================================================================
+    // ERROR HANDLING
+    // ========================================================================
+
+    function showErrorState() {
+        const timeline = byId('upcomingPPVsTimeline');
+        if (!timeline) return;
+        timeline.innerHTML = `
+            <div class="empty-timeline">
+                <i class="bi bi-exclamation-triangle text-danger"></i>
+                <h5>Connection Error</h5>
+                <p>Failed to load data. Please refresh the page.</p>
+                <button class="btn btn-outline-primary" onclick="window.loadOfficeData()">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Retry
+                </button>
+            </div>
+        `;
+    }
+
+    // ========================================================================
+    // EVENT HANDLERS
+    // ========================================================================
+
+    // Generate card button with loading state
+    const generateCardBtn = byId('generateCardBtn');
+    if (generateCardBtn) {
+        generateCardBtn.addEventListener('click', function() {
+            const btn = this;
+            const originalHTML = btn.innerHTML;
+            
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
+            btn.disabled = true;
+            
+            // Small delay for visual feedback
+            setTimeout(() => {
+                loadView('booking');
+            }, 300);
+        });
+    }
+
+    // ========================================================================
+    // CSS ANIMATIONS
+    // ========================================================================
+
+    if (!document.getElementById('officeDashboardDynamicStyles')) {
+        const styleSheet = document.createElement('style');
+        styleSheet.id = 'officeDashboardDynamicStyles';
+        styleSheet.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(-20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+        
+        @keyframes slideDown {
+            from { 
+                opacity: 0; 
+                transform: translateY(-20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        .alert-stat {
+            background: rgba(255, 193, 7, 0.15);
+            border-radius: 8px;
+            padding: 4px 12px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Enhancement E: Contract Alerts Widget Styles */
+        #contractAlertsBody .alert {
+            border-radius: 8px;
+            border-left-width: 4px;
+        }
+        
+        #contractAlertsBody .alert-danger {
+            border-left-color: #dc3545;
+        }
+        
+        #contractAlertsBody .alert-warning {
+            border-left-color: #ffc107;
+        }
+        
+        #contractAlertsBody .alert-success {
+            border-left-color: #28a745;
+        }
+        
+        #contractAlertsBody .alert-info {
+            border-left-color: #17a2b8;
+        }
+    `;
+        document.head.appendChild(styleSheet);
+    }
+
+    // ========================================================================
+    // EXPOSE FUNCTIONS TO GLOBAL WINDOW OBJECT
+    // Required for onclick handlers in dynamically generated HTML
+    // ========================================================================
+    window.quickExtendContract = quickExtendContract;
+    window.loadOfficeData = loadOfficeData;
+    window.loadContractAlertsLegacy = loadContractAlertsLegacy;
+    window.loadContractAlertsDashboard = loadContractAlertsDashboard;
+    window.refreshContractAlerts = refreshContractAlerts;
+    window.loadShowPreview = loadShowPreview;
+    window.loadNextPPVInfo = loadNextPPVInfo;
+    window.loadUpcomingPPVs = loadUpcomingPPVs;
+    window.loadAlertBadge = loadAlertBadge;
+
+    // ========================================================================
+    // INITIALIZATION
+    // ========================================================================
+
+    // Load data on view load
+    loadOfficeData();
+    
+    // Load badge on page load and refresh every 30 seconds
+    loadAlertBadge();
+    alertBadgeInterval = setInterval(loadAlertBadge, 30000);
+    
+    // Auto-refresh contract alerts every 5 minutes
+    contractAlertsInterval = setInterval(loadContractAlertsDashboard, 5 * 60 * 1000);
+
+    window.viewCleanup = function() {
+        if (alertBadgeInterval) {
+            clearInterval(alertBadgeInterval);
+            alertBadgeInterval = null;
+        }
+        if (contractAlertsInterval) {
+            clearInterval(contractAlertsInterval);
+            contractAlertsInterval = null;
+        }
+    };
+
+})();
+</script>

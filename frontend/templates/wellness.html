@@ -1,0 +1,343 @@
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="bi bi-heart-pulse-fill"></i> Wellness</h2>
+        <p class="lead">Monitor fatigue, burnout, injury risk, veteran decline, and your company wellness policy.</p>
+        <hr>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12 d-flex flex-wrap gap-2">
+        <button class="btn btn-outline-danger" onclick="loadView('injuries')">
+            <i class="bi bi-bandaid"></i> Open Rehab Center
+        </button>
+        <button class="btn btn-outline-secondary" data-action="refresh-wellness">
+            <i class="bi bi-arrow-repeat"></i> Refresh
+        </button>
+        <button class="btn btn-primary" data-action="open-violation-modal">
+            <i class="bi bi-exclamation-octagon"></i> Record Violation
+        </button>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-danger text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="burnoutRiskCount">-</h3>
+                <small>Burnout Risk</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="injuryRiskCount">-</h3>
+                <small>Injury / Fatigue Risk</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="veteranWatchCount">-</h3>
+                <small>Veteran Watch</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-dark text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="suspensionWeeksTotal">-</h3>
+                <small>Total Suspension Weeks</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-5">
+        <div class="card h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-shield-check"></i> Wellness Policy</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Policy Name</label>
+                    <input class="form-control" id="policyName">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Testing Frequency (Weeks)</label>
+                    <input class="form-control" id="testingFrequencyWeeks" type="number" min="1" max="52">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Strictness</label>
+                    <input class="form-control" id="policyStrictness" type="number" min="0" max="100">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Minor Suspension (Weeks)</label>
+                    <input class="form-control" id="minorSuspensionWeeks" type="number" min="0" max="26">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Major Suspension (Weeks)</label>
+                    <input class="form-control" id="majorSuspensionWeeks" type="number" min="0" max="52">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Rehab Focus</label>
+                    <input class="form-control" id="rehabFocus" type="number" min="0" max="100">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" id="policyNotes" rows="3"></textarea>
+                </div>
+                <button class="btn btn-primary" data-action="save-policy">
+                    <i class="bi bi-save"></i> Save Policy
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-list-check"></i> Wellness Violations</h5>
+            </div>
+            <div class="card-body">
+                <div id="violationsList">
+                    <p class="text-muted text-center">Loading violations...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Burnout Risk</h5>
+            </div>
+            <div class="card-body" id="burnoutRiskList"></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">Fatigue Watch</h5>
+            </div>
+            <div class="card-body" id="fatigueWatchList"></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Age Decline Watch</h5>
+            </div>
+            <div class="card-body" id="ageWatchList"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="violationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Record Wellness Violation</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Wrestler</label>
+                    <select class="form-select" id="violationWrestler"></select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Violation Type</label>
+                    <input class="form-control" id="violationType" value="wellness_violation">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Severity</label>
+                    <select class="form-select" id="violationSeverity">
+                        <option value="minor">Minor</option>
+                        <option value="major">Major</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" id="violationNotes" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" data-action="save-violation">Record</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    let roster = [];
+
+    document.addEventListener('click', function (e) {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+
+        const action = target.dataset.action;
+        if (action === 'refresh-wellness') loadPage();
+        if (action === 'save-policy') savePolicy();
+        if (action === 'open-violation-modal') openViolationModal();
+        if (action === 'save-violation') saveViolation();
+    });
+
+    function renderRosterCards(containerId, wrestlers, formatter) {
+        const container = document.getElementById(containerId);
+        if (!wrestlers.length) {
+            container.innerHTML = '<p class="text-muted mb-0">No wrestlers in this category.</p>';
+            return;
+        }
+
+        container.innerHTML = wrestlers.map(wrestler => `
+            <div class="border rounded p-2 mb-2">
+                <strong>${wrestler.name}</strong>
+                <div class="small text-muted">${wrestler.primary_brand} • ${wrestler.role}</div>
+                <div class="small mt-1">${formatter(wrestler)}</div>
+            </div>
+        `).join('');
+    }
+
+    async function loadRoster() {
+        const response = await fetchAPI('/api/roster?active_only=true');
+        roster = response.wrestlers || [];
+        document.getElementById('violationWrestler').innerHTML = roster
+            .map(wrestler => `<option value="${wrestler.id}">${wrestler.name} (${wrestler.primary_brand})</option>`)
+            .join('');
+    }
+
+    async function loadOverview() {
+        const response = await fetchAPI('/api/wellness/dashboard');
+        const summary = response.summary || {};
+
+        document.getElementById('burnoutRiskCount').textContent = summary.burnout_risk_count || 0;
+        document.getElementById('injuryRiskCount').textContent = summary.fatigue_watch_count || 0;
+        document.getElementById('veteranWatchCount').textContent = summary.age_watch_count || 0;
+        document.getElementById('suspensionWeeksTotal').textContent = summary.suspension_weeks_total || 0;
+
+        renderRosterCards('burnoutRiskList', response.burnout_watch || [], wrestler =>
+            `Burnout: ${wrestler.burnout_level} | Fatigue: ${wrestler.fatigue} | Morale: ${wrestler.morale}`
+        );
+        renderRosterCards('fatigueWatchList', response.fatigue_watch || [], wrestler =>
+            `Fatigue: ${wrestler.fatigue} | Injured: ${wrestler.is_injured ? 'Yes' : 'No'} | Age: ${wrestler.age}`
+        );
+        renderRosterCards('ageWatchList', response.age_watch || [], wrestler =>
+            `Age: ${wrestler.age} | Decline score: ${wrestler.age_decline_score} | Fatigue: ${wrestler.fatigue}`
+        );
+    }
+
+    async function loadPolicy() {
+        const response = await fetchAPI('/api/wellness/policy');
+        const policy = response.policy || {};
+        document.getElementById('policyName').value = policy.policy_name || '';
+        document.getElementById('testingFrequencyWeeks').value = policy.testing_frequency_weeks || 4;
+        document.getElementById('policyStrictness').value = policy.strictness || 60;
+        document.getElementById('minorSuspensionWeeks').value = policy.suspension_weeks_minor || 1;
+        document.getElementById('majorSuspensionWeeks').value = policy.suspension_weeks_major || 4;
+        document.getElementById('rehabFocus').value = policy.rehab_focus || 60;
+        document.getElementById('policyNotes').value = policy.notes || '';
+    }
+
+    async function savePolicy() {
+        const response = await fetchAPI('/api/wellness/policy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                policy_name: document.getElementById('policyName').value.trim(),
+                testing_frequency_weeks: parseInt(document.getElementById('testingFrequencyWeeks').value || '4', 10),
+                strictness: parseInt(document.getElementById('policyStrictness').value || '60', 10),
+                suspension_weeks_minor: parseInt(document.getElementById('minorSuspensionWeeks').value || '1', 10),
+                suspension_weeks_major: parseInt(document.getElementById('majorSuspensionWeeks').value || '4', 10),
+                rehab_focus: parseInt(document.getElementById('rehabFocus').value || '60', 10),
+                notes: document.getElementById('policyNotes').value.trim()
+            })
+        });
+
+        if (!response.success) {
+            alert(`Failed to save wellness policy: ${response.error}`);
+            return;
+        }
+
+        loadPolicy();
+    }
+
+    async function loadViolations() {
+        const response = await fetchAPI('/api/wellness/violations');
+        const violations = response.violations || [];
+        const container = document.getElementById('violationsList');
+
+        if (!violations.length) {
+            container.innerHTML = '<p class="text-muted mb-0">No wellness violations recorded.</p>';
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Wrestler</th>
+                            <th>Type</th>
+                            <th>Severity</th>
+                            <th>Suspension</th>
+                            <th>Week</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${violations.map(violation => `
+                            <tr>
+                                <td>${violation.wrestler_name}</td>
+                                <td>${violation.violation_type}</td>
+                                <td>${violation.severity}</td>
+                                <td>${violation.suspension_weeks} week(s)</td>
+                                <td>Y${violation.year} W${violation.week}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    function openViolationModal() {
+        new bootstrap.Modal(document.getElementById('violationModal')).show();
+    }
+
+    async function saveViolation() {
+        const response = await fetchAPI('/api/wellness/violations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                wrestler_id: document.getElementById('violationWrestler').value,
+                violation_type: document.getElementById('violationType').value.trim(),
+                severity: document.getElementById('violationSeverity').value,
+                notes: document.getElementById('violationNotes').value.trim()
+            })
+        });
+
+        if (!response.success) {
+            alert(`Failed to record violation: ${response.error}`);
+            return;
+        }
+
+        bootstrap.Modal.getInstance(document.getElementById('violationModal')).hide();
+        document.getElementById('violationNotes').value = '';
+        loadOverview();
+        loadViolations();
+    }
+
+    function loadPage() {
+        loadOverview();
+        loadPolicy();
+        loadViolations();
+    }
+
+    loadRoster().then(loadPage);
+})();
+</script>

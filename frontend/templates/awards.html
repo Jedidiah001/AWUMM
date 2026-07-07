@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWUM - Year-End Awards</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+    <style>
+        .awards-header {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffa500 100%);
+            color: #1a1a2e;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.3);
+        }
+        
+        .awards-header::before {
+            content: '🏆';
+            position: absolute;
+            font-size: 15rem;
+            opacity: 0.1;
+            right: -50px;
+            top: -50px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .awards-header h2 {
+            font-size: 3rem;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 0.5rem;
+        }
+        
+        .year-selector {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .award-category-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .award-category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        
+        .award-category-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .award-category-header.gold {
+            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+            color: #1a1a2e;
+        }
+        
+        .award-icon {
+            font-size: 2.5rem;
+        }
+        
+        .award-category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .award-winner-section {
+            background: linear-gradient(145deg, #fff8dc 0%, #fffacd 100%);
+            padding: 2rem;
+            border-bottom: 3px solid #ffd700;
+        }
+        
+        .winner-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1a1a2e;
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4);
+        }
+        
+        .winner-name {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #1a1a2e;
+            margin-bottom: 0.5rem;
+        }
+        
+        .winner-reason {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        
+        .nominees-section {
+            padding: 1.5rem;
+        }
+        
+        .nominee-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        
+        .nominee-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .nominee-rank {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #6c757d;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .nominee-info {
+            flex: 1;
+        }
+        
+        .nominee-name {
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 0.25rem;
+        }
+        
+        .nominee-reason {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .nominee-score {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+        
+        .empty-awards {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6c757d;
+        }
+        
+        .empty-awards i {
+            font-size: 5rem;
+            opacity: 0.3;
+            margin-bottom: 1rem;
+        }
+        
+        .awards-summary {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .summary-item {
+            text-align: center;
+            padding: 1rem;
+            background: linear-gradient(145deg, #f8f9ff 0%, #eef1ff 100%);
+            border-radius: 10px;
+        }
+        
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #667eea;
+        }
+        
+        .summary-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">🎮 AWUM</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/office">Office</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/roster">Roster</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/stats">Stats</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/awards">Awards</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/feuds">Feuds</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contracts">Contracts</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="awards-header">
+            <h2><i class="bi bi-trophy-fill"></i> Year-End Awards</h2>
+            <p class="lead mb-0">Celebrating excellence in Ring of Champions</p>
+        </div>
+
+        <!-- Year Selector -->
+        <div class="year-selector">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-calendar-event"></i> Select Year</h5>
+                </div>
+                <div class="col-md-6">
+                    <select class="form-select" id="yearSelect">
+                        <option value="">Loading years...</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Awards Summary -->
+        <div id="awardsSummary" style="display: none;">
+            <div class="awards-summary">
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-value" id="summaryYear">1</div>
+                        <div class="summary-label">Year</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="summaryTotal">0</div>
+                        <div class="summary-label">Total Awards</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value">🏆</div>
+                        <div class="summary-label">Excellence</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Awards Display -->
+        <div id="awardsContainer">
+            <div class="empty-awards">
+                <i class="bi bi-trophy"></i>
+                <h4>No Awards Yet</h4>
+                <p>Awards ceremonies appear at the end of each year (Week 52)</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/awards.js"></script>
+</body>
+</html>

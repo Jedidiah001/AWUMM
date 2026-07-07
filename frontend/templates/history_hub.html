@@ -1,0 +1,229 @@
+<style>
+  .history-hub { color:#E8E8E8; }
+  .history-hub .subtle { color:#AFAFAF; }
+  .history-hub .card { background:#111 !important; border-color:#2d2d2d !important; }
+  .history-hub code { color:#F0CE6A; }
+</style>
+
+<div class="container-fluid p-4 history-hub">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h2 class="mb-1">History Hub (203-211)</h2>
+      <div class="subtle">Match archive, storyline memory, championship lineage, Hall of Fame, rivalries, anniversaries, records, moments, and era naming.</div>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <span class="badge text-bg-success">Live</span>
+      <small id="hhLastSync" class="subtle">Never synced</small>
+      <button class="btn btn-outline-light btn-sm" id="hhRefreshBtn">Refresh</button>
+    </div>
+  </div>
+
+  <div id="hhSummary" class="row g-2 mb-3"></div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-12 col-xl-6">
+      <div class="card p-3 h-100">
+        <h5>Add Match History Entry</h5>
+        <div class="row g-2">
+          <div class="col-6"><input id="hhShowName" class="form-control form-control-sm" placeholder="Show Name"></div>
+          <div class="col-6"><input id="hhMatchType" class="form-control form-control-sm" placeholder="Match Type (e.g. cage)"></div>
+          <div class="col-6"><input id="hhP1" class="form-control form-control-sm" placeholder="Wrestler 1 ID"></div>
+          <div class="col-6"><input id="hhP2" class="form-control form-control-sm" placeholder="Wrestler 2 ID"></div>
+          <div class="col-4"><input id="hhWinner" class="form-control form-control-sm" placeholder="Winner ID"></div>
+          <div class="col-4"><input id="hhRating" type="number" min="0" max="100" class="form-control form-control-sm" value="72"></div>
+          <div class="col-4"><input id="hhCrowd" type="number" min="0" max="100" class="form-control form-control-sm" value="74"></div>
+          <div class="col-12"><input id="hhTags" class="form-control form-control-sm" placeholder="Tags comma-separated (title_match,main_event,debut)"></div>
+          <div class="col-12 d-grid"><button id="hhAddMatchBtn" class="btn btn-primary btn-sm">Save Match + Update History Systems</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+      <div class="card p-3 h-100">
+        <h5>Storyline Archive</h5>
+        <div class="input-group input-group-sm mb-2">
+          <input id="hhStoryTitle" class="form-control" placeholder="Storyline title">
+          <button id="hhAddStoryBtn" class="btn btn-warning">Archive Storyline</button>
+        </div>
+        <div id="hhStoryList" style="max-height:240px;overflow:auto" class="small"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-12 col-xl-4">
+      <div class="card p-3 h-100">
+        <h5>Hall of Fame</h5>
+        <div class="input-group input-group-sm mb-2">
+          <input id="hhHofWrestlerId" class="form-control" placeholder="Wrestler ID">
+          <input id="hhHofWrestlerName" class="form-control" placeholder="Wrestler Name">
+          <button id="hhInductBtn" class="btn btn-success">Induct</button>
+        </div>
+        <div id="hhHofList" style="max-height:220px;overflow:auto" class="small"></div>
+      </div>
+    </div>
+    <div class="col-12 col-xl-4">
+      <div class="card p-3 h-100">
+        <h5>Record Tracking</h5>
+        <div id="hhRecords" style="max-height:220px;overflow:auto" class="small"></div>
+      </div>
+    </div>
+    <div class="col-12 col-xl-4">
+      <div class="card p-3 h-100">
+        <h5>Era Naming</h5>
+        <div class="d-grid gap-2">
+          <button id="hhDetectEraBtn" class="btn btn-info btn-sm">Auto-Detect Era</button>
+          <input id="hhEraName" class="form-control form-control-sm" placeholder="Manual era name">
+          <button id="hhCreateEraBtn" class="btn btn-outline-info btn-sm">Create Era</button>
+        </div>
+        <div id="hhEraOutput" class="small subtle mt-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-xl-6">
+      <div class="card p-3">
+        <h5>Rivalry History</h5>
+        <div id="hhRivalries" style="max-height:260px;overflow:auto" class="small"></div>
+      </div>
+    </div>
+    <div class="col-12 col-xl-6">
+      <div class="card p-3">
+        <h5>Upcoming Anniversaries</h5>
+        <div id="hhAnniversaries" style="max-height:260px;overflow:auto" class="small"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  let pollId = null;
+
+  async function api(url, opts){
+    const r = await fetch(url, opts);
+    const j = await r.json().catch(()=>({ok:false,error:'Invalid JSON'}));
+    if(!r.ok || j.ok===false) throw new Error(j.error || `HTTP ${r.status}`);
+    return j;
+  }
+
+  function esc(v){ return String(v ?? ''); }
+
+  async function refreshAll(){
+    const [dash, stories, hof, records, rivalries, anniversaries] = await Promise.all([
+      api('/api/history/dashboard'),
+      api('/api/history/storylines'),
+      api('/api/history/hof'),
+      api('/api/history/records'),
+      api('/api/history/rivalries'),
+      api('/api/history/anniversaries/upcoming?days=120'),
+    ]);
+
+    const s = dash.summary || {};
+    document.getElementById('hhSummary').innerHTML = `
+      <div class="col-6 col-md-3"><div class="card p-2"><div class="subtle small">Matches</div><div class="h4 mb-0">${s.matches||0}</div></div></div>
+      <div class="col-6 col-md-3"><div class="card p-2"><div class="subtle small">Storylines</div><div class="h4 mb-0">${s.storylines||0}</div></div></div>
+      <div class="col-6 col-md-3"><div class="card p-2"><div class="subtle small">Records</div><div class="h4 mb-0">${s.records||0}</div></div></div>
+      <div class="col-6 col-md-3"><div class="card p-2"><div class="subtle small">Eras</div><div class="h4 mb-0">${s.eras||0}</div></div></div>`;
+
+    document.getElementById('hhStoryList').innerHTML = (stories.storylines||[]).slice(0,20).map(s=>`
+      <div class="border-bottom border-secondary py-1"><strong>${esc(s.title)}</strong><div class="subtle">Start: Y${esc(s.start_year)} W${esc(s.start_week)}</div></div>
+    `).join('') || '<div class="subtle">No storylines archived.</div>';
+
+    document.getElementById('hhHofList').innerHTML = (hof.inductees||[]).slice(0,20).map(i=>`
+      <div class="border-bottom border-secondary py-1"><strong>${esc(i.wrestler_name)}</strong> <span class="subtle">Y${esc(i.induction_year)} W${esc(i.induction_week)}</span></div>
+    `).join('') || '<div class="subtle">No Hall of Fame inductees yet.</div>';
+
+    document.getElementById('hhRecords').innerHTML = (records.records||[]).slice(0,12).map(r=>`
+      <div class="border-bottom border-secondary py-1"><code>${esc(r.metric_name)}</code>: ${esc(r.value_text || r.value_numeric)}</div>
+    `).join('') + ((records.near_record_alerts||[]).map(a=>`<div class="text-warning mt-1">⚠ ${esc(a)}</div>`).join(''));
+
+    document.getElementById('hhRivalries').innerHTML = (rivalries.rivalries||[]).slice(0,25).map(r=>`
+      <div class="border-bottom border-secondary py-1"><strong>${esc(r.wrestler_a_id)}</strong> vs <strong>${esc(r.wrestler_b_id)}</strong> — ${esc(r.total_matches)} matches, peak ${Number(r.intensity_peak||0).toFixed(1)}</div>
+    `).join('') || '<div class="subtle">No rivalry history yet.</div>';
+
+    document.getElementById('hhAnniversaries').innerHTML = (anniversaries.anniversaries||[]).map(a=>`
+      <div class="border-bottom border-secondary py-1"><strong>${esc(a.subject_type)}</strong> · ${esc(a.upcoming_date)}</div>
+    `).join('') || '<div class="subtle">No upcoming anniversaries in window.</div>';
+
+    document.getElementById('hhLastSync').textContent = `Synced ${new Date().toLocaleTimeString()}`;
+  }
+
+  document.getElementById('hhRefreshBtn').addEventListener('click', refreshAll);
+
+  document.getElementById('hhAddMatchBtn').addEventListener('click', async ()=>{
+    const participants = [
+      { wrestler_id: document.getElementById('hhP1').value.trim(), wrestler_name: document.getElementById('hhP1').value.trim() },
+      { wrestler_id: document.getElementById('hhP2').value.trim(), wrestler_name: document.getElementById('hhP2').value.trim() },
+    ].filter(p=>p.wrestler_id);
+
+    if(participants.length < 2) return alert('Please enter 2 wrestler IDs.');
+
+    await api('/api/history/matches', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        show_name: document.getElementById('hhShowName').value.trim() || 'Weekly Show',
+        participants,
+        winner_ids: [document.getElementById('hhWinner').value.trim()].filter(Boolean),
+        finish_type: document.getElementById('hhMatchType').value.trim() || 'pinfall',
+        match_rating: Number(document.getElementById('hhRating').value || 72),
+        crowd_reaction: Number(document.getElementById('hhCrowd').value || 74),
+        tags: (document.getElementById('hhTags').value || '').split(',').map(s=>s.trim()).filter(Boolean),
+      })
+    });
+    await refreshAll();
+  });
+
+  document.getElementById('hhAddStoryBtn').addEventListener('click', async ()=>{
+    const title = document.getElementById('hhStoryTitle').value.trim();
+    if(!title) return alert('Storyline title required');
+    await api('/api/history/storylines', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ title })
+    });
+    document.getElementById('hhStoryTitle').value='';
+    await refreshAll();
+  });
+
+  document.getElementById('hhInductBtn').addEventListener('click', async ()=>{
+    const wrestler_id = document.getElementById('hhHofWrestlerId').value.trim();
+    const wrestler_name = document.getElementById('hhHofWrestlerName').value.trim() || wrestler_id;
+    if(!wrestler_id) return alert('Wrestler ID required');
+    await api('/api/history/hof', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ wrestler_id, wrestler_name, legacy_score: 85 })
+    });
+    await refreshAll();
+  });
+
+  document.getElementById('hhDetectEraBtn').addEventListener('click', async ()=>{
+    const out = await api('/api/history/eras?detect=1');
+    const s = out.suggested_era || {};
+    document.getElementById('hhEraOutput').innerHTML = `<div><strong>${esc(s.era_name)}</strong> (confidence ${esc(s.confidence)})</div><div class='subtle'>${esc((s.style_markers||[]).join(', '))}</div>`;
+  });
+
+  document.getElementById('hhCreateEraBtn').addEventListener('click', async ()=>{
+    const era_name = document.getElementById('hhEraName').value.trim();
+    if(!era_name) return alert('Era name required');
+    await api('/api/history/eras', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ era_name, style_markers: ['manual_override'] })
+    });
+    document.getElementById('hhEraName').value='';
+    await refreshAll();
+  });
+
+  refreshAll().catch(err=>{
+    console.error(err);
+    alert(`History Hub failed to load: ${err.message}`);
+  });
+
+  pollId = setInterval(()=>{ refreshAll().catch(console.error); }, 12000);
+  window.viewCleanup = function(){ if(pollId) clearInterval(pollId); };
+})();
+</script>

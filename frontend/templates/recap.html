@@ -1,0 +1,2242 @@
+<!-- Enhanced Recap View - Show Results with STEP 14 Features -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2>
+                    <i class="bi bi-trophy"></i> <span id="recapShowName">Show Recap</span>
+                </h2>
+                <p class="lead mb-0">
+                    <span id="recapBrand">Brand</span> | 
+                    Year <span id="recapYear">1</span>, Week <span id="recapWeek">1</span>
+                </p>
+            </div>
+            <div>
+                <div class="btn-group me-2">
+                    <button class="btn btn-outline-secondary" onclick="exportShowReport()" title="Export Report">
+                        <i class="bi bi-download"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="window.print()" title="Print Report">
+                        <i class="bi bi-printer"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="shareShowReport()" title="Share">
+                        <i class="bi bi-share"></i>
+                    </button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-warning btn-lg" onclick="reviewPostShowFallout()">
+                        <i class="bi bi-lightning-charge-fill"></i> Review Fallout
+                    </button>
+                    <button class="btn btn-outline-primary btn-lg" onclick="autoHandlePostShowFallout()">
+                        <i class="bi bi-cpu"></i> Let AI Handle
+                    </button>
+                    <button class="btn btn-primary btn-lg" onclick="continueToNextShow()">
+                        <i class="bi bi-arrow-right"></i> Next Show
+                    </button>
+                </div>
+            </div>
+        </div>
+        <hr>
+    </div>
+</div>
+
+<!-- Loading State -->
+<div id="recapLoading" class="text-center my-5">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+    <p class="mt-3">Loading show results...</p>
+</div>
+
+<!-- Show Summary -->
+<div id="recapContent" style="display:none;">
+    <!-- Show Summary Card -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card border-primary shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-bar-chart-fill"></i> Show Summary
+                    </h4>
+                </div>
+                <div class="card-body bg-light">
+                    <div class="row text-center">
+                        <div class="col-md-2">
+                            <h6 class="text-muted mb-2">Overall Rating</h6>
+                            <div id="recapOverallRating" class="display-4">⭐⭐⭐⭐</div>
+                            <p class="mb-0"><strong id="recapOverallRatingValue">3.75 stars</strong></p>
+                        </div>
+                        <div class="col-md-2">
+                            <h6 class="text-muted mb-2">Matches</h6>
+                            <div class="display-4" id="recapMatchCount">5</div>
+                            <p class="mb-0">Total</p>
+                        </div>
+                        <div class="col-md-2">
+                            <h6 class="text-muted mb-2">Attendance</h6>
+                            <div class="display-4 text-primary" id="recapAttendance">5,000</div>
+                            <p class="mb-0">Fans</p>
+                        </div>
+                        <div class="col-md-2">
+                            <h6 class="text-muted mb-2">Revenue</h6>
+                            <div class="display-4 text-success" id="recapRevenue">$150K</div>
+                            <p class="mb-0">Gross</p>
+                        </div>
+                        <div class="col-md-2">
+                            <h6 class="text-muted mb-2">Expenses</h6>
+                            <div class="display-4 text-danger" id="recapExpenses">$100K</div>
+                            <p class="mb-0">Total</p>
+                        </div>
+                        <div class="col-md-2">
+                            <h6 class="text-muted mb-2">Net Profit</h6>
+                            <div class="display-4" id="recapNetProfit">$50K</div>
+                            <p class="mb-0" id="recapNetLabel">Profit</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Post-Show Fallout Desk -->
+    <div class="row mb-4" id="postShowFalloutSection" style="display:none;">
+        <div class="col-md-12">
+            <div class="card border-danger shadow-lg">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0"><i class="bi bi-broadcast-pin"></i> Post-Show Fallout Desk</h4>
+                        <small id="postShowFalloutSummary">The world is reacting to the show.</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-light text-danger" id="postShowFalloutUrgency">Urgency 0</span>
+                        <span class="badge bg-dark ms-1" id="postShowFalloutActions">0 actions</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="postShowFalloutHeadlines" class="mb-3"></div>
+                    <div id="postShowFalloutItems" class="row"></div>
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button class="btn btn-outline-primary" onclick="autoHandlePostShowFallout()">
+                            <i class="bi bi-cpu"></i> Let AI Handle Open Items
+                        </button>
+                        <button class="btn btn-primary" onclick="continueToNextShow()">
+                            <i class="bi bi-arrow-right-circle"></i> Continue to Next Show
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison with Last Week -->
+    <div class="row mb-4" id="comparisonSection" style="display:none;">
+        <div class="col-md-12">
+            <div class="card border-secondary shadow">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-arrow-left-right"></i> Comparison vs Last Week
+                    </h5>
+                    <button class="btn btn-sm btn-outline-light" onclick="toggleSection('comparisonBody')">
+                        <i class="bi bi-chevron-down" id="comparisonBodyIcon"></i>
+                    </button>
+                </div>
+                <div class="card-body" id="comparisonBody">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <small class="text-muted">Rating Change</small>
+                            <h4 id="ratingChange" class="mb-0">+0.25 ⭐</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Attendance Change</small>
+                            <h4 id="attendanceChange" class="mb-0">+500</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Revenue Change</small>
+                            <h4 id="revenueChange" class="mb-0">+$10K</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Trend</small>
+                            <h4 id="trendIndicator" class="mb-0">📈 Improving</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notable Events Section -->
+    <div class="row mb-4" id="recapEventsSection" style="display:none;">
+        <div class="col-md-12">
+            <div class="card border-warning shadow">
+                <div class="card-header bg-warning d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Notable Events
+                    </h5>
+                    <span class="badge bg-dark" id="eventCount">0</span>
+                </div>
+                <div class="card-body">
+                    <div id="recapEventsList" class="row">
+                        <!-- Events will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Crowd Energy Timeline -->
+    <div class="row mb-4" id="crowdEnergySection">
+        <div class="col-md-12">
+            <div class="card border-success shadow">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-activity"></i> Crowd Energy Throughout the Show
+                    </h5>
+                    <div>
+                        <span class="badge bg-light text-dark" id="avgCrowdEnergy">Avg: 0%</span>
+                        <span class="badge bg-light text-dark ms-1" id="peakCrowdEnergy">Peak: 0%</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="crowdEnergyTimeline" class="position-relative" style="height: 100px;">
+                        <!-- Timeline will be inserted here -->
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted mt-2">
+                        <span>Opening</span>
+                        <span>Mid-Card</span>
+                        <span>Main Event</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Wrestler Performance Stats -->
+    <div class="row mb-4" id="wrestlerStatsSection">
+        <div class="col-md-12">
+            <div class="card border-info shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up"></i> Wrestler Performance
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Top Performers -->
+                        <div class="col-md-4">
+                            <h6 class="text-muted">
+                                <i class="bi bi-trophy-fill text-warning"></i> Top Performers (Momentum Gained)
+                            </h6>
+                            <div id="topPerformers" class="list-group">
+                                <div class="text-center text-muted py-3">
+                                    <small>Calculating...</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Match of the Night -->
+                        <div class="col-md-4">
+                            <h6 class="text-muted">
+                                <i class="bi bi-star-fill text-warning"></i> Match of the Night
+                            </h6>
+                            <div id="matchOfNight" class="card bg-light">
+                                <div class="card-body text-center">
+                                    <small class="text-muted">Calculating...</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Biggest Losers -->
+                        <div class="col-md-4">
+                            <h6 class="text-muted">
+                                <i class="bi bi-arrow-down-circle-fill text-danger"></i> Momentum Lost
+                            </h6>
+                            <div id="biggestLosers" class="list-group">
+                                <div class="text-center text-muted py-3">
+                                    <small>Calculating...</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Star Distribution Chart -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h6 class="text-muted"><i class="bi bi-bar-chart"></i> Match Quality Distribution</h6>
+                            <div class="d-flex align-items-end justify-content-center" id="starDistribution" style="height: 120px;">
+                                <!-- Bar chart will be inserted here -->
+                            </div>
+                            <div class="d-flex justify-content-center small text-muted mt-2" style="gap: 40px;">
+                                <span>0-1⭐</span>
+                                <span>1-2⭐</span>
+                                <span>2-3⭐</span>
+                                <span>3-4⭐</span>
+                                <span>4-5⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Social Media Buzz -->
+    <div class="row mb-4" id="socialBuzzSection">
+        <div class="col-md-12">
+            <div class="card border-primary shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-dots-fill"></i> Social Media Buzz
+                    </h5>
+                    <div>
+                        <span class="badge bg-light text-dark" id="socialPostCount">0 posts</span>
+                        <button class="btn btn-sm btn-outline-light ms-2" onclick="toggleSection('socialBuzzBody')">
+                            <i class="bi bi-chevron-down" id="socialBuzzBodyIcon"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body" id="socialBuzzBody" style="max-height: 400px; overflow-y: auto;">
+                    <div id="socialBuzzFeed">
+                        <!-- Social posts will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Match Results -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-list-ol"></i> Match Results
+                    </h4>
+                    <div>
+                        <button class="btn btn-sm btn-outline-light me-2" onclick="expandAllMatches()">
+                            <i class="bi bi-arrows-expand"></i> Expand All
+                        </button>
+                        <button class="btn btn-sm btn-outline-light" onclick="collapseAllMatches()">
+                            <i class="bi bi-arrows-collapse"></i> Collapse All
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div id="recapMatchResults">
+                        <!-- Match results will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Show Grade Summary -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card border-0 shadow-lg" id="showGradeCard">
+                <div class="card-body text-center py-4">
+                    <h3 class="text-muted mb-3">Final Show Grade</h3>
+                    <div id="showGrade" class="display-1 fw-bold mb-2">A</div>
+                    <p id="showGradeDescription" class="lead text-muted">Excellent show! The fans loved it.</p>
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <div class="border rounded p-2">
+                                <small class="text-muted">Match Quality</small>
+                                <div id="gradeMatchQuality" class="fw-bold text-success">A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2">
+                                <small class="text-muted">Crowd Engagement</small>
+                                <div id="gradeCrowd" class="fw-bold text-success">A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2">
+                                <small class="text-muted">Financial Success</small>
+                                <div id="gradeFinancial" class="fw-bold text-success">A</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Continue Button (Bottom) -->
+    <div class="row mt-4 mb-5">
+        <div class="col-md-12">
+            <div class="d-grid gap-2">
+                <button class="btn btn-warning btn-lg shadow" onclick="reviewPostShowFallout()">
+                    <i class="bi bi-lightning-charge-fill"></i> Review Post-Show Fallout
+                </button>
+                <button class="btn btn-primary btn-lg shadow" onclick="continueToNextShow()">
+                    <i class="bi bi-arrow-right-circle-fill"></i> Continue to Next Show
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-share"></i> Share Show Results</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Share Text</label>
+                    <textarea class="form-control" id="shareText" rows="4" readonly></textarea>
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="copyShareText()">
+                        <i class="bi bi-clipboard"></i> Copy to Clipboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // All variables are now scoped to this IIFE
+    var showResult = null;
+    var matchDetailsExpanded = {};
+    var postShowFallout = null;
+
+    function recapHtml(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function(c) {
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+        });
+    }
+
+    function recapAttr(value) {
+        return recapHtml(value).replace(/\\/g, '\\\\');
+    }
+
+    async function loadRecapView() {
+        try {
+            document.getElementById('recapLoading').style.display = 'block';
+            document.getElementById('recapContent').style.display = 'none';
+            
+            // Try to get show result from sessionStorage
+            var storedResult = sessionStorage.getItem('lastShowResult');
+            
+            if (!storedResult) {
+                // Fallback: get latest show from history
+                var history = await fetchAPI('/api/show/history?limit=1');
+                
+                if (!history.shows || history.shows.length === 0) {
+                    throw new Error('No show results available');
+                }
+                
+                showResult = history.shows[0];
+                
+                // Need to fetch match results separately
+                var matchHistory = await fetchAPI('/api/match/history?limit=20');
+                
+                // Filter matches for this show
+                var showMatches = matchHistory.matches.filter(function(m) { 
+                    return m.show_id === showResult.show_id; 
+                });
+                
+                // Convert to match result format
+                showResult.match_results = showMatches.map(function(m) {
+                    return {
+                        match_id: m.match_id,
+                        side_a: {
+                            wrestler_ids: m.side_a_ids,
+                            wrestler_names: m.side_a_names
+                        },
+                        side_b: {
+                            wrestler_ids: m.side_b_ids,
+                            wrestler_names: m.side_b_names
+                        },
+                        winner: m.winner,
+                        winner_names: m.winner === 'side_a' ? m.side_a_names : m.side_b_names,
+                        loser_names: m.winner === 'side_a' ? m.side_b_names : m.side_a_names,
+                        finish_type: m.finish_type,
+                        duration_minutes: m.duration_minutes,
+                        star_rating: m.star_rating,
+                        highlights: m.highlights,
+                        match_summary: m.match_summary,
+                        is_upset: m.is_upset === 1,
+                        title_changed_hands: m.title_changed_hands === 1,
+                        is_title_match: m.is_title_match === 1,
+                        referee_name: m.referee_name,
+                        crowd_energy: m.crowd_energy,
+                        crowd_pacing_grade: m.crowd_pacing_grade,
+                        special_match_type: m.special_match_type
+                    };
+                });
+                
+            } else {
+                showResult = JSON.parse(storedResult);
+                
+                // Clear sessionStorage
+                sessionStorage.removeItem('lastShowResult');
+            }
+            
+            displayShowResult(showResult);
+            
+            // Load comparison data
+            loadComparison();
+
+            // Load persistent post-show fallout generated by the simulation
+            await loadPostShowFallout(showResult);
+            
+            document.getElementById('recapLoading').style.display = 'none';
+            document.getElementById('recapContent').style.display = 'block';
+            
+        } catch (error) {
+            console.error('Failed to load recap:', error);
+            document.getElementById('recapLoading').innerHTML = 
+                '<div class="alert alert-danger">' +
+                '<h4>Failed to Load Recap</h4>' +
+                '<p>' + error.message + '</p>' +
+                '<button class="btn btn-primary" onclick="loadView(\'office\')">Return to Office</button>' +
+                '</div>';
+        }
+    }
+
+    function displayShowResult(result) {
+        console.log('Displaying show result:', result);
+        
+        // Header
+        var showName = result.show_name || result.name || 'Show Recap';
+        var overallRating = Number(result.overall_rating || 0);
+        var attendance = Number(result.total_attendance != null ? result.total_attendance : result.attendance || 0);
+        var revenue = Number(result.total_revenue != null ? result.total_revenue : result.revenue || 0);
+        var payroll = Number(result.total_payroll != null ? result.total_payroll : 0);
+        var netProfit = Number(result.net_profit != null ? result.net_profit : (revenue - payroll));
+        var expenses = Number(result.total_expenses != null ? result.total_expenses : (revenue - netProfit));
+
+        document.getElementById('recapShowName').textContent = showName;
+        document.getElementById('recapBrand').textContent = result.brand || 'Unknown Brand';
+        document.getElementById('recapYear').textContent = result.year || '-';
+        document.getElementById('recapWeek').textContent = result.week || '-';
+        
+        // Summary stats
+        var stars = generateStarRating(overallRating);
+        document.getElementById('recapOverallRating').innerHTML = stars;
+        document.getElementById('recapOverallRatingValue').textContent = overallRating.toFixed(2) + ' stars';
+        
+        document.getElementById('recapMatchCount').textContent = result.match_count || (result.match_results ? result.match_results.length : 0);
+        document.getElementById('recapAttendance').textContent = attendance.toLocaleString();
+        
+        // Revenue
+        document.getElementById('recapRevenue').textContent = revenue >= 1000000 
+            ? '$' + (revenue / 1000000).toFixed(1) + 'M' 
+            : '$' + (revenue / 1000).toFixed(0) + 'K';
+        
+        // Expenses
+        document.getElementById('recapExpenses').textContent = expenses >= 1000000 
+            ? '$' + (expenses / 1000000).toFixed(1) + 'M' 
+            : '$' + (expenses / 1000).toFixed(0) + 'K';
+        
+        // Net profit
+        var netEl = document.getElementById('recapNetProfit');
+        var netLabel = document.getElementById('recapNetLabel');
+        
+        if (netProfit >= 0) {
+            netEl.className = 'display-4 text-success';
+            netLabel.textContent = 'Profit';
+            netEl.textContent = netProfit >= 1000000 
+                ? '$' + (netProfit / 1000000).toFixed(1) + 'M' 
+                : '$' + (netProfit / 1000).toFixed(0) + 'K';
+        } else {
+            netEl.className = 'display-4 text-danger';
+            netLabel.textContent = 'Loss';
+            netEl.textContent = '-$' + (Math.abs(netProfit) >= 1000000 
+                ? (Math.abs(netProfit) / 1000000).toFixed(1) + 'M' 
+                : (Math.abs(netProfit) / 1000).toFixed(0) + 'K');
+        }
+        
+        // Events
+        if (result.events && result.events.length > 0) {
+            displayEvents(result.events);
+        }
+        
+        // Wrestler performance stats
+        if (result.match_results && result.match_results.length > 0) {
+            displayWrestlerStats(result.match_results);
+            renderStarDistribution(result.match_results);
+            renderCrowdEnergyTimeline(result.match_results);
+        }
+        
+        // Social media buzz
+        generateSocialBuzz(result.match_results, result.events);
+        
+        // Match results
+        if (result.match_results && result.match_results.length > 0) {
+            displayMatchResults(result.match_results);
+        } else {
+            document.getElementById('recapMatchResults').innerHTML = 
+                '<div class="p-4 text-center text-muted">' +
+                '<p>No match results available for this show.</p>' +
+                '</div>';
+        }
+        
+        // Calculate and display show grade
+        calculateShowGrade(result);
+    }
+
+    async function loadPostShowFallout(result) {
+        try {
+            if (result.post_show_fallout) {
+                postShowFallout = result.post_show_fallout;
+                renderPostShowFallout(postShowFallout);
+                surfaceUrgentPostShowFallout(postShowFallout);
+                return;
+            }
+
+            if (!result.show_id || !result.year || !result.week) {
+                renderPostShowFallout(null);
+                return;
+            }
+
+            var falloutUrl = '/api/booker/post-show/fallout/latest?show_id=' +
+                encodeURIComponent(result.show_id) +
+                '&year=' + encodeURIComponent(result.year) +
+                '&week=' + encodeURIComponent(result.week);
+            var falloutResponse = await fetch(falloutUrl);
+            if (falloutResponse.status === 404) {
+                renderPostShowFallout(null);
+                return;
+            }
+            var response = await falloutResponse.json();
+            if (!falloutResponse.ok || response.error) {
+                throw new Error(response.error || 'Failed to load post-show fallout');
+            }
+            postShowFallout = response.report || null;
+            renderPostShowFallout(postShowFallout);
+            surfaceUrgentPostShowFallout(postShowFallout);
+        } catch (error) {
+            console.warn('Could not load post-show fallout:', error.message || error);
+            renderPostShowFallout(null);
+        }
+    }
+
+    function renderPostShowFallout(report) {
+        var section = document.getElementById('postShowFalloutSection');
+        var summary = document.getElementById('postShowFalloutSummary');
+        var urgency = document.getElementById('postShowFalloutUrgency');
+        var actions = document.getElementById('postShowFalloutActions');
+        var headlines = document.getElementById('postShowFalloutHeadlines');
+        var itemsContainer = document.getElementById('postShowFalloutItems');
+        if (!section || !itemsContainer) return;
+
+        if (!report || !report.items || report.items.length === 0) {
+            section.style.display = 'block';
+            if (summary) summary.textContent = 'No major fallout was recorded, but the locker room still noticed what happened.';
+            if (urgency) urgency.textContent = 'Urgency 0';
+            if (actions) actions.textContent = '0 actions';
+            headlines.innerHTML = '';
+            itemsContainer.innerHTML = '<div class="col-12"><div class="alert alert-secondary mb-0">Quiet night. No urgent post-show items are waiting.</div></div>';
+            return;
+        }
+
+        section.style.display = 'block';
+        if (summary) summary.textContent = report.summary || 'The world is reacting to the show.';
+        if (urgency) urgency.textContent = 'Urgency ' + Math.round(report.urgency_score || 0);
+        var openActions = (report.open_actions || []).length;
+        if (actions) actions.textContent = openActions + ' action' + (openActions === 1 ? '' : 's');
+
+        var headlineList = report.headlines || [];
+        headlines.innerHTML = headlineList.length
+            ? headlineList.map(function(headline) {
+                return '<span class="badge bg-dark me-2 mb-2"><i class="bi bi-newspaper"></i> ' + recapHtml(headline) + '</span>';
+            }).join('')
+            : '';
+
+        itemsContainer.innerHTML = report.items.map(function(item) {
+            var border = postShowUrgencyBorder(item.urgency);
+            var badge = postShowUrgencyBadge(item.urgency);
+            var effects = item.mechanical_effects || [];
+            var effectHtml = effects.length
+                ? '<div class="small text-muted mt-2">' + effects.map(function(effect) {
+                    var delta = Number(effect.delta || 0);
+                    return '<span class="badge bg-light text-dark border me-1">' +
+                        recapHtml(effect.target_name || effect.target_type) + ' ' +
+                        recapHtml(effect.impact_type) + ' ' +
+                        (delta >= 0 ? '+' : '') + delta +
+                        '</span>';
+                }).join('') + '</div>'
+                : '';
+            var actionHtml = (item.suggested_actions || []).slice(0, 3).map(function(action) {
+                return '<li>' + recapHtml(action) + '</li>';
+            }).join('');
+            var buttons = item.status === 'open'
+                ? '<div class="btn-group btn-group-sm mt-3">' +
+                    '<button class="btn btn-outline-success" onclick="decidePostShowFalloutItem(\'' + recapAttr(item.id) + '\', \'approve\')">Approve</button>' +
+                    '<button class="btn btn-outline-primary" onclick="decidePostShowFalloutItem(\'' + recapAttr(item.id) + '\', \'counter\')">Counter</button>' +
+                    '<button class="btn btn-outline-secondary" onclick="decidePostShowFalloutItem(\'' + recapAttr(item.id) + '\', \'dismiss\')">Dismiss</button>' +
+                  '</div>'
+                : '<span class="badge bg-secondary mt-3">Resolved: ' + recapHtml(item.status) + '</span>';
+
+            return '<div class="col-lg-6 mb-3">' +
+                '<div class="card h-100 ' + border + '">' +
+                    '<div class="card-body">' +
+                        '<div class="d-flex justify-content-between align-items-start mb-2">' +
+                            '<h5 class="mb-0">' + recapHtml(item.title) + '</h5>' +
+                            '<span class="badge ' + badge + '">' + recapHtml(item.urgency || 'medium') + '</span>' +
+                        '</div>' +
+                        '<p class="mb-2">' + recapHtml(item.summary) + '</p>' +
+                        (item.requires_response ? '<span class="badge bg-warning text-dark">Booker response requested</span> ' : '') +
+                        (item.auto_execute_allowed ? '<span class="badge bg-info text-dark">AI may act</span>' : '') +
+                        effectHtml +
+                        (actionHtml ? '<div class="mt-3"><small class="text-muted">Suggested next moves</small><ul class="small mb-0">' + actionHtml + '</ul></div>' : '') +
+                        buttons +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    function postShowUrgencyBorder(urgency) {
+        if (urgency === 'critical') return 'border-danger border-3';
+        if (urgency === 'high') return 'border-warning border-2';
+        if (urgency === 'medium') return 'border-info';
+        return 'border-secondary';
+    }
+
+    function postShowUrgencyBadge(urgency) {
+        if (urgency === 'critical') return 'bg-danger';
+        if (urgency === 'high') return 'bg-warning text-dark';
+        if (urgency === 'medium') return 'bg-info text-dark';
+        return 'bg-secondary';
+    }
+
+    function surfaceUrgentPostShowFallout(report) {
+        if (!report || !report.urgent_items || report.urgent_items.length === 0) return;
+        var item = report.urgent_items.find(function(entry) { return entry.status === 'open'; }) || report.urgent_items[0];
+        if (!item || !window.showPostShowFalloutPopup) return;
+        window.showPostShowFalloutPopup({
+            id: item.id,
+            report_id: report.id,
+            title: item.title,
+            summary: item.summary,
+            urgency: item.urgency,
+            item_type: item.item_type,
+            show_name: report.show_name,
+            year: report.year,
+            week: report.week,
+            auto_execute_allowed: item.auto_execute_allowed
+        });
+    }
+
+    // Show comparison with last week
+    async function loadComparison() {
+        try {
+            var history = await fetchAPI('/api/show/history?limit=2');
+            
+            if (history.shows && history.shows.length >= 2) {
+                var current = history.shows[0];
+                var previous = history.shows[1];
+                
+                document.getElementById('comparisonSection').style.display = 'block';
+                
+                // Rating change
+                var ratingDiff = current.overall_rating - previous.overall_rating;
+                var ratingEl = document.getElementById('ratingChange');
+                ratingEl.innerHTML = (ratingDiff >= 0 ? '+' : '') + ratingDiff.toFixed(2) + ' ⭐ ' + (ratingDiff >= 0 ? '📈' : '📉');
+                ratingEl.className = ratingDiff >= 0 ? 'mb-0 text-success' : 'mb-0 text-danger';
+                
+                // Attendance change
+                var attDiff = current.total_attendance - previous.total_attendance;
+                var attEl = document.getElementById('attendanceChange');
+                attEl.innerHTML = (attDiff >= 0 ? '+' : '') + attDiff.toLocaleString() + ' ' + (attDiff >= 0 ? '📈' : '📉');
+                attEl.className = attDiff >= 0 ? 'mb-0 text-success' : 'mb-0 text-danger';
+                
+                // Revenue change
+                var revDiff = current.total_revenue - previous.total_revenue;
+                var revEl = document.getElementById('revenueChange');
+                revEl.innerHTML = (revDiff >= 0 ? '+' : '-') + '$' + Math.abs(revDiff / 1000).toFixed(0) + 'K ' + (revDiff >= 0 ? '📈' : '📉');
+                revEl.className = revDiff >= 0 ? 'mb-0 text-success' : 'mb-0 text-danger';
+                
+                // Overall trend
+                var trendEl = document.getElementById('trendIndicator');
+                var improvements = (ratingDiff > 0 ? 1 : 0) + (attDiff > 0 ? 1 : 0) + (revDiff > 0 ? 1 : 0);
+                
+                if (improvements >= 2) {
+                    trendEl.innerHTML = '📈 <span class="text-success fw-bold">Improving</span>';
+                } else if (improvements <= 1) {
+                    trendEl.innerHTML = '📉 <span class="text-danger fw-bold">Declining</span>';
+                } else {
+                    trendEl.innerHTML = '➡️ <span class="text-warning fw-bold">Stable</span>';
+                }
+            }
+        } catch (error) {
+            console.log('Could not load comparison data:', error);
+        }
+    }
+
+    function displayEvents(events) {
+        var eventsSection = document.getElementById('recapEventsSection');
+        var eventsList = document.getElementById('recapEventsList');
+        
+        if (events.length === 0) {
+            eventsSection.style.display = 'none';
+            return;
+        }
+        
+        eventsSection.style.display = 'block';
+        document.getElementById('eventCount').textContent = events.length;
+        
+        var html = '';
+        
+        events.forEach(function(event) {
+            var icon = getEventIcon(event.type);
+            var colorClass = getEventColorClass(event.type);
+            
+            html += 
+                '<div class="col-md-6 mb-3">' +
+                '<div class="alert ' + colorClass + ' mb-0 event-card">' +
+                '<h6 class="mb-1">' + icon + ' ' + getEventTitle(event.type) + '</h6>' +
+                '<p class="mb-0">' + event.description + '</p>' +
+                '</div>' +
+                '</div>';
+        });
+        
+        eventsList.innerHTML = html;
+    }
+
+    function displayWrestlerStats(matches) {
+        // Calculate wrestler performance from matches
+        var wrestlerPerformance = {};
+        
+        matches.forEach(function(match) {
+            // Get all participants
+            var allParticipants = [].concat(
+                match.side_a && match.side_a.wrestler_names ? match.side_a.wrestler_names : [],
+                match.side_b && match.side_b.wrestler_names ? match.side_b.wrestler_names : []
+            );
+            
+            allParticipants.forEach(function(name) {
+                if (!wrestlerPerformance[name]) {
+                    wrestlerPerformance[name] = {
+                        name: name,
+                        matches: 0,
+                        wins: 0,
+                        losses: 0,
+                        totalStarRating: 0,
+                        momentumGain: 0,
+                        wasInUpset: false,
+                        wonTitle: false
+                    };
+                }
+                
+                wrestlerPerformance[name].matches++;
+                wrestlerPerformance[name].totalStarRating += match.star_rating;
+                
+                // Check if winner
+                var isWinner = (match.winner_names || []).indexOf(name) !== -1;
+                
+                if (isWinner) {
+                    wrestlerPerformance[name].wins++;
+                    
+                    // Estimate momentum gain
+                    var momentumGain = 5; // Base
+                    
+                    if (match.star_rating >= 4.0) momentumGain += 3;
+                    if (match.is_upset) momentumGain += 10;
+                    if (match.title_changed_hands) momentumGain += 15;
+                    
+                    wrestlerPerformance[name].momentumGain += momentumGain;
+                    
+                    if (match.is_upset) wrestlerPerformance[name].wasInUpset = true;
+                    if (match.title_changed_hands) wrestlerPerformance[name].wonTitle = true;
+                } else {
+                    wrestlerPerformance[name].losses++;
+                    
+                    // Estimate momentum loss
+                    var momentumLoss = -3; // Base
+                    
+                    if (match.is_upset) momentumLoss -= 8;
+                    if (match.title_changed_hands) momentumLoss -= 10;
+                    
+                    wrestlerPerformance[name].momentumGain += momentumLoss;
+                }
+            });
+        });
+        
+        // Convert to array and sort
+        var performers = Object.keys(wrestlerPerformance).map(function(key) {
+            return wrestlerPerformance[key];
+        });
+        
+        // Top performers (by momentum gain)
+        var topPerformers = performers
+            .filter(function(p) { return p.momentumGain > 0; })
+            .sort(function(a, b) { return b.momentumGain - a.momentumGain; })
+            .slice(0, 5);
+        
+        // Biggest losers (by momentum loss)
+        var biggestLosers = performers
+            .filter(function(p) { return p.momentumGain < 0; })
+            .sort(function(a, b) { return a.momentumGain - b.momentumGain; })
+            .slice(0, 5);
+        
+        // Match of the night (highest star rating)
+        var matchOfNight = matches.reduce(function(best, current) {
+            return current.star_rating > best.star_rating ? current : best;
+        });
+        
+        // Render top performers
+        renderTopPerformers(topPerformers);
+        renderBiggestLosers(biggestLosers);
+        renderMatchOfNight(matchOfNight);
+    }
+
+    function renderTopPerformers(performers) {
+        var container = document.getElementById('topPerformers');
+        
+        if (performers.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted py-3"><small>No standout performances</small></div>';
+            return;
+        }
+        
+        var html = '';
+        var medals = ['🥇', '🥈', '🥉'];
+        
+        performers.forEach(function(performer, index) {
+            var badgeClass = index === 0 ? 'bg-warning text-dark' : 'bg-secondary';
+            var medal = medals[index] || '🏅';
+            
+            var badges = [];
+            if (performer.wasInUpset) badges.push('<span class="badge bg-danger">Upset Victory</span>');
+            if (performer.wonTitle) badges.push('<span class="badge bg-warning text-dark">New Champion</span>');
+            
+            html += 
+                '<div class="list-group-item ' + (index === 0 ? 'bg-light border-warning' : '') + ' performer-item">' +
+                '<div class="d-flex justify-content-between align-items-center">' +
+                '<div>' +
+                '<strong>' + medal + ' ' + performer.name + '</strong><br>' +
+                '<small class="text-muted">' +
+                performer.wins + 'W-' + performer.losses + 'L | ' +
+                'Avg: ' + (performer.totalStarRating / performer.matches).toFixed(2) + '⭐' +
+                '</small>' +
+                (badges.length > 0 ? '<br>' + badges.join(' ') : '') +
+                '</div>' +
+                '<div>' +
+                '<span class="badge ' + badgeClass + ' fs-6">+' + performer.momentumGain + '</span>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+        });
+        
+        container.innerHTML = html;
+    }
+
+    function renderBiggestLosers(losers) {
+        var container = document.getElementById('biggestLosers');
+        
+        if (losers.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted py-3"><small>No significant losses</small></div>';
+            return;
+        }
+        
+        var html = '';
+        
+        losers.forEach(function(loser) {
+            html += 
+                '<div class="list-group-item loser-item">' +
+                '<div class="d-flex justify-content-between align-items-center">' +
+                '<div>' +
+                '<strong>' + loser.name + '</strong><br>' +
+                '<small class="text-muted">' +
+                loser.wins + 'W-' + loser.losses + 'L | ' +
+                'Avg: ' + (loser.totalStarRating / loser.matches).toFixed(2) + '⭐' +
+                '</small>' +
+                '</div>' +
+                '<div>' +
+                '<span class="badge bg-danger fs-6">' + loser.momentumGain + '</span>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+        });
+        
+        container.innerHTML = html;
+    }
+
+    function renderMatchOfNight(match) {
+        var container = document.getElementById('matchOfNight');
+        
+        var stars = generateStarRating(match.star_rating);
+        var winnerNames = (match.winner_names || []).join(' & ');
+        var loserNames = (match.loser_names || []).join(' & ');
+        
+        container.innerHTML = 
+            '<div class="card-body text-center bg-warning bg-opacity-25 match-of-night-card">' +
+            '<div class="mb-2 star-display">' + stars + '</div>' +
+            '<h5 class="mb-2">' + match.star_rating.toFixed(2) + ' Stars</h5>' +
+            '<p class="mb-1">' +
+            '<strong class="text-success">' + winnerNames + '</strong> ' +
+            '<span class="text-muted">def.</span> ' +
+            '<strong class="text-danger">' + loserNames + '</strong>' +
+            '</p>' +
+            '<small class="text-muted">' + formatFinishType(match.finish_type) + ' | ' + match.duration_minutes + ' mins</small>' +
+            '</div>';
+    }
+
+    // Star distribution chart
+    function renderStarDistribution(matches) {
+        var container = document.getElementById('starDistribution');
+        if (!container) return;
+        
+        // Count matches in each star range
+        var ranges = [0, 0, 0, 0, 0]; // 0-1, 1-2, 2-3, 3-4, 4-5
+        
+        matches.forEach(function(m) {
+            var idx = Math.min(Math.floor(m.star_rating), 4);
+            ranges[idx]++;
+        });
+        
+        var maxCount = Math.max.apply(null, ranges.concat([1]));
+        var colors = ['#dc3545', '#fd7e14', '#ffc107', '#28a745', '#20c997'];
+        var labels = ['Poor', 'Below Avg', 'Average', 'Good', 'Excellent'];
+        
+        var html = '';
+        ranges.forEach(function(count, idx) {
+            var height = Math.max((count / maxCount) * 100, count > 0 ? 15 : 0);
+            html += 
+                '<div class="d-flex flex-column align-items-center mx-2" style="width: 60px;">' +
+                '<div class="position-relative" style="height: 100px; width: 100%;">' +
+                '<div class="position-absolute bottom-0 w-100 rounded-top star-bar" ' +
+                'style="height: ' + height + '%; background-color: ' + colors[idx] + '; transition: height 0.5s ease;" ' +
+                'title="' + labels[idx] + ': ' + count + ' matches">' +
+                '</div>' +
+                '</div>' +
+                '<div class="text-center mt-1">' +
+                '<strong class="fs-5">' + count + '</strong>' +
+                '</div>' +
+                '</div>';
+        });
+        
+        container.innerHTML = html;
+    }
+
+    // Crowd energy timeline
+    function renderCrowdEnergyTimeline(matches) {
+        var container = document.getElementById('crowdEnergyTimeline');
+        if (!container || !matches.length) return;
+        
+        // Get energy from matches (use crowd_energy field or estimate from star rating)
+        var energyPoints = matches.map(function(m, idx) {
+            return {
+                match: idx + 1,
+                energy: m.crowd_energy || Math.round(m.star_rating * 18 + Math.random() * 10),
+                isMainEvent: idx === matches.length - 1,
+                matchName: ((m.winner_names || [])[0] || 'Unknown') + ' vs ' + ((m.loser_names || [])[0] || 'Unknown')
+            };
+        });
+        
+        // Calculate stats
+        var totalEnergy = energyPoints.reduce(function(sum, p) { return sum + p.energy; }, 0);
+        var avgEnergy = Math.round(totalEnergy / energyPoints.length);
+        var peakEnergy = Math.max.apply(null, energyPoints.map(function(p) { return p.energy; }));
+        
+        document.getElementById('avgCrowdEnergy').textContent = 'Avg: ' + avgEnergy + '%';
+        document.getElementById('peakCrowdEnergy').textContent = 'Peak: ' + peakEnergy + '%';
+        
+        // Create SVG path
+        var width = container.offsetWidth || 600;
+        var height = 100;
+        var padding = 20;
+        
+        var xScale = function(idx) { 
+            return padding + (idx / Math.max(energyPoints.length - 1, 1)) * (width - 2 * padding); 
+        };
+        var yScale = function(val) { 
+            return height - padding - (val / 100) * (height - 2 * padding); 
+        };
+        
+        var pathD = 'M ' + xScale(0) + ' ' + yScale(energyPoints[0].energy);
+        energyPoints.slice(1).forEach(function(point, idx) {
+            pathD += ' L ' + xScale(idx + 1) + ' ' + yScale(point.energy);
+        });
+        
+        // Create gradient fill
+        var areaD = pathD + ' L ' + xScale(energyPoints.length - 1) + ' ' + (height - padding) + ' L ' + xScale(0) + ' ' + (height - padding) + ' Z';
+        
+        var dotsHTML = energyPoints.map(function(point, idx) {
+            var fillColor = point.isMainEvent ? '#dc3545' : (point.energy >= 70 ? '#28a745' : (point.energy >= 50 ? '#ffc107' : '#dc3545'));
+            return '<circle cx="' + xScale(idx) + '" cy="' + yScale(point.energy) + '" r="8" ' +
+                'fill="' + fillColor + '" ' +
+                'stroke="white" stroke-width="2" class="energy-dot" ' +
+                'style="cursor: pointer;">' +
+                '<title>Match ' + point.match + ': ' + point.matchName + '\nEnergy: ' + point.energy + '%</title>' +
+                '</circle>' +
+                '<text x="' + xScale(idx) + '" y="' + (yScale(point.energy) - 12) + '" ' +
+                'text-anchor="middle" font-size="10" fill="#666">' +
+                point.energy + '%' +
+                '</text>';
+        }).join('');
+        
+        // Add threshold lines
+        var thresholdLines = 
+            '<line x1="' + padding + '" y1="' + yScale(70) + '" x2="' + (width - padding) + '" y2="' + yScale(70) + '" ' +
+            'stroke="#28a745" stroke-dasharray="5,5" stroke-opacity="0.5"/>' +
+            '<line x1="' + padding + '" y1="' + yScale(50) + '" x2="' + (width - padding) + '" y2="' + yScale(50) + '" ' +
+            'stroke="#ffc107" stroke-dasharray="5,5" stroke-opacity="0.5"/>';
+        
+        container.innerHTML = 
+            '<svg width="100%" height="' + height + '" style="overflow: visible;">' +
+            '<defs>' +
+            '<linearGradient id="energyGradient" x1="0%" y1="0%" x2="0%" y2="100%">' +
+            '<stop offset="0%" style="stop-color:#28a745;stop-opacity:0.4" />' +
+            '<stop offset="100%" style="stop-color:#28a745;stop-opacity:0.05" />' +
+            '</linearGradient>' +
+            '</defs>' +
+            thresholdLines +
+            '<path d="' + areaD + '" fill="url(#energyGradient)" />' +
+            '<path d="' + pathD + '" fill="none" stroke="#28a745" stroke-width="3" class="energy-line" />' +
+            dotsHTML +
+            '</svg>';
+    }
+
+    function generateSocialBuzz(matches, events) {
+        var container = document.getElementById('socialBuzzFeed');
+        
+        var posts = [];
+        
+        // Generate posts from events
+        if (events) {
+            events.forEach(function(event) {
+                if (event.type === 'title_change') {
+                    posts.push({
+                        type: 'title',
+                        icon: '🏆',
+                        handle: '@WrestlingNews',
+                        text: event.description,
+                        reactions: Math.floor(Math.random() * 5000) + 1000,
+                        retweets: Math.floor(Math.random() * 1000) + 200,
+                        priority: 5
+                    });
+                } else if (event.type === 'feud_started') {
+                    posts.push({
+                        type: 'feud',
+                        icon: '🔥',
+                        handle: '@FightFans',
+                        text: event.description,
+                        reactions: Math.floor(Math.random() * 3000) + 500,
+                        retweets: Math.floor(Math.random() * 500) + 100,
+                        priority: 4
+                    });
+                } else if (event.type === 'injury') {
+                    posts.push({
+                        type: 'injury',
+                        icon: '⚠️',
+                        handle: '@InjuryReport',
+                        text: event.description,
+                        reactions: Math.floor(Math.random() * 2000) + 300,
+                        retweets: Math.floor(Math.random() * 300) + 50,
+                        priority: 3
+                    });
+                } else if (event.type === 'surprise_return') {
+                    posts.push({
+                        type: 'return',
+                        icon: '🎉',
+                        handle: '@WrestlingPop',
+                        text: event.description,
+                        reactions: Math.floor(Math.random() * 10000) + 5000,
+                        retweets: Math.floor(Math.random() * 2000) + 500,
+                        priority: 6
+                    });
+                }
+            });
+        }
+        
+        // Generate posts from notable matches
+        if (matches) {
+            matches.forEach(function(match, index) {
+                if (match.is_upset) {
+                    var winnerName = (match.winner_names || [])[0] || 'Unknown';
+                    var loserName = (match.loser_names || [])[0] || 'Unknown';
+                    posts.push({
+                        type: 'upset',
+                        icon: '🚨',
+                        handle: '@ShockingMoments',
+                        text: 'UPSET ALERT! ' + winnerName + ' just shocked the world by defeating ' + loserName + '! Nobody saw this coming! #WrestlingUpset',
+                        reactions: Math.floor(Math.random() * 8000) + 2000,
+                        retweets: Math.floor(Math.random() * 1500) + 300,
+                        priority: 5
+                    });
+                }
+                
+                if (match.star_rating >= 4.5) {
+                    posts.push({
+                        type: 'classic',
+                        icon: '⭐',
+                        handle: '@MatchRatings',
+                        text: 'What a CLASSIC! ' + (match.winner_names || []).join(' & ') + ' vs ' + (match.loser_names || []).join(' & ') + ' just delivered a ' + match.star_rating.toFixed(2) + ' star match! This is why we love wrestling! 🔥',
+                        reactions: Math.floor(Math.random() * 6000) + 1500,
+                        retweets: Math.floor(Math.random() * 1200) + 250,
+                        priority: 4
+                    });
+                } else if (match.star_rating >= 4.0) {
+                    posts.push({
+                        type: 'great',
+                        icon: '👏',
+                        handle: '@ProWrestlingFan',
+                        text: 'Great match between ' + (match.winner_names || [])[0] + ' and ' + (match.loser_names || [])[0] + '! ' + match.star_rating.toFixed(1) + ' stars well deserved. #Wrestling',
+                        reactions: Math.floor(Math.random() * 3000) + 500,
+                        retweets: Math.floor(Math.random() * 500) + 100,
+                        priority: 2
+                    });
+                }
+                
+                // Main event post
+                if (index === matches.length - 1) {
+                    posts.push({
+                        type: 'main_event',
+                        icon: '🎯',
+                        handle: '@MainEventNews',
+                        text: 'Tonight\'s main event: ' + (match.winner_names || []).join(' & ') + ' defeats ' + (match.loser_names || []).join(' & ') + ' via ' + formatFinishType(match.finish_type) + '! What a way to close the show!',
+                        reactions: Math.floor(Math.random() * 4000) + 1000,
+                        retweets: Math.floor(Math.random() * 800) + 150,
+                        priority: 3
+                    });
+                }
+            });
+        }
+        
+        // Add some generic fan reactions
+        if (matches && matches.length > 0) {
+            var totalRating = matches.reduce(function(sum, m) { return sum + m.star_rating; }, 0);
+            var avgRating = totalRating / matches.length;
+            
+            if (avgRating >= 3.5) {
+                posts.push({
+                    type: 'fan',
+                    icon: '😍',
+                    handle: '@CasualFan42',
+                    text: 'What an incredible show tonight! Every match delivered. This is why I never miss a show! #BestShowEver',
+                    reactions: Math.floor(Math.random() * 500) + 100,
+                    retweets: Math.floor(Math.random() * 50) + 10,
+                    priority: 1
+                });
+            } else if (avgRating < 2.5) {
+                posts.push({
+                    type: 'fan',
+                    icon: '😴',
+                    handle: '@SkepticalFan',
+                    text: 'Meh, not the best show tonight. Hopefully next week is better. #Disappointed',
+                    reactions: Math.floor(Math.random() * 200) + 50,
+                    retweets: Math.floor(Math.random() * 20) + 5,
+                    priority: 1
+                });
+            }
+        }
+        
+        // Sort by priority then reactions
+        posts.sort(function(a, b) { 
+            return b.priority - a.priority || b.reactions - a.reactions; 
+        });
+        
+        // Update post count
+        document.getElementById('socialPostCount').textContent = posts.length + ' posts';
+        
+        if (posts.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted py-4"><small>No trending posts</small></div>';
+            return;
+        }
+        
+        // Render posts
+        var html = '';
+        
+        posts.forEach(function(post, index) {
+            var timeAgo = index === 0 ? 'Just now' : (Math.floor(Math.random() * 30) + 1) + 'm ago';
+            var isHot = post.reactions > 3000;
+            
+            html += 
+                '<div class="card mb-2 social-post ' + (index === 0 ? 'border-primary' : '') + ' ' + (isHot ? 'hot-post' : '') + '">' +
+                '<div class="card-body py-2">' +
+                '<div class="d-flex align-items-start">' +
+                '<div class="fs-3 me-3">' + post.icon + '</div>' +
+                '<div class="flex-grow-1">' +
+                '<div class="d-flex justify-content-between align-items-center mb-1">' +
+                '<strong class="text-primary">' + post.handle + '</strong>' +
+                '<small class="text-muted">' + timeAgo + '</small>' +
+                '</div>' +
+                '<p class="mb-1">' + post.text + '</p>' +
+                '<small class="text-muted">' +
+                '<span class="me-3"><i class="bi bi-heart-fill text-danger"></i> ' + post.reactions.toLocaleString() + '</span>' +
+                '<span class="me-3"><i class="bi bi-arrow-repeat text-success"></i> ' + post.retweets.toLocaleString() + '</span>' +
+                '<span><i class="bi bi-chat"></i> ' + Math.floor(post.reactions / 10) + '</span>' +
+                '</small>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+        });
+        
+        container.innerHTML = html;
+    }
+
+    function displayMatchResults(matches) {
+        var container = document.getElementById('recapMatchResults');
+        
+        var html = '';
+        
+        matches.forEach(function(match, index) {
+            matchDetailsExpanded[index] = false;
+            html += createMatchResultCard(match, index + 1, matches.length);
+        });
+        
+        container.innerHTML = html;
+    }
+
+    function createMatchResultCard(match, matchNumber, totalMatches) {
+        var stars = generateStarRating(match.star_rating);
+        
+        var winnerNames = (match.winner_names || []).join(' & ');
+        var loserNames = (match.loser_names || []).join(' & ');
+        
+        var badges = [];
+        if (match.is_upset) {
+            badges.push('<span class="badge bg-danger fs-6 pulse-badge">🚨 MAJOR UPSET!</span>');
+        }
+        if (match.title_changed_hands) {
+            badges.push('<span class="badge bg-warning text-dark fs-6 pulse-badge">🏆 TITLE CHANGE!</span>');
+        }
+        if (match.is_title_match) {
+            badges.push('<span class="badge bg-info fs-6">Championship Match</span>');
+        }
+        
+        // Add special match type badge
+        if (match.special_match_type) {
+            var specialName = match.special_match_type.replace(/_/g, ' ').toUpperCase();
+            badges.push('<span class="badge bg-purple text-white fs-6">🎭 ' + specialName + '</span>');
+        }
+        
+        // Match quality color
+        var matchQualityClass = 'border-secondary';
+        var matchQualityBg = '';
+        var headerClass = 'bg-light';
+        
+        if (match.star_rating >= 4.5) {
+            matchQualityClass = 'border-warning border-3';
+            matchQualityBg = 'bg-warning bg-opacity-10';
+            headerClass = 'bg-warning bg-opacity-25';
+        } else if (match.star_rating >= 4.0) {
+            matchQualityClass = 'border-success border-2';
+            matchQualityBg = 'bg-success bg-opacity-10';
+        } else if (match.star_rating >= 3.5) {
+            matchQualityClass = 'border-primary';
+        }
+        
+        // Main event indicator
+        var isMainEvent = matchNumber === totalMatches;
+        var mainEventBadge = isMainEvent ? '<span class="badge bg-danger ms-2">MAIN EVENT</span>' : '';
+        
+        if (isMainEvent) {
+            headerClass = 'bg-danger text-white';
+        }
+        
+        // Highlights
+        var highlightsHTML = '';
+        if (match.highlights && match.highlights.length > 0) {
+            highlightsHTML = '<div class="mt-3"><h6 class="text-muted"><i class="bi bi-film"></i> Match Highlights:</h6><ul class="small mb-0 highlight-list">';
+            match.highlights.forEach(function(h) {
+                var highlightIcon = getHighlightIcon(h.type);
+                highlightsHTML += '<li class="highlight-item">' + highlightIcon + ' <strong>' + h.timestamp + '</strong> - ' + h.description + '</li>';
+            });
+            highlightsHTML += '</ul></div>';
+        }
+        
+        // Match metadata (referee, crowd, special match)
+        var metadataHTML = '<div class="row mt-3">';
+        
+        if (match.referee_name) {
+            metadataHTML += 
+                '<div class="col-md-4 mb-2">' +
+                '<small class="text-muted">Referee:</small><br>' +
+                '<span class="badge bg-secondary">👨‍⚖️ ' + match.referee_name + '</span>' +
+                '</div>';
+        }
+        
+        if (match.crowd_pacing_grade) {
+            var gradeClasses = {
+                'Excellent': 'success',
+                'Great': 'primary',
+                'Good': 'info',
+                'Average': 'secondary',
+                'Poor': 'danger'
+            };
+            var gradeClass = gradeClasses[match.crowd_pacing_grade] || 'secondary';
+            
+            metadataHTML += 
+                '<div class="col-md-4 mb-2">' +
+                '<small class="text-muted">Crowd Reaction:</small><br>' +
+                '<span class="badge bg-' + gradeClass + '">👥 ' + match.crowd_pacing_grade + '</span>' +
+                '</div>';
+        }
+        
+        if (match.crowd_energy) {
+            var energyClass = match.crowd_energy >= 70 ? 'success' : (match.crowd_energy >= 50 ? 'warning' : 'danger');
+            metadataHTML += 
+                '<div class="col-md-4 mb-2">' +
+                '<small class="text-muted">Crowd Energy:</small><br>' +
+                '<div class="progress" style="height: 20px;">' +
+                '<div class="progress-bar bg-' + energyClass + '" style="width: ' + match.crowd_energy + '%">' +
+                '🔥 ' + match.crowd_energy + '%' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+        }
+        
+        metadataHTML += '</div>';
+        
+        var matchIndex = matchNumber - 1;
+        
+        return '<div class="match-result-card ' + matchQualityBg + '" style="animation-delay: ' + (matchNumber * 0.1) + 's;">' +
+            '<div class="card ' + matchQualityClass + ' mb-0">' +
+            '<div class="card-header ' + headerClass + ' d-flex justify-content-between align-items-center" ' +
+            'style="cursor: pointer;" onclick="toggleMatchDetails(' + matchIndex + ')">' +
+            '<div>' +
+            '<strong>Match ' + matchNumber + '</strong> ' + mainEventBadge +
+            '</div>' +
+            '<div class="d-flex align-items-center">' +
+            '<span class="fs-5 me-2">' + stars + '</span>' +
+            '<small class="me-3">' + match.star_rating.toFixed(2) + ' stars</small>' +
+            '<i class="bi bi-chevron-down" id="matchIcon-' + matchIndex + '"></i>' +
+            '</div>' +
+            '</div>' +
+            '<div class="card-body">' +
+            (badges.length > 0 ? '<div class="mb-3">' + badges.join(' ') + '</div>' : '') +
+            '<h5 class="card-title mb-3">' +
+            '<span class="text-success fw-bold">' + winnerNames + '</span> ' +
+            '<span class="text-muted">defeated</span> ' +
+            '<span class="text-danger">' + loserNames + '</span>' +
+            '</h5>' +
+            '<div class="row mb-2">' +
+            '<div class="col-md-4">' +
+            '<small class="text-muted">Finish:</small><br>' +
+            '<strong>' + formatFinishType(match.finish_type) + '</strong>' +
+            '</div>' +
+            '<div class="col-md-4">' +
+            '<small class="text-muted">Duration:</small><br>' +
+            '<strong>' + match.duration_minutes + ':00</strong>' +
+            '</div>' +
+            '<div class="col-md-4">' +
+            '<small class="text-muted">Quality:</small><br>' +
+            '<strong>' + getMatchQualityLabel(match.star_rating) + '</strong>' +
+            '</div>' +
+            '</div>' +
+            '<div id="matchDetails-' + matchIndex + '" class="match-details" style="display: none;">' +
+            (match.match_summary ? '<p class="text-muted mb-2 fst-italic border-start border-3 border-primary ps-3">"' + match.match_summary + '"</p>' : '') +
+            metadataHTML +
+            highlightsHTML +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+    }
+
+    function calculateShowGrade(result) {
+        var matchQuality = result.overall_rating;
+        var matches = result.match_results || [];
+        
+        // Calculate crowd engagement (avg crowd energy or estimate)
+        var avgCrowdEnergy = 50;
+        if (matches.length > 0) {
+            var energies = matches.map(function(m) { 
+                return m.crowd_energy || Math.round(m.star_rating * 18); 
+            });
+            avgCrowdEnergy = energies.reduce(function(a, b) { return a + b; }, 0) / energies.length;
+        }
+        
+        // Calculate financial success
+        var profit = result.net_profit || 0;
+        var revenue = result.total_revenue || 1;
+        var profitMargin = (profit / revenue) * 100;
+        
+        // Grade calculations
+        var matchGrade = getLetterGrade(matchQuality * 20); // 0-5 stars to 0-100
+        var crowdGrade = getLetterGrade(avgCrowdEnergy);
+        var financialGrade = getLetterGrade(50 + profitMargin); // Center at 50, profit adds to it
+        
+        // Overall grade (weighted average)
+        var overallScore = (matchQuality * 20 * 0.4) + (avgCrowdEnergy * 0.3) + ((50 + profitMargin) * 0.3);
+        var overallGrade = getLetterGrade(overallScore);
+        
+        // Update display
+        document.getElementById('showGrade').textContent = overallGrade;
+        document.getElementById('gradeMatchQuality').textContent = matchGrade;
+        document.getElementById('gradeCrowd').textContent = crowdGrade;
+        document.getElementById('gradeFinancial').textContent = financialGrade;
+        
+        // Color coding
+        var gradeColors = { 'A+': 'success', 'A': 'success', 'A-': 'success', 'B+': 'primary', 'B': 'primary', 'B-': 'info', 'C+': 'warning', 'C': 'warning', 'C-': 'warning', 'D': 'danger', 'F': 'danger' };
+        
+        document.getElementById('showGrade').className = 'display-1 fw-bold mb-2 text-' + (gradeColors[overallGrade] || 'secondary');
+        document.getElementById('gradeMatchQuality').className = 'fw-bold text-' + (gradeColors[matchGrade] || 'secondary');
+        document.getElementById('gradeCrowd').className = 'fw-bold text-' + (gradeColors[crowdGrade] || 'secondary');
+        document.getElementById('gradeFinancial').className = 'fw-bold text-' + (gradeColors[financialGrade] || 'secondary');
+        
+        // Description
+        var descriptions = {
+            'A+': '🌟 Legendary show! This will be remembered for years!',
+            'A': '🔥 Excellent show! The fans absolutely loved it!',
+            'A-': '✨ Great show! Very entertaining throughout.',
+            'B+': '👍 Good show! Fans went home happy.',
+            'B': '👌 Solid show with some memorable moments.',
+            'B-': '📊 Decent show, but room for improvement.',
+            'C+': '😐 Average show. Nothing special.',
+            'C': '📉 Below expectations. Fans were disappointed.',
+            'C-': '😔 Poor show. Need to do better.',
+            'D': '👎 Bad show. Fans are unhappy.',
+            'F': '💀 Terrible show. Crisis mode!'
+        };
+        
+        document.getElementById('showGradeDescription').textContent = descriptions[overallGrade] || 'Show completed.';
+        
+        // Card background based on grade
+        var cardBg = overallScore >= 80 ? 'bg-success bg-opacity-10' : (overallScore >= 60 ? 'bg-primary bg-opacity-10' : (overallScore >= 40 ? 'bg-warning bg-opacity-10' : 'bg-danger bg-opacity-10'));
+        document.getElementById('showGradeCard').className = 'card border-0 shadow-lg ' + cardBg;
+    }
+
+    function getLetterGrade(score) {
+        if (score >= 95) return 'A+';
+        if (score >= 90) return 'A';
+        if (score >= 85) return 'A-';
+        if (score >= 80) return 'B+';
+        if (score >= 75) return 'B';
+        if (score >= 70) return 'B-';
+        if (score >= 65) return 'C+';
+        if (score >= 60) return 'C';
+        if (score >= 55) return 'C-';
+        if (score >= 50) return 'D';
+        return 'F';
+    }
+
+    // Helper functions
+    function generateStarRating(rating) {
+        var fullStars = Math.floor(rating);
+        var halfStar = (rating % 1) >= 0.5;
+        var emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+        
+        var stars = '';
+        for (var i = 0; i < fullStars; i++) stars += '⭐';
+        if (halfStar) stars += '✨';
+        for (var i = 0; i < emptyStars; i++) stars += '☆';
+        
+        return stars;
+    }
+
+    function getEventIcon(eventType) {
+        var icons = {
+            'injury': '⚠️',
+            'title_change': '🏆',
+            'upset': '🚨',
+            'feud_started': '🔥',
+            'contract_expired': '📋',
+            'contract_expiring': '⏰',
+            'retirement': '👴',
+            'surprise_return': '🎉',
+            'injury_healed': '✅'
+        };
+        
+        return icons[eventType] || '📌';
+    }
+
+    function getEventColorClass(eventType) {
+        var colors = {
+            'injury': 'alert-warning',
+            'title_change': 'alert-success',
+            'upset': 'alert-danger',
+            'feud_started': 'alert-danger',
+            'contract_expired': 'alert-warning',
+            'contract_expiring': 'alert-info',
+            'retirement': 'alert-secondary',
+            'surprise_return': 'alert-success',
+            'injury_healed': 'alert-info'
+        };
+        
+        return colors[eventType] || 'alert-info';
+    }
+
+    function getEventTitle(eventType) {
+        var titles = {
+            'injury': 'Injury Report',
+            'title_change': 'Championship Change',
+            'upset': 'Major Upset',
+            'feud_started': 'New Feud',
+            'contract_expired': 'Contract Expired',
+            'contract_expiring': 'Contract Expiring',
+            'retirement': 'Retirement',
+            'surprise_return': 'Surprise Return',
+            'injury_healed': 'Injury Recovery'
+        };
+        
+        return titles[eventType] || 'Event';
+    }
+
+    function getHighlightIcon(highlightType) {
+        var icons = {
+            'opening': '🔔',
+            'offense': '👊',
+            'comeback': '🔥',
+            'nearfall': '😱',
+            'signature': '💥',
+            'finish': '🏁'
+        };
+        
+        return icons[highlightType] || '•';
+    }
+
+    function formatFinishType(finishType) {
+        var formats = {
+            'clean_pin': 'Clean Pinfall',
+            'submission': 'Submission',
+            'cheating': 'Cheating Tactics',
+            'rollup': 'Surprise Rollup',
+            'dq': 'Disqualification',
+            'countout': 'Countout',
+            'no_contest': 'No Contest'
+        };
+        
+        return formats[finishType] || (finishType || '').replace('_', ' ').toUpperCase();
+    }
+
+    function getMatchQualityLabel(rating) {
+        if (rating >= 4.75) return '🌟 Classic';
+        if (rating >= 4.5) return '⭐ Excellent';
+        if (rating >= 4.0) return '✨ Great';
+        if (rating >= 3.5) return '👍 Good';
+        if (rating >= 3.0) return '👌 Solid';
+        if (rating >= 2.5) return '📊 Average';
+        return '📉 Below Average';
+    }
+
+    // Export functions to global scope so onclick handlers work
+    window.toggleMatchDetails = function(matchIndex) {
+        var details = document.getElementById('matchDetails-' + matchIndex);
+        var icon = document.getElementById('matchIcon-' + matchIndex);
+        
+        if (details.style.display === 'none') {
+            details.style.display = 'block';
+            icon.className = 'bi bi-chevron-up';
+            matchDetailsExpanded[matchIndex] = true;
+        } else {
+            details.style.display = 'none';
+            icon.className = 'bi bi-chevron-down';
+            matchDetailsExpanded[matchIndex] = false;
+        }
+    };
+
+    window.expandAllMatches = function() {
+        Object.keys(matchDetailsExpanded).forEach(function(idx) {
+            var details = document.getElementById('matchDetails-' + idx);
+            var icon = document.getElementById('matchIcon-' + idx);
+            if (details) {
+                details.style.display = 'block';
+                icon.className = 'bi bi-chevron-up';
+                matchDetailsExpanded[idx] = true;
+            }
+        });
+    };
+
+    window.collapseAllMatches = function() {
+        Object.keys(matchDetailsExpanded).forEach(function(idx) {
+            var details = document.getElementById('matchDetails-' + idx);
+            var icon = document.getElementById('matchIcon-' + idx);
+            if (details) {
+                details.style.display = 'none';
+                icon.className = 'bi bi-chevron-down';
+                matchDetailsExpanded[idx] = false;
+            }
+        });
+    };
+
+    window.toggleSection = function(sectionId) {
+        var section = document.getElementById(sectionId);
+        var icon = document.getElementById(sectionId + 'Icon');
+        
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            if (icon) icon.className = 'bi bi-chevron-up';
+        } else {
+            section.style.display = 'none';
+            if (icon) icon.className = 'bi bi-chevron-down';
+        }
+    };
+
+    window.exportShowReport = function() {
+        if (!showResult) {
+            alert('No show data to export');
+            return;
+        }
+        
+        var report = {
+            show: showResult.show_name,
+            brand: showResult.brand,
+            date: 'Year ' + showResult.year + ', Week ' + showResult.week,
+            rating: showResult.overall_rating,
+            attendance: showResult.total_attendance,
+            revenue: showResult.total_revenue,
+            profit: showResult.net_profit,
+            matches: showResult.match_results ? showResult.match_results.map(function(m) {
+                return {
+                    participants: (m.winner_names || []).join(' & ') + ' vs ' + (m.loser_names || []).join(' & '),
+                    winner: (m.winner_names || []).join(' & '),
+                    rating: m.star_rating,
+                    finish: m.finish_type,
+                    duration: m.duration_minutes
+                };
+            }) : [],
+            events: showResult.events
+        };
+        
+        var blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'show_report_y' + showResult.year + 'w' + showResult.week + '_' + showResult.brand + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    window.shareShowReport = function() {
+        if (!showResult) return;
+        
+        var matches = showResult.match_results || [];
+        var matchList = matches.map(function(m, i) {
+            return (i + 1) + '. ' + (m.winner_names || [])[0] + ' def. ' + (m.loser_names || [])[0] + ' (' + m.star_rating.toFixed(1) + '⭐)';
+        }).join('\n');
+        
+        var shareText = '🎭 ' + showResult.show_name + ' Results\n' +
+            '📍 ' + showResult.brand + ' | Year ' + showResult.year + ', Week ' + showResult.week + '\n\n' +
+            '⭐ Overall Rating: ' + showResult.overall_rating.toFixed(2) + ' stars\n' +
+            '👥 Attendance: ' + (showResult.total_attendance || 0).toLocaleString() + '\n' +
+            '💰 Revenue: $' + ((showResult.total_revenue || 0) / 1000).toFixed(0) + 'K\n\n' +
+            '📋 Match Results:\n' + matchList + '\n\n' +
+            '#WrestlingGM #ProWrestling';
+        
+        document.getElementById('shareText').value = shareText;
+        
+        var modal = new bootstrap.Modal(document.getElementById('shareModal'));
+        modal.show();
+    };
+
+    window.copyShareText = function() {
+        var textArea = document.getElementById('shareText');
+        textArea.select();
+        document.execCommand('copy');
+        
+        // Show feedback
+        var btn = event.target;
+        var originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(function() {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-primary');
+        }, 2000);
+    };
+
+    window.reviewPostShowFallout = function() {
+        var section = document.getElementById('postShowFalloutSection');
+        if (section) {
+            section.style.display = 'block';
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
+    window.continueToNextShow = function() {
+        loadView('booking');
+    };
+
+    window.decidePostShowFalloutItem = async function(itemId, decision) {
+        try {
+            var counterPitch = '';
+            if (decision === 'counter') {
+                counterPitch = prompt('Counter-pitch this fallout response:', 'Keep the consequence, but adjust next week\'s creative direction.') || '';
+            }
+            var response = await fetch('/api/booker/post-show/fallout/items/' + encodeURIComponent(itemId) + '/decision', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    decision: decision,
+                    counter_pitch: counterPitch,
+                    notes: 'Handled from post-show recap'
+                })
+            });
+            var data = await response.json();
+            if (!response.ok || data.error) {
+                throw new Error(data.error || 'Failed to resolve fallout item');
+            }
+            if (window.showToast) showToast('Post-show fallout updated', 'success');
+            await loadPostShowFallout(showResult || {});
+        } catch (error) {
+            console.error('Failed to decide post-show fallout:', error);
+            if (window.showToast) showToast(error.message, 'danger');
+            else alert(error.message);
+        }
+    };
+
+    window.autoHandlePostShowFallout = async function() {
+        try {
+            if (!postShowFallout || !postShowFallout.id) {
+                window.reviewPostShowFallout();
+                return;
+            }
+            var response = await fetch('/api/booker/post-show/fallout/' + encodeURIComponent(postShowFallout.id) + '/auto-handle', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({})
+            });
+            var data = await response.json();
+            if (!response.ok || data.error) {
+                throw new Error(data.error || 'AI could not handle fallout');
+            }
+            postShowFallout = data.report || postShowFallout;
+            renderPostShowFallout(postShowFallout);
+            if (window.showToast) showToast('AI handled ' + (data.resolved || 0) + ' fallout item(s)', 'success');
+        } catch (error) {
+            console.error('Failed to auto-handle fallout:', error);
+            if (window.showToast) showToast(error.message, 'danger');
+            else alert(error.message);
+        }
+    };
+
+    // Initialize
+    loadRecapView();
+})();
+</script>
+
+<style>
+/* Fade-in animation for match cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.match-result-card {
+    transition: all 0.3s ease;
+    padding: 1rem;
+    animation: fadeInUp 0.5s ease-out;
+    animation-fill-mode: both;
+}
+
+.match-result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.match-result-card .card {
+    border-radius: 8px;
+}
+
+/* Pulse effect for special badges */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.pulse-badge {
+    animation: pulse 2s infinite;
+}
+
+/* Hover effects */
+.list-group-item {
+    transition: all 0.2s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+
+.performer-item:hover, .loser-item:hover {
+    background-color: rgba(0,0,0,0.03);
+}
+
+/* Social buzz cards */
+.social-post {
+    transition: all 0.2s ease;
+}
+
+.social-post:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transform: translateX(3px);
+}
+
+.hot-post {
+    border-left: 4px solid #dc3545 !important;
+}
+
+/* Star rating glow */
+.display-4 {
+    text-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+}
+
+/* Match details transition */
+.match-details {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Highlight list */
+.highlight-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.highlight-item {
+    padding: 5px 10px;
+    border-left: 3px solid #0d6efd;
+    margin-bottom: 5px;
+    background: rgba(13, 110, 253, 0.05);
+    border-radius: 0 4px 4px 0;
+}
+
+/* Star distribution bars */
+.star-bar {
+    transition: height 0.5s ease;
+}
+
+.star-bar:hover {
+    opacity: 0.8;
+    transform: scaleY(1.05);
+}
+
+/* Energy timeline */
+.energy-line {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawLine 1.5s ease forwards;
+}
+
+@keyframes drawLine {
+    to { stroke-dashoffset: 0; }
+}
+
+.energy-dot {
+    transition: r 0.2s ease;
+}
+
+.energy-dot:hover {
+    r: 12;
+}
+
+/* Event cards */
+.event-card {
+    transition: all 0.2s ease;
+}
+
+.event-card:hover {
+    transform: scale(1.02);
+}
+
+/* Match of night card */
+.match-of-night-card {
+    border-radius: 8px;
+}
+
+.star-display {
+    font-size: 1.5rem;
+    text-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
+}
+
+/* Show grade animation */
+#showGrade {
+    animation: gradeReveal 0.5s ease;
+}
+
+@keyframes gradeReveal {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Purple badge for special matches */
+.bg-purple {
+    background-color: #6f42c1 !important;
+}
+
+/* Print styles */
+@media print {
+    .btn, button, .btn-group {
+        display: none !important;
+    }
+    
+    .card {
+        break-inside: avoid;
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+    }
+    
+    .match-result-card {
+        animation: none !important;
+    }
+    
+    #socialBuzzSection {
+        display: none !important;
+    }
+    
+    .match-details {
+        display: block !important;
+    }
+    
+    .collapse-btn {
+        display: none !important;
+    }
+    
+    body {
+        font-size: 12px;
+    }
+    
+    .display-4 {
+        font-size: 1.5rem;
+    }
+
+    .display-1 {
+        font-size: 2rem;
+    }
+    
+    #crowdEnergySection {
+        display: none !important;
+    }
+    
+    #comparisonSection {
+        page-break-after: always;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 1.5rem;
+    }
+    
+    .display-1 {
+        font-size: 2.5rem;
+    }
+    
+    .match-result-card {
+        padding: 0.5rem;
+    }
+    
+    #starDistribution {
+        height: 80px !important;
+    }
+    
+    .btn-group {
+        margin-bottom: 10px;
+    }
+    
+    .row.text-center .col-md-2 {
+        margin-bottom: 15px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .bg-light {
+        background-color: #2d2d2d !important;
+    }
+    
+    .card {
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+    }
+    
+    .text-muted {
+        color: #aaa !important;
+    }
+    
+    .list-group-item {
+        background-color: #2d2d2d;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+    
+    .list-group-item:hover {
+        background-color: #3d3d3d;
+    }
+}
+
+/* Confetti animation for big moments */
+@keyframes confetti {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    animation: confetti 3s ease-out forwards;
+    z-index: 9999;
+}
+
+/* Glow effect for excellent matches */
+.border-warning.border-3 {
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+}
+
+/* Progress bar animation */
+.progress-bar {
+    transition: width 1s ease;
+}
+
+/* Scrollbar styling for social feed */
+#socialBuzzBody::-webkit-scrollbar {
+    width: 8px;
+}
+
+#socialBuzzBody::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#socialBuzzBody::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#socialBuzzBody::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Tooltip styling */
+[title] {
+    position: relative;
+    cursor: help;
+}
+
+/* Card header clickable styling */
+.card-header[onclick] {
+    cursor: pointer;
+    user-select: none;
+}
+
+.card-header[onclick]:hover {
+    filter: brightness(0.95);
+}
+
+/* Badge hover effects */
+.badge {
+    transition: all 0.2s ease;
+}
+
+.badge:hover {
+    transform: scale(1.05);
+}
+
+/* Loading skeleton animation */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+
+/* Trophy animation for match of the night */
+@keyframes trophy-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+#matchOfNight .card-body {
+    position: relative;
+}
+
+#matchOfNight .star-display {
+    animation: trophy-bounce 2s ease infinite;
+}
+
+/* Notification badge pulse */
+@keyframes badge-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+}
+
+.badge.bg-danger {
+    animation: badge-pulse 2s infinite;
+}
+
+/* Momentum indicator arrows */
+.momentum-up::after {
+    content: ' ↑';
+    color: #28a745;
+}
+
+.momentum-down::after {
+    content: ' ↓';
+    color: #dc3545;
+}
+
+/* Chart tooltip */
+.chart-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 100;
+}
+
+/* Fade transitions for sections */
+.section-fade {
+    transition: opacity 0.3s ease, max-height 0.3s ease;
+    overflow: hidden;
+}
+
+.section-fade.collapsed {
+    opacity: 0;
+    max-height: 0;
+}
+
+/* Grade card special effects */
+#showGradeCard {
+    transition: all 0.3s ease;
+}
+
+#showGradeCard:hover {
+    transform: scale(1.01);
+}
+
+/* A+ grade special effect */
+#showGrade.text-success {
+    text-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
+}
+
+/* Wrestler name hover effect */
+.text-success.fw-bold, .text-danger {
+    transition: all 0.2s ease;
+}
+
+.text-success.fw-bold:hover, .text-danger:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+</style>

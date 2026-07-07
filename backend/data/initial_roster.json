@@ -1,0 +1,1442 @@
+[
+  {
+    "id": "w001",
+    "name": "Magnus Steele",
+    "age": 32,
+    "gender": "Male",
+    "alignment": "Face",
+    "role": "Main Event",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 88,
+      "technical": 82,
+      "speed": 70,
+      "mic": 90,
+      "psychology": 92,
+      "stamina": 85
+    },
+    "years_experience": 12,
+    "is_major_superstar": true,
+    "stats": {
+      "popularity": 85,
+      "momentum": 30,
+      "morale": 70,
+      "fatigue": 10
+    },
+    "contract": {
+      "salary_per_show": 25000,
+      "total_length_weeks": 104,
+      "weeks_remaining": 90,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w002",
+    "name": "Victor Reign",
+    "age": 29,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Main Event",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 85,
+      "technical": 88,
+      "speed": 75,
+      "mic": 92,
+      "psychology": 90,
+      "stamina": 82
+    },
+    "years_experience": 10,
+    "is_major_superstar": true,
+    "stats": {
+      "popularity": 78,
+      "momentum": 20,
+      "morale": 65,
+      "fatigue": 15
+    },
+    "contract": {
+      "salary_per_show": 23000,
+      "total_length_weeks": 104,
+      "weeks_remaining": 85,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w003",
+    "name": "Drake Thunder",
+    "age": 35,
+    "gender": "Male",
+    "alignment": "Tweener",
+    "role": "Main Event",
+    "primary_brand": "ROC Velocity",
+    "attributes": {
+      "brawling": 90,
+      "technical": 78,
+      "speed": 68,
+      "mic": 85,
+      "psychology": 88,
+      "stamina": 80
+    },
+    "years_experience": 15,
+    "is_major_superstar": true,
+    "stats": {
+      "popularity": 82,
+      "momentum": 15,
+      "morale": 60,
+      "fatigue": 20
+    },
+    "contract": {
+      "salary_per_show": 24000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 40,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w004",
+    "name": "Apex King",
+    "age": 27,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Main Event",
+    "primary_brand": "ROC Velocity",
+    "attributes": {
+      "brawling": 82,
+      "technical": 85,
+      "speed": 80,
+      "mic": 88,
+      "psychology": 85,
+      "stamina": 88
+    },
+    "years_experience": 8,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 72,
+      "momentum": 25,
+      "morale": 75,
+      "fatigue": 5
+    },
+    "contract": {
+      "salary_per_show": 20000,
+      "total_length_weeks": 104,
+      "weeks_remaining": 100,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w005",
+    "name": "Phoenix Wright",
+    "age": 30,
+    "gender": "Male",
+    "alignment": "Face",
+    "role": "Upper Midcard",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 75,
+      "technical": 80,
+      "speed": 85,
+      "mic": 78,
+      "psychology": 82,
+      "stamina": 83
+    },
+    "years_experience": 9,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 68,
+      "momentum": 10,
+      "morale": 65,
+      "fatigue": 12
+    },
+    "contract": {
+      "salary_per_show": 15000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 45,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w006",
+    "name": "Jaxon Viper",
+    "age": 28,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Upper Midcard",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 78,
+      "technical": 82,
+      "speed": 80,
+      "mic": 75,
+      "psychology": 80,
+      "stamina": 78
+    },
+    "years_experience": 7,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 62,
+      "momentum": 5,
+      "morale": 60,
+      "fatigue": 18
+    },
+    "contract": {
+      "salary_per_show": 14000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 38,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w007",
+    "name": "Marcus Blaze",
+    "age": 26,
+    "gender": "Male",
+    "alignment": "Face",
+    "role": "Midcard",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 70,
+      "technical": 72,
+      "speed": 78,
+      "mic": 68,
+      "psychology": 70,
+      "stamina": 75
+    },
+    "years_experience": 5,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 55,
+      "momentum": 0,
+      "morale": 70,
+      "fatigue": 10
+    },
+    "contract": {
+      "salary_per_show": 10000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 50,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w008",
+    "name": "Cole Striker",
+    "age": 31,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Midcard",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 72,
+      "technical": 75,
+      "speed": 70,
+      "mic": 72,
+      "psychology": 74,
+      "stamina": 70
+    },
+    "years_experience": 10,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 52,
+      "momentum": -5,
+      "morale": 55,
+      "fatigue": 15
+    },
+    "contract": {
+      "salary_per_show": 9500,
+      "total_length_weeks": 52,
+      "weeks_remaining": 30,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w009",
+    "name": "Ryan Cross",
+    "age": 24,
+    "gender": "Male",
+    "alignment": "Face",
+    "role": "Lower Midcard",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 65,
+      "technical": 68,
+      "speed": 75,
+      "mic": 60,
+      "psychology": 62,
+      "stamina": 72
+    },
+    "years_experience": 3,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 45,
+      "momentum": 5,
+      "morale": 75,
+      "fatigue": 8
+    },
+    "contract": {
+      "salary_per_show": 7000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 48,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w010",
+    "name": "Tyler Kane",
+    "age": 25,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Lower Midcard",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 68,
+      "technical": 70,
+      "speed": 72,
+      "mic": 65,
+      "psychology": 65,
+      "stamina": 70
+    },
+    "years_experience": 4,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 42,
+      "momentum": 0,
+      "morale": 68,
+      "fatigue": 12
+    },
+    "contract": {
+      "salary_per_show": 7500,
+      "total_length_weeks": 52,
+      "weeks_remaining": 44,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w011",
+    "name": "Josh Parker",
+    "age": 22,
+    "gender": "Male",
+    "alignment": "Face",
+    "role": "Jobber",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 58,
+      "technical": 60,
+      "speed": 68,
+      "mic": 50,
+      "psychology": 55,
+      "stamina": 65
+    },
+    "years_experience": 2,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 35,
+      "momentum": 0,
+      "morale": 70,
+      "fatigue": 5
+    },
+    "contract": {
+      "salary_per_show": 5000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 52,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w012",
+    "name": "Alex Stone",
+    "age": 23,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Jobber",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 60,
+      "technical": 62,
+      "speed": 65,
+      "mic": 52,
+      "psychology": 58,
+      "stamina": 68
+    },
+    "years_experience": 2,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 32,
+      "momentum": -5,
+      "morale": 65,
+      "fatigue": 10
+    },
+    "contract": {
+      "salary_per_show": 5000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 50,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w013",
+    "name": "Luna Eclipse",
+    "age": 28,
+    "gender": "Female",
+    "alignment": "Face",
+    "role": "Main Event",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 80,
+      "technical": 85,
+      "speed": 82,
+      "mic": 88,
+      "psychology": 90,
+      "stamina": 83
+    },
+    "years_experience": 9,
+    "is_major_superstar": true,
+    "stats": {
+      "popularity": 80,
+      "momentum": 25,
+      "morale": 72,
+      "fatigue": 12
+    },
+    "contract": {
+      "salary_per_show": 22000,
+      "total_length_weeks": 104,
+      "weeks_remaining": 95,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w014",
+    "name": "Raven Noir",
+    "age": 26,
+    "gender": "Female",
+    "alignment": "Heel",
+    "role": "Main Event",
+    "primary_brand": "ROC Velocity",
+    "attributes": {
+      "brawling": 78,
+      "technical": 82,
+      "speed": 85,
+      "mic": 85,
+      "psychology": 88,
+      "stamina": 80
+    },
+    "years_experience": 7,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 75,
+      "momentum": 20,
+      "morale": 70,
+      "fatigue": 10
+    },
+    "contract": {
+      "salary_per_show": 20000,
+      "total_length_weeks": 104,
+      "weeks_remaining": 98,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w015",
+    "name": "Jade Tempest",
+    "age": 25,
+    "gender": "Female",
+    "alignment": "Face",
+    "role": "Upper Midcard",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 72,
+      "technical": 75,
+      "speed": 80,
+      "mic": 70,
+      "psychology": 75,
+      "stamina": 78
+    },
+    "years_experience": 5,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 65,
+      "momentum": 15,
+      "morale": 75,
+      "fatigue": 8
+    },
+    "contract": {
+      "salary_per_show": 14000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 46,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w016",
+    "name": "Dante Inferno",
+    "age": 33,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Upper Midcard",
+    "primary_brand": "ROC Velocity",
+    "attributes": {
+      "brawling": 80,
+      "technical": 78,
+      "speed": 75,
+      "mic": 82,
+      "psychology": 83,
+      "stamina": 76
+    },
+    "years_experience": 12,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 64,
+      "momentum": 8,
+      "morale": 58,
+      "fatigue": 20
+    },
+    "contract": {
+      "salary_per_show": 15500,
+      "total_length_weeks": 52,
+      "weeks_remaining": 35,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w017",
+    "name": "Nova Star",
+    "age": 24,
+    "gender": "Male",
+    "alignment": "Face",
+    "role": "Midcard",
+    "primary_brand": "ROC Velocity",
+    "attributes": {
+      "brawling": 68,
+      "technical": 70,
+      "speed": 85,
+      "mic": 65,
+      "psychology": 68,
+      "stamina": 80
+    },
+    "years_experience": 4,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 58,
+      "momentum": 12,
+      "morale": 72,
+      "fatigue": 6
+    },
+    "contract": {
+      "salary_per_show": 9000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 48,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w018",
+    "name": "Crimson Hawk",
+    "age": 29,
+    "gender": "Male",
+    "alignment": "Tweener",
+    "role": "Midcard",
+    "primary_brand": "ROC Velocity",
+    "attributes": {
+      "brawling": 75,
+      "technical": 72,
+      "speed": 78,
+      "mic": 70,
+      "psychology": 72,
+      "stamina": 74
+    },
+    "years_experience": 8,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 56,
+      "momentum": 5,
+      "morale": 62,
+      "fatigue": 14
+    },
+    "contract": {
+      "salary_per_show": 10500,
+      "total_length_weeks": 52,
+      "weeks_remaining": 40,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w019",
+    "name": "Zane Fury",
+    "age": 26,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Lower Midcard",
+    "primary_brand": "ROC Velocity",
+    "attributes": {
+      "brawling": 70,
+      "technical": 68,
+      "speed": 72,
+      "mic": 68,
+      "psychology": 66,
+      "stamina": 70
+    },
+    "years_experience": 5,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 48,
+      "momentum": 3,
+      "morale": 68,
+      "fatigue": 11
+    },
+    "contract": {
+      "salary_per_show": 8000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 42,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w020",
+    "name": "Sienna Frost",
+    "age": 27,
+    "gender": "Female",
+    "alignment": "Heel",
+    "role": "Upper Midcard",
+    "primary_brand": "ROC Velocity",
+    "attributes": {
+      "brawling": 70,
+      "technical": 78,
+      "speed": 75,
+      "mic": 80,
+      "psychology": 77,
+      "stamina": 72
+    },
+    "years_experience": 6,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 62,
+      "momentum": 10,
+      "morale": 65,
+      "fatigue": 13
+    },
+    "contract": {
+      "salary_per_show": 13500,
+      "total_length_weeks": 52,
+      "weeks_remaining": 44,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w021",
+    "name": "Blake Shadow",
+    "age": 23,
+    "gender": "Male",
+    "alignment": "Face",
+    "role": "Jobber",
+    "primary_brand": "ROC Velocity",
+    "attributes": {
+      "brawling": 62,
+      "technical": 65,
+      "speed": 70,
+      "mic": 55,
+      "psychology": 60,
+      "stamina": 68
+    },
+    "years_experience": 2,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 38,
+      "momentum": 0,
+      "morale": 70,
+      "fatigue": 7
+    },
+    "contract": {
+      "salary_per_show": 5500,
+      "total_length_weeks": 52,
+      "weeks_remaining": 50,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w022",
+    "name": "Chad Steele",
+    "age": 24,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Jobber",
+    "primary_brand": "ROC Velocity",
+    "attributes": {
+      "brawling": 60,
+      "technical": 63,
+      "speed": 68,
+      "mic": 50,
+      "psychology": 58,
+      "stamina": 66
+    },
+    "years_experience": 3,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 36,
+      "momentum": -3,
+      "morale": 65,
+      "fatigue": 9
+    },
+    "contract": {
+      "salary_per_show": 5500,
+      "total_length_weeks": 52,
+      "weeks_remaining": 48,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w023",
+    "name": "Orion Savage",
+    "age": 22,
+    "gender": "Male",
+    "alignment": "Face",
+    "role": "Main Event",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 75,
+      "technical": 78,
+      "speed": 85,
+      "mic": 72,
+      "psychology": 75,
+      "stamina": 88
+    },
+    "years_experience": 3,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 60,
+      "momentum": 20,
+      "morale": 80,
+      "fatigue": 5
+    },
+    "contract": {
+      "salary_per_show": 12000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 50,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w024",
+    "name": "Kai Razor",
+    "age": 21,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Upper Midcard",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 72,
+      "technical": 75,
+      "speed": 80,
+      "mic": 68,
+      "psychology": 70,
+      "stamina": 82
+    },
+    "years_experience": 2,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 55,
+      "momentum": 15,
+      "morale": 75,
+      "fatigue": 6
+    },
+    "contract": {
+      "salary_per_show": 10000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 48,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w025",
+    "name": "Skylar Phoenix",
+    "age": 23,
+    "gender": "Female",
+    "alignment": "Face",
+    "role": "Upper Midcard",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 68,
+      "technical": 72,
+      "speed": 82,
+      "mic": 70,
+      "psychology": 72,
+      "stamina": 78
+    },
+    "years_experience": 4,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 58,
+      "momentum": 18,
+      "morale": 78,
+      "fatigue": 7
+    },
+    "contract": {
+      "salary_per_show": 11000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 46,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w026",
+    "name": "Ryder Storm",
+    "age": 20,
+    "gender": "Male",
+    "alignment": "Face",
+    "role": "Midcard",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 65,
+      "technical": 68,
+      "speed": 78,
+      "mic": 62,
+      "psychology": 65,
+      "stamina": 80
+    },
+    "years_experience": 1,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 50,
+      "momentum": 10,
+      "morale": 82,
+      "fatigue": 4
+    },
+    "contract": {
+      "salary_per_show": 8000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 52,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w027",
+    "name": "Axel Riot",
+    "age": 22,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Midcard",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 70,
+      "technical": 70,
+      "speed": 75,
+      "mic": 65,
+      "psychology": 68,
+      "stamina": 76
+    },
+    "years_experience": 2,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 48,
+      "momentum": 8,
+      "morale": 70,
+      "fatigue": 8
+    },
+    "contract": {
+      "salary_per_show": 8500,
+      "total_length_weeks": 52,
+      "weeks_remaining": 50,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w028",
+    "name": "Ember Blaze",
+    "age": 21,
+    "gender": "Female",
+    "alignment": "Face",
+    "role": "Midcard",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 62,
+      "technical": 70,
+      "speed": 80,
+      "mic": 68,
+      "psychology": 70,
+      "stamina": 75
+    },
+    "years_experience": 2,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 52,
+      "momentum": 12,
+      "morale": 76,
+      "fatigue": 6
+    },
+    "contract": {
+      "salary_per_show": 9000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 48,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w029",
+    "name": "Troy Titan",
+    "age": 24,
+    "gender": "Male",
+    "alignment": "Tweener",
+    "role": "Lower Midcard",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 68,
+      "technical": 66,
+      "speed": 70,
+      "mic": 60,
+      "psychology": 64,
+      "stamina": 72
+    },
+    "years_experience": 3,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 46,
+      "momentum": 5,
+      "morale": 72,
+      "fatigue": 10
+    },
+    "contract": {
+      "salary_per_show": 7500,
+      "total_length_weeks": 52,
+      "weeks_remaining": 44,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w030",
+    "name": "Mason Steel",
+    "age": 20,
+    "gender": "Male",
+    "alignment": "Face",
+    "role": "Lower Midcard",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 64,
+      "technical": 68,
+      "speed": 72,
+      "mic": 58,
+      "psychology": 62,
+      "stamina": 70
+    },
+    "years_experience": 1,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 44,
+      "momentum": 8,
+      "morale": 80,
+      "fatigue": 5
+    },
+    "contract": {
+      "salary_per_show": 7000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 50,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w031",
+    "name": "Colt Venom",
+    "age": 23,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Lower Midcard",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 66,
+      "technical": 65,
+      "speed": 70,
+      "mic": 62,
+      "psychology": 64,
+      "stamina": 68
+    },
+    "years_experience": 2,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 42,
+      "momentum": 3,
+      "morale": 68,
+      "fatigue": 9
+    },
+    "contract": {
+      "salary_per_show": 7000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 46,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w032",
+    "name": "Hunter Wolf",
+    "age": 19,
+    "gender": "Male",
+    "alignment": "Face",
+    "role": "Jobber",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 58,
+      "technical": 62,
+      "speed": 68,
+      "mic": 52,
+      "psychology": 58,
+      "stamina": 70
+    },
+    "years_experience": 1,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 38,
+      "momentum": 5,
+      "morale": 78,
+      "fatigue": 4
+    },
+    "contract": {
+      "salary_per_show": 5000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 52,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w033",
+    "name": "Zach Night",
+    "age": 20,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Jobber",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 60,
+      "technical": 60,
+      "speed": 65,
+      "mic": 50,
+      "psychology": 56,
+      "stamina": 68
+    },
+    "years_experience": 1,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 36,
+      "momentum": 0,
+      "morale": 75,
+      "fatigue": 6
+    },
+    "contract": {
+      "salary_per_show": 5000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 50,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w034",
+    "name": "Aurora Skye",
+    "age": 22,
+    "gender": "Female",
+    "alignment": "Face",
+    "role": "Midcard",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 65,
+      "technical": 70,
+      "speed": 78,
+      "mic": 66,
+      "psychology": 68,
+      "stamina": 72
+    },
+    "years_experience": 3,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 54,
+      "momentum": 10,
+      "morale": 74,
+      "fatigue": 7
+    },
+    "contract": {
+      "salary_per_show": 9500,
+      "total_length_weeks": 52,
+      "weeks_remaining": 46,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w035",
+    "name": "Ivy Vortex",
+    "age": 24,
+    "gender": "Female",
+    "alignment": "Heel",
+    "role": "Midcard",
+    "primary_brand": "ROC Velocity",
+    "attributes": {
+      "brawling": 68,
+      "technical": 72,
+      "speed": 75,
+      "mic": 70,
+      "psychology": 70,
+      "stamina": 70
+    },
+    "years_experience": 4,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 52,
+      "momentum": 6,
+      "morale": 66,
+      "fatigue": 12
+    },
+    "contract": {
+      "salary_per_show": 10000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 42,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w036",
+    "name": "Scarlett Venom",
+    "age": 23,
+    "gender": "Female",
+    "alignment": "Tweener",
+    "role": "Lower Midcard",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 62,
+      "technical": 68,
+      "speed": 72,
+      "mic": 64,
+      "psychology": 66,
+      "stamina": 68
+    },
+    "years_experience": 3,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 48,
+      "momentum": 4,
+      "morale": 70,
+      "fatigue": 10
+    },
+    "contract": {
+      "salary_per_show": 8500,
+      "total_length_weeks": 52,
+      "weeks_remaining": 44,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w037",
+    "name": "Titan Maximus",
+    "age": 38,
+    "gender": "Male",
+    "alignment": "Face",
+    "role": "Upper Midcard",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 82,
+      "technical": 76,
+      "speed": 62,
+      "mic": 80,
+      "psychology": 85,
+      "stamina": 70
+    },
+    "years_experience": 18,
+    "is_major_superstar": true,
+    "stats": {
+      "popularity": 76,
+      "momentum": 5,
+      "morale": 55,
+      "fatigue": 25
+    },
+    "contract": {
+      "salary_per_show": 18000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 28,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w038",
+    "name": "Deacon Graves",
+    "age": 40,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Upper Midcard",
+    "primary_brand": "ROC Velocity",
+    "attributes": {
+      "brawling": 85,
+      "technical": 80,
+      "speed": 58,
+      "mic": 88,
+      "psychology": 92,
+      "stamina": 68
+    },
+    "years_experience": 20,
+    "is_major_superstar": true,
+    "stats": {
+      "popularity": 78,
+      "momentum": 0,
+      "morale": 50,
+      "fatigue": 30
+    },
+    "contract": {
+      "salary_per_show": 19000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 20,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w039",
+    "name": "Leon Crusher",
+    "age": 36,
+    "gender": "Male",
+    "alignment": "Tweener",
+    "role": "Main Event",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 88,
+      "technical": 80,
+      "speed": 65,
+      "mic": 82,
+      "psychology": 86,
+      "stamina": 75
+    },
+    "years_experience": 16,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 74,
+      "momentum": 10,
+      "morale": 60,
+      "fatigue": 18
+    },
+    "contract": {
+      "salary_per_show": 21000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 32,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w040",
+    "name": "Rex Vanguard",
+    "age": 25,
+    "gender": "Male",
+    "alignment": "Face",
+    "role": "Upper Midcard",
+    "primary_brand": "ROC Velocity",
+    "attributes": {
+      "brawling": 76,
+      "technical": 78,
+      "speed": 80,
+      "mic": 74,
+      "psychology": 76,
+      "stamina": 82
+    },
+    "years_experience": 5,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 66,
+      "momentum": 16,
+      "morale": 72,
+      "fatigue": 9
+    },
+    "contract": {
+      "salary_per_show": 13000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 48,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w041",
+    "name": "Selena Wildfire",
+    "age": 29,
+    "gender": "Female",
+    "alignment": "Heel",
+    "role": "Midcard",
+    "primary_brand": "ROC Alpha",
+    "attributes": {
+      "brawling": 70,
+      "technical": 74,
+      "speed": 76,
+      "mic": 72,
+      "psychology": 74,
+      "stamina": 72
+    },
+    "years_experience": 7,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 58,
+      "momentum": 7,
+      "morale": 64,
+      "fatigue": 14
+    },
+    "contract": {
+      "salary_per_show": 11000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 40,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w042",
+    "name": "Grayson Edge",
+    "age": 27,
+    "gender": "Male",
+    "alignment": "Heel",
+    "role": "Midcard",
+    "primary_brand": "ROC Velocity",
+    "attributes": {
+      "brawling": 72,
+      "technical": 74,
+      "speed": 76,
+      "mic": 68,
+      "psychology": 70,
+      "stamina": 74
+    },
+    "years_experience": 6,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 54,
+      "momentum": 4,
+      "morale": 66,
+      "fatigue": 12
+    },
+    "contract": {
+      "salary_per_show": 10500,
+      "total_length_weeks": 52,
+      "weeks_remaining": 38,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w043",
+    "name": "Violet Chaos",
+    "age": 26,
+    "gender": "Female",
+    "alignment": "Face",
+    "role": "Lower Midcard",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 64,
+      "technical": 68,
+      "speed": 74,
+      "mic": 62,
+      "psychology": 66,
+      "stamina": 70
+    },
+    "years_experience": 4,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 50,
+      "momentum": 6,
+      "morale": 72,
+      "fatigue": 8
+    },
+    "contract": {
+      "salary_per_show": 8500,
+      "total_length_weeks": 52,
+      "weeks_remaining": 44,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w044",
+    "name": "Jett Blitz",
+    "age": 21,
+    "gender": "Male",
+    "alignment": "Face",
+    "role": "Lower Midcard",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 62,
+      "technical": 66,
+      "speed": 78,
+      "mic": 58,
+      "psychology": 62,
+      "stamina": 74
+    },
+    "years_experience": 2,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 46,
+      "momentum": 8,
+      "morale": 76,
+      "fatigue": 6
+    },
+    "contract": {
+      "salary_per_show": 7500,
+      "total_length_weeks": 52,
+      "weeks_remaining": 48,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  },
+  {
+    "id": "w045",
+    "name": "Maxine Fury",
+    "age": 25,
+    "gender": "Female",
+    "alignment": "Tweener",
+    "role": "Midcard",
+    "primary_brand": "ROC Vanguard",
+    "attributes": {
+      "brawling": 68,
+      "technical": 70,
+      "speed": 76,
+      "mic": 66,
+      "psychology": 68,
+      "stamina": 72
+    },
+    "years_experience": 5,
+    "is_major_superstar": false,
+    "stats": {
+      "popularity": 56,
+      "momentum": 9,
+      "morale": 70,
+      "fatigue": 10
+    },
+    "contract": {
+      "salary_per_show": 10000,
+      "total_length_weeks": 52,
+      "weeks_remaining": 46,
+      "signing_year": 1,
+      "signing_week": 1
+    }
+  }
+]

@@ -1,0 +1,908 @@
+<!-- Storylines View - Partial Template for SPA Loading -->
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="page-title">
+                <i class="bi bi-book-half"></i> Scripted Storylines
+            </h2>
+            <p class="text-muted">Pre-written narrative arcs that trigger throughout the year</p>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Storylines</h6>
+                    <h3 class="mb-0" id="totalStorylines">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card text-warning">
+                <div class="card-body">
+                    <h6 class="text-muted">Pending</h6>
+                    <h3 class="mb-0" id="pendingStorylines">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card text-success">
+                <div class="card-body">
+                    <h6 class="text-muted">Active</h6>
+                    <h3 class="mb-0" id="activeStorylines">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card text-secondary">
+                <div class="card-body">
+                    <h6 class="text-muted">Completed</h6>
+                    <h3 class="mb-0" id="completedStorylines">0</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Creative AI Planning -->
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-cpu"></i> Creative AI Planning
+            </h5>
+            <div>
+                <button class="btn btn-sm btn-outline-light" id="btnStoryArcPulse">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh AI
+                </button>
+                <button class="btn btn-sm btn-warning ms-2" id="btnStoryArcWeekly">
+                    <i class="bi bi-lightning-charge"></i> Run Story Week
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row g-3 mb-3">
+                <div class="col-md-3">
+                    <div class="ai-story-metric">
+                        <span>Active Arcs</span>
+                        <strong id="aiActiveArcs">0</strong>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="ai-story-metric">
+                        <span>Draft Arcs</span>
+                        <strong id="aiDraftArcs">0</strong>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="ai-story-metric">
+                        <span>Pending Reviews</span>
+                        <strong id="aiPendingReviews">0</strong>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="ai-story-metric">
+                        <span>Calendar Events</span>
+                        <strong id="aiCalendarEvents">0</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-lg-5">
+                    <h6 class="text-muted text-uppercase">Pending Approvals</h6>
+                    <div id="storyArcReviewsPanel" class="ai-story-panel"></div>
+                </div>
+                <div class="col-lg-4">
+                    <h6 class="text-muted text-uppercase">Active AI Arcs</h6>
+                    <div id="storyArcActivePanel" class="ai-story-panel"></div>
+                </div>
+                <div class="col-lg-3">
+                    <h6 class="text-muted text-uppercase">Event Calendar</h6>
+                    <div id="storyArcCalendarPanel" class="ai-story-panel"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Storylines -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-play-circle"></i> Active Storylines
+            </h5>
+        </div>
+        <div class="card-body">
+            <div id="activeStorylinesContainer">
+                <p class="text-muted">No active storylines</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Storylines -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-list-ul"></i> All Storylines
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="storylinesTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Trigger</th>
+                            <th>Progress</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="storylinesTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Controls (Development) -->
+    <div class="card mt-4">
+        <div class="card-header bg-warning">
+            <h5 class="mb-0">
+                <i class="bi bi-gear"></i> Test Controls (Development Only)
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <button class="btn btn-primary" id="btnCheckTriggers">
+                        <i class="bi bi-lightning"></i> Check Triggers
+                    </button>
+                    <button class="btn btn-success ms-2" id="btnProcessWeek">
+                        <i class="bi bi-fast-forward"></i> Process Week
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-info" id="btnPreviewSegments">
+                        <i class="bi bi-eye"></i> Preview Segments
+                    </button>
+                </div>
+            </div>
+            <div id="testResults" class="mt-3"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Storyline Detail Modal -->
+<div class="modal fade" id="storylineModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="storylineModalTitle">Storyline Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="storylineModalBody">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .page-title {
+        color: #1a1a2e;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .storyline-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+
+    .storyline-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+    }
+
+    .storyline-type {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .type-return { background: #28a745; color: white; }
+    .type-title_pursuit { background: #ffc107; color: #000; }
+    .type-faction_war { background: #6f42c1; color: white; }
+    .type-retirement { background: #6c757d; color: white; }
+    .type-rookie_rise { background: #20c997; color: white; }
+    .type-authority { background: #fd7e14; color: white; }
+    .type-mystery { background: #343a40; color: white; }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-pending { background: #ffc107; color: #000; }
+    .status-active { background: #28a745; color: white; }
+    .status-completed { background: #6c757d; color: white; }
+    .status-failed { background: #dc3545; color: white; }
+
+    .cast-member {
+        display: inline-block;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 20px;
+        padding: 0.25rem 0.75rem;
+        margin: 0.25rem;
+        font-size: 0.85rem;
+    }
+
+    .cast-role {
+        font-weight: 600;
+        color: #6c757d;
+    }
+
+    .beat-timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+
+    .beat-timeline::before {
+        content: '';
+        position: absolute;
+        left: 0.75rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+
+    .beat-item {
+        position: relative;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .beat-item::before {
+        content: '';
+        position: absolute;
+        left: -1.5rem;
+        top: 1rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #6c757d;
+        border: 2px solid white;
+    }
+
+    .beat-item.completed::before {
+        background: #28a745;
+    }
+
+    .beat-item.upcoming::before {
+        background: #ffc107;
+    }
+
+    .beat-week {
+        font-size: 0.8rem;
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    .beat-description {
+        margin-top: 0.25rem;
+        font-weight: 500;
+    }
+
+    .beat-effects {
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .beat-effect {
+        display: inline-block;
+        background: #e9ecef;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        margin-right: 0.5rem;
+        margin-top: 0.25rem;
+    }
+
+    .ai-story-metric {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 0.9rem 1rem;
+        background: #f8f9fa;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ai-story-metric span {
+        color: #6c757d;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+
+    .ai-story-metric strong {
+        font-size: 1.5rem;
+        color: #1a1a2e;
+    }
+
+    .ai-story-panel {
+        min-height: 130px;
+        max-height: 360px;
+        overflow: auto;
+    }
+
+    .ai-story-item {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 0.85rem;
+        margin-bottom: 0.75rem;
+        background: #fff;
+    }
+
+    .ai-story-title {
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .ai-story-meta {
+        color: #6c757d;
+        font-size: 0.82rem;
+        margin-bottom: 0.45rem;
+    }
+
+    .ai-story-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+</style>
+
+<script>
+    // Storylines View Script
+    (function() {
+        let storylinesData = [];
+        let storyArcAiData = null;
+
+        // Load storylines on view load
+        async function loadStorylines() {
+            try {
+                console.log('Loading storylines...');
+                const response = await getAPI('/api/storylines');
+                console.log('Storylines response:', response);
+                
+                if (response.success) {
+                    storylinesData = response.storylines || [];
+                    
+                    // Update summary cards
+                    document.getElementById('totalStorylines').textContent = response.total_storylines || 0;
+                    document.getElementById('pendingStorylines').textContent = response.pending || 0;
+                    document.getElementById('activeStorylines').textContent = response.active || 0;
+                    document.getElementById('completedStorylines').textContent = response.completed || 0;
+                    
+                    // Update tables
+                    updateActiveStorylines();
+                    updateStorylinesTable();
+                } else {
+                    console.error('API returned success=false:', response);
+                    showAlert('Failed to load storylines: ' + (response.error || 'Unknown error'), 'danger');
+                }
+            } catch (error) {
+                console.error('Error loading storylines:', error);
+                showAlert('Failed to load storylines: ' + error.message, 'danger');
+                
+                // Show error in table
+                document.getElementById('storylinesTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-danger">
+                            Error loading storylines: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        async function loadStoryArcAi() {
+            try {
+                const response = await fetch('/api/story-arc-ai/dashboard');
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || 'Failed to load Creative AI');
+                storyArcAiData = result.data;
+                renderStoryArcAi();
+            } catch (error) {
+                const reviews = document.getElementById('storyArcReviewsPanel');
+                if (reviews) reviews.innerHTML = `<div class="text-danger">Creative AI unavailable: ${escapeHtml(error.message)}</div>`;
+            }
+        }
+
+        async function runStoryArcWeek() {
+            try {
+                const response = await fetch('/api/story-arc-ai/weekly', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ force: true, auto: false })
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || 'Failed to run story AI');
+                await loadStoryArcAi();
+                if (window.checkStoryArcAIPulse) window.checkStoryArcAIPulse('storylines-manual', true);
+            } catch (error) {
+                showAlert('Failed to run story AI: ' + error.message, 'danger');
+            }
+        }
+
+        function renderStoryArcAi() {
+            if (!storyArcAiData) return;
+            const summary = storyArcAiData.summary || {};
+            setText('aiActiveArcs', summary.active_arcs || 0);
+            setText('aiDraftArcs', summary.draft_arcs || 0);
+            setText('aiPendingReviews', summary.pending_reviews || 0);
+            setText('aiCalendarEvents', summary.next_calendar_events || 0);
+            renderStoryArcReviews(storyArcAiData.pending_reviews || []);
+            renderStoryArcActive(storyArcAiData.arcs || []);
+            renderStoryArcCalendar(storyArcAiData.calendar || []);
+        }
+
+        function renderStoryArcReviews(reviews) {
+            const panel = document.getElementById('storyArcReviewsPanel');
+            if (!panel) return;
+            if (!reviews.length) {
+                panel.innerHTML = '<p class="text-muted">No pending creative approvals.</p>';
+                return;
+            }
+            panel.innerHTML = reviews.map(review => {
+                const options = Array.isArray(review.options_json) ? review.options_json : [];
+                const buttons = options.length ? options.map(option => {
+                    const decision = option.key === 'approve' ? 'approve' : option.key === 'reject' ? 'reject' : 'defer';
+                    return `<button class="btn btn-sm btn-outline-primary" onclick="window.storyArcDecision('${safeAttr(review.id)}', '${safeAttr(decision)}', '${safeAttr(option.key)}')">${escapeHtml(option.label)}</button>`;
+                }).join('') : `<button class="btn btn-sm btn-primary" onclick="window.storyArcDecision('${safeAttr(review.id)}', 'approve', 'approve')">Approve</button>`;
+                return `
+                    <div class="ai-story-item">
+                        <div class="ai-story-title">${escapeHtml(review.title)}</div>
+                        <div class="ai-story-meta">${escapeHtml(review.review_type)} · ${escapeHtml(review.severity)} · Y${review.due_year || '-'} W${review.due_week || '-'}</div>
+                        <div class="mb-2">${escapeHtml(review.summary)}</div>
+                        <div class="ai-story-actions">${buttons}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderStoryArcActive(arcs) {
+            const panel = document.getElementById('storyArcActivePanel');
+            if (!panel) return;
+            const active = arcs.filter(arc => arc.status === 'active' || arc.status === 'pending_review').slice(0, 8);
+            if (!active.length) {
+                panel.innerHTML = '<p class="text-muted">No AI-managed arcs yet.</p>';
+                return;
+            }
+            panel.innerHTML = active.map(arc => {
+                const health = arc.health || {};
+                return `
+                    <div class="ai-story-item">
+                        <div class="ai-story-title">${escapeHtml(arc.name)}</div>
+                        <div class="ai-story-meta">${escapeHtml(arc.tier || 'unclassified')} · ${escapeHtml(arc.status)} · ${Number(arc.priority_score || 0).toFixed(0)} priority</div>
+                        <div>${escapeHtml(health.recommended_action || arc.premise || 'Tracking active storyline.')}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderStoryArcCalendar(events) {
+            const panel = document.getElementById('storyArcCalendarPanel');
+            if (!panel) return;
+            if (!events.length) {
+                panel.innerHTML = '<p class="text-muted">No planned events.</p>';
+                return;
+            }
+            panel.innerHTML = events.slice(0, 10).map(event => `
+                <div class="ai-story-item">
+                    <div class="ai-story-title">${escapeHtml(event.event_name)}</div>
+                    <div class="ai-story-meta">Y${event.year} W${event.week} · ${escapeHtml(event.tier)}</div>
+                    <div>${escapeHtml(event.strategic_purpose)}</div>
+                </div>
+            `).join('');
+        }
+
+        window.storyArcDecision = async function(reviewId, decision, selectedOption) {
+            try {
+                const response = await fetch(`/api/story-arc-ai/reviews/${encodeURIComponent(reviewId)}/decision`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ decision, selected_option: selectedOption })
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || 'Could not save decision');
+                await loadStoryArcAi();
+            } catch (error) {
+                showAlert('Could not save story AI decision: ' + error.message, 'danger');
+            }
+        };
+
+        function setText(id, value) {
+            const element = document.getElementById(id);
+            if (element) element.textContent = value;
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        function safeAttr(value) {
+            return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        // Update active storylines display
+        function updateActiveStorylines() {
+            const container = document.getElementById('activeStorylinesContainer');
+            const activeStorylines = storylinesData.filter(s => s.status === 'active');
+            
+            if (activeStorylines.length === 0) {
+                container.innerHTML = '<p class="text-muted">No active storylines</p>';
+                return;
+            }
+            
+            let html = '';
+            
+            for (const storyline of activeStorylines) {
+                const progress = storyline.total_beats > 0 
+                    ? Math.round((storyline.completed_beats / storyline.total_beats) * 100)
+                    : 0;
+                
+                html += `
+                    <div class="storyline-card">
+                        <div class="storyline-header">
+                            <h5 class="mb-1">${storyline.name}</h5>
+                            <span class="storyline-type type-${storyline.type}">${storyline.type.replace('_', ' ')}</span>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">${storyline.description || 'No description'}</p>
+                            
+                            <div class="mb-3">
+                                <strong>Cast:</strong>
+                                ${Object.entries(storyline.cast || {}).map(([role, wrestlerId]) => 
+                                    `<span class="cast-member">
+                                        <span class="cast-role">${role}:</span> ${wrestlerId}
+                                    </span>`
+                                ).join('')}
+                            </div>
+                            
+                            <div class="progress mb-2" style="height: 20px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: ${progress}%">
+                                    ${storyline.completed_beats}/${storyline.total_beats} beats
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-sm btn-primary" onclick="window.storylinesViewStoryline('${storyline.id}')">
+                                <i class="bi bi-eye"></i> View Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Update all storylines table
+        function updateStorylinesTable() {
+            const tbody = document.getElementById('storylinesTableBody');
+            
+            if (storylinesData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No storylines loaded</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            for (const storyline of storylinesData) {
+                const triggerInfo = storyline.triggered_week 
+                    ? `Week ${storyline.triggered_week}`
+                    : 'Not triggered';
+                
+                const progress = storyline.total_beats > 0
+                    ? `${storyline.completed_beats}/${storyline.total_beats}`
+                    : '0/0';
+                
+                html += `
+                    <tr>
+                        <td>
+                            <strong>${storyline.name}</strong>
+                        </td>
+                        <td>
+                            <span class="storyline-type type-${storyline.type}">
+                                ${storyline.type.replace('_', ' ')}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-${storyline.status}">
+                                ${storyline.status}
+                            </span>
+                        </td>
+                        <td>${triggerInfo}</td>
+                        <td>${progress}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="window.storylinesViewStoryline('${storyline.id}')">
+                                <i class="bi bi-eye"></i> View
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            tbody.innerHTML = html;
+        }
+
+        // View storyline details - exposed globally for onclick
+        window.storylinesViewStoryline = async function(storylineId) {
+            try {
+                const response = await getAPI(`/api/storylines/${storylineId}`);
+                
+                if (response.success) {
+                    showStorylineModal(response.storyline, response.cast_with_names);
+                }
+            } catch (error) {
+                console.error('Error loading storyline:', error);
+                showAlert('Failed to load storyline details', 'danger');
+            }
+        };
+
+        // Show storyline modal
+        function showStorylineModal(storyline, castWithNames) {
+            const modal = new bootstrap.Modal(document.getElementById('storylineModal'));
+            
+            document.getElementById('storylineModalTitle').textContent = storyline.name;
+            
+            let beatsHtml = '';
+            const beats = storyline.beats || [];
+            const completedBeats = storyline.completed_beats || [];
+            
+            if (beats.length > 0) {
+                beatsHtml = '<div class="beat-timeline">';
+                
+                for (const beat of beats) {
+                    const isCompleted = Array.isArray(completedBeats) && completedBeats.includes(beat.beat_id);
+                    const beatClass = isCompleted ? 'completed' : 'upcoming';
+                    
+                    let effectsHtml = '';
+                    if (beat.create_feud) effectsHtml += '<span class="beat-effect">Creates Feud</span>';
+                    if (beat.injury_target) effectsHtml += '<span class="beat-effect">Injury</span>';
+                    if (beat.title_change_setup) effectsHtml += '<span class="beat-effect">Title Setup</span>';
+                    
+                    beatsHtml += `
+                        <div class="beat-item ${beatClass}">
+                            <div class="beat-week">Week +${beat.week_offset}</div>
+                            <div class="beat-description">${beat.description}</div>
+                            ${effectsHtml ? `<div class="beat-effects">${effectsHtml}</div>` : ''}
+                        </div>
+                    `;
+                }
+                
+                beatsHtml += '</div>';
+            } else {
+                beatsHtml = '<p class="text-muted">No beats defined</p>';
+            }
+            
+            const modalBody = `
+                <div class="mb-3">
+                    <p class="lead">${storyline.description || 'No description'}</p>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Type:</strong> 
+                        <span class="storyline-type type-${storyline.storyline_type}">
+                            ${(storyline.storyline_type || 'unknown').replace('_', ' ')}
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Status:</strong> 
+                        <span class="status-badge status-${storyline.status}">
+                            ${storyline.status}
+                        </span>
+                    </div>
+                </div>
+                
+                ${storyline.triggered_week ? `
+                    <div class="mb-3">
+                        <strong>Triggered:</strong> Year ${storyline.triggered_year}, Week ${storyline.triggered_week}
+                    </div>
+                ` : ''}
+                
+                <div class="mb-4">
+                    <h6>Cast:</h6>
+                    ${castWithNames && Object.keys(castWithNames).length > 0 
+                        ? Object.entries(castWithNames).map(([role, wrestler]) => `
+                            <span class="cast-member">
+                                <span class="cast-role">${role}:</span> 
+                                ${wrestler.name} (${wrestler.id})
+                            </span>
+                        `).join('')
+                        : '<p class="text-muted">No cast assigned</p>'
+                    }
+                </div>
+                
+                <div>
+                    <h6>Story Beats:</h6>
+                    ${beatsHtml}
+                </div>
+                
+                ${storyline.payoff_show ? `
+                    <div class="mt-3">
+                        <strong>Payoff Show:</strong> ${storyline.payoff_show}
+                    </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('storylineModalBody').innerHTML = modalBody;
+            modal.show();
+        }
+
+        // Test functions
+        async function checkTriggers() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = '<div class="spinner-border spinner-border-sm"></div> Checking triggers...';
+            
+            try {
+                const response = await postAPI('/api/storylines/check-triggers', {});
+                
+                if (response.success) {
+                    if (response.triggered_count > 0) {
+                        let html = `<div class="alert alert-success">
+                            <strong>Triggered ${response.triggered_count} storyline(s):</strong><ul>`;
+                        for (const storyline of response.triggered) {
+                            html += `<li>${storyline.name} (${storyline.type})</li>`;
+                        }
+                        html += '</ul></div>';
+                        resultsDiv.innerHTML = html;
+                    } else {
+                        resultsDiv.innerHTML = `<div class="alert alert-info">No storylines triggered (Week ${response.week}, Year ${response.year})</div>`;
+                    }
+                    
+                    // Reload storylines
+                    await loadStorylines();
+                }
+            } catch (error) {
+                console.error('Error checking triggers:', error);
+                resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function processWeek() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = '<div class="spinner-border spinner-border-sm"></div> Processing week...';
+            
+            try {
+                const response = await postAPI('/api/storylines/process-week', {});
+                
+                if (response.success) {
+                    if (response.beats_processed > 0) {
+                        let html = `<div class="alert alert-success">
+                            <strong>Processed ${response.beats_processed} beat(s):</strong><ul>`;
+                        for (const result of response.results) {
+                            html += `<li>${result.description}</li>`;
+                        }
+                        html += '</ul></div>';
+                        resultsDiv.innerHTML = html;
+                    } else {
+                        resultsDiv.innerHTML = '<div class="alert alert-info">No story beats to process this week</div>';
+                    }
+                    
+                    // Reload storylines
+                    await loadStorylines();
+                }
+            } catch (error) {
+                console.error('Error processing week:', error);
+                resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function previewSegments() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = '<div class="spinner-border spinner-border-sm"></div> Previewing segments...';
+            
+            try {
+                const response = await postAPI('/api/storylines/preview-segments', {
+                    show_type: 'weekly_tv',
+                    brand: 'ROC Alpha'
+                });
+                
+                if (response.success) {
+                    if (response.total > 0) {
+                        let html = `<div class="alert alert-success">
+                            <strong>Would generate ${response.total} segment(s):</strong><ul>`;
+                        for (const segment of response.segments) {
+                            const participants = segment.participants.map(p => p.wrestler_name).join(' vs ');
+                            html += `<li>${segment.segment_type}: ${participants}</li>`;
+                        }
+                        html += '</ul></div>';
+                        resultsDiv.innerHTML = html;
+                    } else {
+                        resultsDiv.innerHTML = '<div class="alert alert-info">No segments would be generated from storylines</div>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error previewing segments:', error);
+                resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            }
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            const container = document.querySelector('.container-fluid');
+            if (container) {
+                container.insertAdjacentHTML('afterbegin', alertHtml);
+                
+                // Auto-dismiss after 5 seconds
+                setTimeout(() => {
+                    const alert = container.querySelector('.alert');
+                    if (alert) {
+                        alert.remove();
+                    }
+                }, 5000);
+            }
+        }
+
+        // Attach event listeners
+        document.getElementById('btnCheckTriggers').addEventListener('click', checkTriggers);
+        document.getElementById('btnProcessWeek').addEventListener('click', processWeek);
+        document.getElementById('btnPreviewSegments').addEventListener('click', previewSegments);
+        document.getElementById('btnStoryArcPulse').addEventListener('click', loadStoryArcAi);
+        document.getElementById('btnStoryArcWeekly').addEventListener('click', runStoryArcWeek);
+        
+        // Load storylines immediately
+        loadStorylines();
+        loadStoryArcAi();
+        
+        console.log('✅ Storylines view initialized');
+    })();
+</script>

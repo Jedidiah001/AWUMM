@@ -1,0 +1,378 @@
+<!-- Contract Alerts View - STEP 120 -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2>
+            <i class="bi bi-bell"></i> Contract Expiration Alerts
+        </h2>
+        <p class="lead">STEP 120: Automated notifications for expiring contracts</p>
+        <hr>
+    </div>
+</div>
+
+<!-- Alert Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-danger">
+            <div class="card-body text-center">
+                <h6 class="text-danger">🚨 URGENT</h6>
+                <h2 id="urgentAlerts" class="text-danger">-</h2>
+                <small>Immediate action required</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-warning">
+            <div class="card-body text-center">
+                <h6 class="text-warning">⚠️ HIGH PRIORITY</h6>
+                <h2 id="highAlerts" class="text-warning">-</h2>
+                <small>Action needed soon</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-info">
+            <div class="card-body text-center">
+                <h6 class="text-info">📋 MEDIUM</h6>
+                <h2 id="mediumAlerts" class="text-info">-</h2>
+                <small>Plan ahead</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <h6 class="text-success">✅ TOTAL ACTIVE</h6>
+                <h2 id="totalAlerts" class="text-success">-</h2>
+                <small>All unacknowledged</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Actions -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="alertFilter" id="filterAllAlerts" value="all" checked>
+                            <label class="btn btn-outline-primary" for="filterAllAlerts">All Alerts</label>
+                            
+                            <input type="radio" class="btn-check" name="alertFilter" id="filterUnack" value="unack">
+                            <label class="btn btn-outline-danger" for="filterUnack">Unacknowledged</label>
+                            
+                            <input type="radio" class="btn-check" name="alertFilter" id="filterUrgentOnly" value="urgent">
+                            <label class="btn btn-outline-danger" for="filterUrgentOnly">Urgent Only</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button class="btn btn-success" onclick="acknowledgeAllAlerts()">
+                            <i class="bi bi-check-all"></i> Acknowledge All
+                        </button>
+                        <button class="btn btn-primary" onclick="generateAlerts()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh Alerts
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alerts List -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-ul"></i> Active Alerts (<span id="displayedAlertCount">0</span>)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Priority</th>
+                                <th>Wrestler</th>
+                                <th>Brand</th>
+                                <th>Weeks Left</th>
+                                <th>Type</th>
+                                <th>Morale</th>
+                                <th>Re-Sign Prob.</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alertsTableBody">
+                            <tr>
+                                <td colspan="9" class="text-center">
+                                    <div class="spinner-border" role="status"></div>
+                                    <p>Loading alerts...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // STEP 120: Contract Alerts Frontend
+    
+    let allAlerts = [];
+    let currentFilter = 'all';
+    
+    // Load alerts
+    async function loadAlerts() {
+        try {
+            // Get all alerts
+            const response = await fetchAPI('/api/alerts/contracts');
+            allAlerts = response.alerts;
+            
+            // Get summary
+            const summary = await fetchAPI('/api/alerts/contracts/summary');
+            updateSummaryCards(summary);
+            
+            // Render table
+            renderAlerts();
+            
+        } catch (error) {
+            console.error('Failed to load alerts:', error);
+            document.getElementById('alertsTableBody').innerHTML = `
+                <tr>
+                    <td colspan="9" class="text-center text-danger">
+                        <i class="bi bi-exclamation-triangle"></i> Failed to load alerts: ${error.message}
+                    </td>
+                </tr>
+            `;
+        }
+    }
+    
+    function updateSummaryCards(summary) {
+        document.getElementById('urgentAlerts').textContent = summary.by_priority.urgent;
+        document.getElementById('highAlerts').textContent = summary.by_priority.high;
+        document.getElementById('mediumAlerts').textContent = summary.by_priority.medium;
+        document.getElementById('totalAlerts').textContent = summary.total_unacknowledged;
+    }
+    
+    function renderAlerts() {
+        let filtered = [...allAlerts];
+        
+        // Apply filter
+        if (currentFilter === 'unack') {
+            filtered = filtered.filter(a => !a.acknowledged);
+        } else if (currentFilter === 'urgent') {
+            filtered = filtered.filter(a => a.priority === 1); // URGENT = 1
+        }
+        
+        const tbody = document.getElementById('alertsTableBody');
+        document.getElementById('displayedAlertCount').textContent = filtered.length;
+        
+        if (filtered.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        <i class="bi bi-check-circle"></i> No alerts to display. Great job!
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = filtered.map(alert => {
+            const priorityBadge = getPriorityBadge(alert.priority);
+            const typeBadge = getTypeBadge(alert.alert_type);
+            const moraleBadge = getMoraleBadge(alert.morale);
+            const resignBadge = getResignProbBadge(alert.resign_probability);
+            const ackStatus = alert.acknowledged ? 
+                '<span class="badge bg-secondary">Acknowledged</span>' : 
+                '<span class="badge bg-warning text-dark">New</span>';
+            
+            return `
+                <tr class="${alert.acknowledged ? 'table-secondary' : ''}">
+                    <td>${priorityBadge}</td>
+                    <td>
+                        <strong>${alert.wrestler_name}</strong><br>
+                        ${ackStatus}
+                    </td>
+                    <td><small>${alert.brand}</small></td>
+                    <td>
+                        <strong class="${getWeeksColorClass(alert.weeks_remaining)}">
+                            ${alert.weeks_remaining} weeks
+                        </strong>
+                    </td>
+                    <td>${typeBadge}</td>
+                    <td>${moraleBadge}</td>
+                    <td>${resignBadge}</td>
+                    <td>
+                        <small>Y${alert.created_year} W${alert.created_week}</small>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="openContractNegotiation('${alert.wrestler_id}')">
+                            <i class="bi bi-chat-dots"></i> Negotiate
+                        </button>
+                        ${!alert.acknowledged ? `
+                            <button class="btn btn-sm btn-success" onclick="acknowledgeAlert('${alert.alert_id}')">
+                                <i class="bi bi-check"></i>
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-sm btn-secondary" onclick="dismissAlert('${alert.alert_id}')">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+    
+    function getPriorityBadge(priority) {
+        const badges = {
+            1: '<span class="badge bg-danger">🚨 URGENT</span>',
+            2: '<span class="badge bg-warning text-dark">⚠️ HIGH</span>',
+            3: '<span class="badge bg-info">📋 MEDIUM</span>',
+            4: '<span class="badge bg-secondary">ℹ️ LOW</span>'
+        };
+        return badges[priority] || priority;
+    }
+    
+    function getTypeBadge(type) {
+        const badges = {
+            'expired': '<span class="badge bg-dark">EXPIRED</span>',
+            'critical': '<span class="badge bg-danger">CRITICAL</span>',
+            'warning': '<span class="badge bg-warning text-dark">WARNING</span>',
+            'planning': '<span class="badge bg-info">PLANNING</span>'
+        };
+        return badges[type] || type;
+    }
+    
+    function getMoraleBadge(morale) {
+        let color, text;
+        if (morale >= 70) {
+            color = 'success';
+            text = 'Happy';
+        } else if (morale >= 30) {
+            color = 'warning';
+            text = 'Neutral';
+        } else {
+            color = 'danger';
+            text = 'Unhappy';
+        }
+        return `<span class="badge bg-${color}">${morale}</span>`;
+    }
+    
+    function getResignProbBadge(prob) {
+        const badges = {
+            'High': '<span class="badge bg-success">High</span>',
+            'Medium': '<span class="badge bg-warning text-dark">Medium</span>',
+            'Low': '<span class="badge bg-danger">Low</span>'
+        };
+        return badges[prob] || prob;
+    }
+    
+    function getWeeksColorClass(weeks) {
+        if (weeks === 0) return 'text-secondary';
+        if (weeks <= 4) return 'text-danger';
+        if (weeks <= 13) return 'text-warning';
+        return 'text-info';
+    }
+    
+    async function acknowledgeAlert(alertId) {
+        try {
+            const response = await fetchAPI(`/api/alerts/contracts/${alertId}/acknowledge`, {
+                method: 'POST'
+            });
+            
+            if (response.success) {
+                loadAlerts(); // Refresh
+            }
+        } catch (error) {
+            alert('Failed to acknowledge alert: ' + error.message);
+        }
+    }
+    
+    async function dismissAlert(alertId) {
+        if (!confirm('Dismiss this alert? It will be removed from view.')) {
+            return;
+        }
+        
+        try {
+            const response = await fetchAPI(`/api/alerts/contracts/${alertId}/dismiss`, {
+                method: 'POST'
+            });
+            
+            if (response.success) {
+                loadAlerts(); // Refresh
+            }
+        } catch (error) {
+            alert('Failed to dismiss alert: ' + error.message);
+        }
+    }
+    
+    async function acknowledgeAllAlerts() {
+        if (!confirm('Acknowledge all active alerts?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetchAPI('/api/alerts/contracts/acknowledge-all', {
+                method: 'POST'
+            });
+            
+            if (response.success) {
+                alert('✅ All alerts acknowledged');
+                loadAlerts(); // Refresh
+            }
+        } catch (error) {
+            alert('Failed to acknowledge all: ' + error.message);
+        }
+    }
+    
+    async function generateAlerts() {
+        try {
+            const response = await fetchAPI('/api/alerts/contracts/generate', {
+                method: 'POST'
+            });
+            
+            if (response.success) {
+                alert(`✅ Generated ${response.alerts_generated} alerts`);
+                loadAlerts(); // Refresh
+            }
+        } catch (error) {
+            alert('Failed to generate alerts: ' + error.message);
+        }
+    }
+    
+    function openContractNegotiation(wrestlerId) {
+        // Navigate to contracts view and open negotiation modal
+        loadView('contracts').then(() => {
+            if (typeof window.openNegotiation === 'function') {
+                window.openNegotiation(wrestlerId);
+            }
+        });
+    }
+    
+    // Event listeners
+    document.querySelectorAll('input[name="alertFilter"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            currentFilter = e.target.value;
+            renderAlerts();
+        });
+    });
+    
+    // Expose functions globally
+    window.acknowledgeAlert = acknowledgeAlert;
+    window.dismissAlert = dismissAlert;
+    window.acknowledgeAllAlerts = acknowledgeAllAlerts;
+    window.generateAlerts = generateAlerts;
+    window.openContractNegotiation = openContractNegotiation;
+    
+    // Initialize
+    loadAlerts();
+})();
+</script>

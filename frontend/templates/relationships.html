@@ -1,0 +1,483 @@
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="bi bi-heart-half"></i> Relationships</h2>
+        <p class="lead">Track friendships, heat, mentorships, manager-client pairings, and real-life relationships.</p>
+        <hr>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12 d-flex flex-wrap gap-2">
+        <button class="btn btn-success" data-action="open-create-relationship">
+            <i class="bi bi-plus-circle"></i> Create Relationship
+        </button>
+        <button class="btn btn-info" data-action="auto-seed-relationships">
+            <i class="bi bi-magic"></i> Auto-Seed Natural Links
+        </button>
+        <button class="btn btn-outline-secondary" data-action="refresh-relationships">
+            <i class="bi bi-arrow-repeat"></i> Refresh
+        </button>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-dark text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="dashboardTagTeams">-</h3>
+                <small>Official Tag Teams</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-secondary text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="dashboardFactions">-</h3>
+                <small>Factions / Stables</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="dashboardMentorships">-</h3>
+                <small>Mentor / Protégé</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card" style="background:#f8d7da;">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="dashboardRomance">-</h3>
+                <small>Real-Life Relationships</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="relationshipTotal">-</h3>
+                <small>Total Active</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="friendshipCount">-</h3>
+                <small>Friendships</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="heatCount">-</h3>
+                <small>Heat</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark h-100">
+            <div class="card-body text-center">
+                <h3 class="mb-1" id="managerCount">-</h3>
+                <small>Manager-Client Links</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <label class="form-label">Relationship Type</label>
+        <select class="form-select" id="relationshipTypeFilter" data-action="filter-relationships">
+            <option value="">All</option>
+            <option value="friendship">Friendship</option>
+            <option value="heat">Heat</option>
+            <option value="mentorship">Mentorship</option>
+            <option value="romantic">Romantic</option>
+            <option value="manager_client">Manager/Client</option>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Wrestler</label>
+        <select class="form-select" id="relationshipWrestlerFilter" data-action="filter-relationships">
+            <option value="">All wrestlers</option>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Auto-Seed Brand</label>
+        <select class="form-select" id="autoSeedBrand">
+            <option value="">All Brands</option>
+            <option value="ROC Alpha">ROC Alpha</option>
+            <option value="ROC Velocity">ROC Velocity</option>
+            <option value="ROC Vanguard">ROC Vanguard</option>
+        </select>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-people-fill"></i> Tag Team Chemistry</h5>
+            </div>
+            <div class="card-body" id="relationshipTagTeamBoard">
+                <p class="text-muted mb-0">Loading team chemistry...</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-person-badge"></i> Manager Effectiveness</h5>
+            </div>
+            <div class="card-body" id="managerEffectivenessBoard">
+                <p class="text-muted mb-0">Loading manager-client links...</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-lightning"></i> Faction Dynamics</h5>
+            </div>
+            <div class="card-body" id="factionStoryHooksBoard">
+                <p class="text-muted mb-0">Loading faction hooks...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="bi bi-share"></i> Active Relationships</h5>
+    </div>
+    <div class="card-body">
+        <div id="relationshipsList">
+            <p class="text-center text-muted">Loading relationships...</p>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="createRelationshipModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Relationship</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Wrestler A</label>
+                        <select class="form-select" id="relationshipA"></select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Wrestler B</label>
+                        <select class="form-select" id="relationshipB"></select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Relationship Type</label>
+                        <select class="form-select" id="relationshipType">
+                            <option value="friendship">Friendship</option>
+                            <option value="heat">Heat</option>
+                            <option value="mentorship">Mentorship</option>
+                            <option value="romantic">Romantic</option>
+                            <option value="manager_client">Manager/Client</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Strength</label>
+                        <input class="form-control" id="relationshipStrength" type="number" min="0" max="100" value="55">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Manager Effectiveness (for manager/client)</label>
+                        <input class="form-control" id="managerEffectiveness" type="number" min="0" max="100" value="70">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Manager Fit (for manager/client)</label>
+                        <input class="form-control" id="managerFit" type="number" min="0" max="100" value="70">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Note</label>
+                        <textarea class="form-control" id="relationshipNote" rows="2" placeholder="Why this relationship exists"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" data-action="create-relationship">Save Relationship</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    let roster = [];
+
+    function renderSimpleList(containerId, items, formatter, emptyMessage) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (!items || !items.length) {
+            container.innerHTML = `<p class="text-muted mb-0">${emptyMessage}</p>`;
+            return;
+        }
+
+        container.innerHTML = items.map(formatter).join('');
+    }
+
+    document.addEventListener('click', function (e) {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+
+        const action = target.dataset.action;
+        if (action === 'open-create-relationship') openCreateModal();
+        if (action === 'auto-seed-relationships') autoSeedRelationships();
+        if (action === 'refresh-relationships') loadRelationships();
+        if (action === 'create-relationship') createRelationship();
+        if (action === 'adjust-relationship') adjustRelationship(target.dataset.relationshipId, parseInt(target.dataset.delta, 10));
+    });
+
+    document.addEventListener('change', function (e) {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+        if (target.dataset.action === 'filter-relationships') loadRelationships();
+    });
+
+    function relationshipBadge(type) {
+        const map = {
+            friendship: 'bg-success',
+            heat: 'bg-danger',
+            mentorship: 'bg-info',
+            romantic: 'bg-pink',
+            manager_client: 'bg-warning text-dark'
+        };
+        return map[type] || 'bg-secondary';
+    }
+
+    function normalizeTypeLabel(type) {
+        return (type || '').replace('_', ' ').replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    async function loadRoster() {
+        const response = await fetchAPI('/api/roster?active_only=true');
+        roster = response.wrestlers || [];
+        const options = ['<option value="">All wrestlers</option>'].concat(
+            roster.map(wrestler => `<option value="${wrestler.id}">${wrestler.name}</option>`)
+        ).join('');
+        document.getElementById('relationshipWrestlerFilter').innerHTML = options;
+
+        const modalOptions = roster.map(wrestler => `<option value="${wrestler.id}">${wrestler.name} (${wrestler.primary_brand})</option>`).join('');
+        document.getElementById('relationshipA').innerHTML = modalOptions;
+        document.getElementById('relationshipB').innerHTML = modalOptions;
+    }
+
+    function renderSummary(relationships) {
+        document.getElementById('relationshipTotal').textContent = relationships.length;
+        document.getElementById('friendshipCount').textContent = relationships.filter(rel => rel.relationship_type === 'friendship').length;
+        document.getElementById('heatCount').textContent = relationships.filter(rel => rel.relationship_type === 'heat').length;
+        document.getElementById('managerCount').textContent = relationships.filter(rel => rel.relationship_type === 'manager_client').length;
+    }
+
+    async function loadRelationshipDashboard() {
+        try {
+            const response = await fetchAPI('/api/relationships/dashboard');
+            const summary = response.summary || {};
+            const tagTeams = response.tag_teams || {};
+            const factions = response.factions || {};
+            const managerEffectiveness = response.manager_effectiveness || [];
+
+            document.getElementById('dashboardTagTeams').textContent = summary.active_tag_teams || 0;
+            document.getElementById('dashboardFactions').textContent = summary.active_factions || 0;
+            document.getElementById('dashboardMentorships').textContent = summary.mentorships || 0;
+            document.getElementById('dashboardRomance').textContent = summary.romantic_relationships || 0;
+
+            renderSimpleList(
+                'relationshipTagTeamBoard',
+                tagTeams.most_experienced || [],
+                team => `
+                    <div class="border rounded p-2 mb-2">
+                        <div class="d-flex justify-content-between">
+                            <strong>${team.team_name}</strong>
+                            <span class="badge bg-primary">${team.chemistry}</span>
+                        </div>
+                        <div class="small text-muted">${(team.member_names || []).join(' &amp; ')}</div>
+                        <div class="small mt-1">Experience: ${team.experience_weeks} weeks | Coordination x${Number(team.coordination_multiplier || 1).toFixed(3)}</div>
+                    </div>
+                `,
+                'No official teams yet.'
+            );
+
+            renderSimpleList(
+                'managerEffectivenessBoard',
+                managerEffectiveness,
+                rel => `
+                    <div class="border rounded p-2 mb-2">
+                        <strong>${rel.manager_name}</strong> managing <strong>${rel.client_name}</strong>
+                        <div class="small text-muted">Effectiveness ${rel.effectiveness} | Fit ${rel.fit}</div>
+                        <div class="small mt-1">Match bonus +${(Number(rel.match_bonus || 0) * 100).toFixed(1)}% | Promo bonus +${(Number(rel.promo_bonus || 0) * 100).toFixed(1)}%</div>
+                    </div>
+                `,
+                'No manager-client links yet.'
+            );
+
+            renderSimpleList(
+                'factionStoryHooksBoard',
+                factions.story_hooks || [],
+                hook => `
+                    <div class="border rounded p-2 mb-2">
+                        <strong>${hook.faction_name}</strong>
+                        <div class="small">${hook.summary}</div>
+                        <div class="small text-muted text-uppercase mt-1">${hook.severity} priority</div>
+                    </div>
+                `,
+                'Faction dynamics are stable right now.'
+            );
+        } catch (error) {
+            renderSimpleList('relationshipTagTeamBoard', [], () => '', `Failed to load team chemistry: ${error.message}`);
+            renderSimpleList('managerEffectivenessBoard', [], () => '', `Failed to load manager effectiveness: ${error.message}`);
+            renderSimpleList('factionStoryHooksBoard', [], () => '', `Failed to load faction hooks: ${error.message}`);
+        }
+    }
+
+    async function loadRelationships() {
+        const type = document.getElementById('relationshipTypeFilter').value;
+        const wrestlerId = document.getElementById('relationshipWrestlerFilter').value;
+        const params = new URLSearchParams();
+        if (type) params.set('type', type);
+        if (wrestlerId) params.set('wrestler_id', wrestlerId);
+
+        const container = document.getElementById('relationshipsList');
+        container.innerHTML = '<p class="text-center"><span class="spinner-border spinner-border-sm"></span> Loading...</p>';
+
+        try {
+            const response = await fetchAPI(`/api/relationships${params.toString() ? `?${params.toString()}` : ''}`);
+            const relationships = response.relationships || [];
+            renderSummary(relationships);
+            loadRelationshipDashboard();
+
+            if (!relationships.length) {
+                container.innerHTML = '<p class="text-muted text-center">No relationships found for this filter.</p>';
+                return;
+            }
+
+            container.innerHTML = `<div class="row">
+                ${relationships.map(rel => `
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${rel.wrestler_a_name} &amp; ${rel.wrestler_b_name}</strong>
+                                </div>
+                                <span class="badge ${relationshipBadge(rel.relationship_type)}">${normalizeTypeLabel(rel.relationship_type)}</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <strong>Strength:</strong>
+                                    <div class="progress mt-1" style="height: 18px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width:${rel.strength}%">${rel.strength}</div>
+                                    </div>
+                                </div>
+                                ${rel.metadata && Object.keys(rel.metadata).length ? `<p class="mb-2"><strong>Metadata:</strong> ${Object.entries(rel.metadata).map(([key, value]) => `${key}: ${value}`).join(' | ')}</p>` : ''}
+                                ${rel.history && rel.history.length ? `<p class="mb-3"><strong>Latest Note:</strong> ${rel.history[rel.history.length - 1]}</p>` : '<p class="text-muted mb-3">No history logged yet.</p>'}
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-success" data-action="adjust-relationship" data-relationship-id="${rel.relationship_id}" data-delta="10">+10</button>
+                                    <button class="btn btn-sm btn-outline-danger" data-action="adjust-relationship" data-relationship-id="${rel.relationship_id}" data-delta="-10">-10</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>`;
+        } catch (error) {
+            container.innerHTML = `<div class="alert alert-danger">Failed to load relationships: ${error.message}</div>`;
+        }
+    }
+
+    function openCreateModal() {
+        new bootstrap.Modal(document.getElementById('createRelationshipModal')).show();
+    }
+
+    async function createRelationship() {
+        const wrestlerAId = document.getElementById('relationshipA').value;
+        const wrestlerBId = document.getElementById('relationshipB').value;
+        const relationshipType = document.getElementById('relationshipType').value;
+
+        if (!wrestlerAId || !wrestlerBId || wrestlerAId === wrestlerBId) {
+            alert('Pick two different wrestlers.');
+            return;
+        }
+
+        const metadata = {};
+        if (relationshipType === 'manager_client') {
+            metadata.effectiveness = parseInt(document.getElementById('managerEffectiveness').value || '70', 10);
+            metadata.fit = parseInt(document.getElementById('managerFit').value || '70', 10);
+        }
+
+        const response = await fetchAPI('/api/relationships/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                wrestler_a_id: wrestlerAId,
+                wrestler_b_id: wrestlerBId,
+                relationship_type: relationshipType,
+                strength: parseInt(document.getElementById('relationshipStrength').value || '55', 10),
+                note: document.getElementById('relationshipNote').value.trim(),
+                metadata
+            })
+        });
+
+        if (!response.success) {
+            alert(`Failed to create relationship: ${response.error}`);
+            return;
+        }
+
+        bootstrap.Modal.getInstance(document.getElementById('createRelationshipModal')).hide();
+        document.getElementById('relationshipNote').value = '';
+        loadRelationships();
+    }
+
+    async function autoSeedRelationships() {
+        const response = await fetchAPI('/api/relationships/auto-seed', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                brand: document.getElementById('autoSeedBrand').value || null,
+                max_new_relationships: 20
+            })
+        });
+
+        if (!response.success) {
+            alert(`Failed to auto-seed relationships: ${response.error}`);
+            return;
+        }
+
+        loadRelationships();
+    }
+
+    async function adjustRelationship(relationshipId, delta) {
+        const response = await fetchAPI(`/api/relationships/${relationshipId}/adjust`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ delta })
+        });
+
+        if (!response.success) {
+            alert(`Failed to adjust relationship: ${response.error}`);
+            return;
+        }
+
+        loadRelationships();
+    }
+
+    loadRoster().then(() => {
+        loadRelationshipDashboard();
+        loadRelationships();
+    });
+})();
+</script>

@@ -1,0 +1,261 @@
+1. When I clicked on "Generate Dark Matches", i got this error:
+Console:
+VM592:275 
+ POST http://localhost:8080/api/show-production/dark-matches/generate 500 (INTERNAL SERVER ERROR)
+generateDarkMatches	@	VM592:275
+onclick	@	(index):1
+
+﻿
+Terminal:
+127.0.0.1 - - [26/Apr/2026 14:03:51] "GET /api/alerts/contracts/summary HTTP/1.1
+" 200 -
+127.0.0.1 - - [26/Apr/2026 14:03:53] "GET /api/universe/state HTTP/1.1" 200 -
+Traceback (most recent call last):
+  File "C:\Users\victo\Documents\AWUM\backend\routes\show_production_routes.py",
+ line 1088, in api_generate_dark_matches
+    from persistence.show_production_db import save_dark_match
+ImportError: cannot import name 'save_dark_match' from 'persistence.show_product
+ion_db' (C:\Users\victo\Documents\AWUM\backend\persistence\show_production_db.py
+)
+127.0.0.1 - - [26/Apr/2026 14:03:55] "POST /api/show-production/dark-matches/gen
+erate HTTP/1.1" 500 -
+
+2. The House Show Tour should be persistent, and added to the calendar too. It keeps disappearing after refreshing the page. It'd be nice to have a Calendar frontend Page integrated. Also, let's have venues for each show, minor, and major PPV & PLE which comprises of real cities in real countries in continents like Asia, North America, Europe. I should be able to edit the cities assigned to each show. A minimum of 200 cities works fine.
+
+3. I also noticed in the titles page, tag team title holders shows only the name of one wrestler, instead of the two wrestlers, or the name of the tag team. I should also be able to book tag teams in tag team matches, instead of always booking them as seperate wrestlers in tag team matches. For example, a tag team or faction named "Era" have wrestler A, and wrestler B, can be booked in a tag team match against wrestler C, and wrestler D as "Era", instead of wrestler A, and wrestler B. Also, I should be able to book a tag team or factions against other tag teams or factions in tag team matches. In the case of factions, the AI automatically selects the 2 wrestlers from the faction to represent them if it's a 2-man tag team match, or 3 wresters in the case of 3-man tag team match. I should be able to manually select too.
+
+4. I noticed that, if the Creative Director AI suggests a match or segment, I can't edit it to my taste. Fix this. Also, the suggested promo by the Creative Director AI doesn't show the names of the Participants.
+4. Implement the features below:
+## HISTORICAL & LEGACY (203-212)
+
+### 203. Match History Database
+Complete record of all matches with participants, results, and ratings.
+
+### 204. Storyline Archive
+Record of all feuds and storylines for continuity reference.
+
+### 205. Championship History
+Full title lineages with reign statistics and memorable moments.
+
+### 206. Hall of Fame System
+Honor retired legends with induction ceremonies and legacy recognition.
+
+### 207. Rivalry History
+Track recurring feuds between wrestlers over career spans.
+
+### 208. Anniversary Tracking
+Automatic reminders for significant dates enabling callback moments.
+
+### 209. Record Tracking
+Monitor records like longest reign, most defenses, fastest victory for milestone storylines.
+
+### 210. Moment Significance Rating
+Mark historical moments with importance levels for future reference.
+
+### 211. Era Naming
+Identify and name distinct periods in promotion history based on dominant stars or styles.
+
+### 212. Legacy Stat Tracking
+Career statistics for all wrestlers including match counts, win percentages, and accomplishments.### 138. Venue Database 
+Access to arenas ranging from small clubs to major stadiums with capacity, cost, and location data.
+
+### 139. Venue Selection Strategy
+Match venue size to expected attendance. Underselling large venues looks bad; overselling creates demand.
+
+### 140. Regional Popularity Tracking
+Different areas have varying fan bases affecting attendance and appropriate booking.
+
+### 141. Tour Routing
+Plan efficient travel routes minimizing costs and wrestler fatigue while maximizing market coverage.
+
+### 142. International Expansion
+Tour foreign markets with different popularity levels, travel complications, and revenue opportunities.
+
+### 143. Residency Deals
+Establish regular venues for consistent local audience building versus constant touring.
+
+### 144. Venue Relationship Management
+Good relationships with venues provide better dates, pricing, and priority booking.
+
+### 145. Production Scaling
+Adjust production values to venue size. Small shows don't need full pyro; big shows need spectacle.
+
+### 146. Weather & External Factors
+Random events affecting attendance including weather, local events, and transportation issues.
+
+### 147. Venue Exclusive Events
+Create venue-specific special events like annual returns to historic locations.
+
+### 148. Sellout Streak Tracking
+Monitor consecutive sellouts for promotional value and pressure.
+### 161. Competing Promotion AI
+Other promotions operate independently, signing talent, running shows, and affecting the industry landscape.
+
+### 162. Talent Raiding
+Competitors may attempt to sign your contracted talent with offers you must counter.
+
+### 163. Free Agent Bidding Wars
+Desirable free agents receive multiple offers requiring competitive bidding.
+
+### 164. Industry-Wide Talent Pool
+Shared ecosystem of available wrestlers across all promotions with movement between them.
+
+### 165. Partnership Agreements
+Establish working relationships with other promotions for talent exchanges and cross-promotion.
+
+### 166. Invasion Angles
+Execute storylines involving competing promotion talent with appropriate agreements.
+
+### 167. Industry Reputation
+Your promotion's standing in the wrestling world affecting talent attraction and fan perception.
+
+### 168. Wrestling Media Coverage
+Dirt sheets and journalists report on your decisions affecting public perception.
+
+### 169. Industry Events
+Wrestling conventions, award shows, and community events for networking and promotion.
+
+### 170. Market Share Tracking
+Monitor your position relative to competition in ratings, attendance, and revenue.
+## DEVELOPMENT & TRAINING (171-182)
+
+### 171. Performance Center System
+Operate training facility for developing new talent with costs and quality levels.
+
+### 172. Developmental Roster
+Separate roster of training wrestlers not yet ready for main programming.
+
+### 173. Trainer Staff
+Hire coaches with different specialties affecting trainee development in specific areas.
+
+### 174. Training Curriculum
+Design development programs emphasizing different skills based on trainee needs.
+
+### 175. Trainee Progression
+Track improvement in specific attributes over time based on training and experience.
+
+### 176. Try-Out System
+Hold open tryouts to discover unknown talent from non-wrestling backgrounds.
+
+### 177. Developmental Shows
+Run smaller shows featuring developing talent for experience and scouting.
+
+### 178. Main Roster Call-Ups
+Promote ready developmental talent with appropriate debut booking.
+
+### 179. Send-Down System
+Return struggling main roster members to development for improvement.
+
+### 180. Training Injury Risk
+Development work carries injury possibilities affecting prospect availability.
+
+### 181. International Training Excursions
+Send talent to foreign territories for experience and style development.
+
+### 182. Veteran Trainer Roles
+Transition retiring wrestlers to coaching roles leveraging their experience.
+
+The Development System/Brand is called ROC Evolve.
+
+### 126. TV Ratings System
+Weekly ratings tracking with demographic breakdowns affecting advertising revenue and network confidence.
+
+### 127. Ratings Analysis
+Detailed quarter-hour breakdowns showing which segments gained or lost viewers for booking feedback.
+
+### 128. Network Relationship
+Manage broadcaster relationship including content demands, time slot assignments, and renewal negotiations.
+
+### 129. Competing Time Slots
+Other programming affects your ratings. Avoid major sporting events or competing wrestling.
+
+### 130. Social Media Presence
+Build following across platforms affecting reach, sponsor interest, and real-time engagement metrics.
+
+### 131. Social Media Controversies
+Wrestler posts can create positive buzz or damaging scandals requiring response.
+
+### 132. Streaming Platform Deals
+Negotiate on-demand content libraries and exclusive streaming rights as industry evolves.
+
+### 133. YouTube/Content Strategy
+Produce supplemental content for online platforms building audience between shows.
+
+### 134. Podcast & Interview Circuit
+Send wrestlers for media appearances building mainstream awareness.
+
+### 135. Documentary Production
+Create behind-the-scenes content for additional revenue and fan engagement.
+
+### 136. Video Game Licensing
+Negotiate game rights providing revenue and promotional value.
+
+### 137. Press Conference System
+Stage media events for major announcements and match promotion.
+## MARKETING & PROMOTION (183-192)
+
+### 183. Advertising Campaigns
+Purchase advertising across media for show promotion with varying costs and reach.
+
+### 184. Event Promotion
+Build specific event interest through announcements, matches, and storyline development.
+
+### 185. Wrestler Push Marketing
+Coordinate marketing efforts with in-ring pushes for maximum impact.
+
+### 186. Mainstream Crossover
+Pursue non-wrestling media appearances for wider audience exposure.
+
+### 187. Celebrity Involvement
+Book celebrity appearances for mainstream attention with associated costs and risks.
+
+### 188. Community Engagement
+Charity work and community involvement building positive brand image.
+
+### 189. Brand Identity
+Develop and maintain consistent visual and tonal identity across all promotion content.
+
+### 190. Target Demographics
+Identify and pursue specific audience segments with tailored content and marketing.
+
+### 191. Nostalgia Marketing
+Leverage promotion history for anniversary events, legends returns, and longtime fan engagement.
+
+### 192. Controversy Management
+Handle public relations issues from booking decisions, wrestler behavior, or external criticism.
+
+---
+
+## STAFF & PERSONNEL (193-202)
+
+### 193. Booker/Creative Team
+Hire AI booking assistants with different philosophies affecting storyline suggestions.
+
+### 194. Referee Staff
+Maintain referee roster with experience levels affecting match quality and botch frequency.
+
+### 195. Announcer Team
+Commentary teams with chemistry ratings and broadcasting skill affecting show presentation.
+
+### 196. Ring Announcer Quality
+Presentation of wrestler introductions affecting atmosphere and professionalism.
+
+### 197. Production Crew
+Behind-the-scenes staff affecting show technical quality and production values.
+
+### 198. Road Agents/Producers
+Experienced personnel laying out matches and assisting wrestlers with planning.
+
+### 199. Medical Team
+Doctor and training staff quality affecting injury treatment and prevention.
+
+### 200. Security Personnel
+Handle crowd control and protect performers from fan incidents.
+
+### 201. Office Staff
+Administrative personnel affecting business operations efficiency.
+
+### 202. Talent Relations
+Staff managing wrestler concerns and communication improving morale.
+
+I know all these are lot. But ensure to implement them efficiently while still using the about 250k tokens I have. Ensure to implement everything without exhausting the tokens I have left.

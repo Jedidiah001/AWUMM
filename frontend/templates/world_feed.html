@@ -1,0 +1,151 @@
+<style>
+  .world-feed-page { color:#E8E8E8; }
+  .world-feed-page .subtle { color:#AFAFAF; }
+  .world-feed-page .card { background:#111 !important; border-color:#2d2d2d !important; }
+</style>
+
+<div class="container-fluid p-4 world-feed-page">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h2 class="mb-1">Kayfabe News Network</h2>
+      <div class="subtle">Real-time simulated world feed with persistent headlines and impacts.</div>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <span class="badge text-bg-success">Live</span>
+      <small id="wfLastSync" class="subtle">Never synced</small>
+      <button class="btn btn-outline-light btn-sm" id="wfRefreshBtn">Refresh Feed</button>
+      <button class="btn btn-warning btn-sm" id="wfTickBtn">Run World Tick</button>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-8">
+      <div class="card p-3">
+        <h5>Live Headlines</h5>
+        <div id="wfFeedList" style="max-height:65vh; overflow:auto"></div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="card p-3 mb-3">
+        <h5>Generator</h5>
+        <label class="form-label subtle">Max stories per tick</label>
+        <input id="wfMaxItems" type="number" min="1" max="10" class="form-control form-control-sm mb-2" value="3">
+        <button class="btn btn-primary btn-sm w-100" id="wfRunTickPrimary">Generate Stories</button>
+      </div>
+      <div class="card p-3">
+        <h5>How it works</h5>
+        <ul class="small subtle mb-0">
+          <li>Reads latest Evolve events.</li>
+          <li>Creates persistent world headlines.</li>
+          <li>Auto-promotes high-significance items into historical moments.</li>
+        </ul>
+      </div>
+      <div class="card p-3 mt-3">
+        <h5>Active World Modifiers</h5>
+        <div id="wfModifierTotals" class="small subtle mb-2">No active modifiers.</div>
+        <div id="wfModifierList" style="max-height:220px; overflow:auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  let pollId = null;
+  let latestSeen = '';
+
+  async function api(url, opts){
+    const r = await fetch(url, opts);
+    const j = await r.json().catch(()=>({ok:false,error:'Invalid JSON'}));
+    if(!r.ok || j.ok===false) throw new Error(j.error || `HTTP ${r.status}`);
+    return j;
+  }
+
+  function esc(v){ return String(v ?? ''); }
+
+  function renderItems(items){
+    const root = document.getElementById('wfFeedList');
+    if(!items.length){
+      root.innerHTML = `<div class='subtle'>No world headlines yet. Run a world tick.</div>`;
+      return;
+    }
+
+    root.innerHTML = items.map(item=>{
+      const impact = item.impact || {};
+      return `
+        <div class="border-bottom border-secondary py-2">
+          <div class="fw-semibold">${esc(item.headline)}</div>
+          <div class="small subtle mb-1">Y${esc(item.year)} W${esc(item.week)} · ${esc(item.created_at)}</div>
+          <div class="small"><code>${esc(item.source_type)}</code> · significance ${esc(item.significance)}</div>
+          <div class="small subtle">Impact: ${esc(JSON.stringify(impact))}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderModifiers(data){
+    const totals = data.totals || {};
+    const mods = data.active_modifiers || [];
+    const totalsRoot = document.getElementById('wfModifierTotals');
+    const listRoot = document.getElementById('wfModifierList');
+
+    const totalEntries = Object.entries(totals);
+    totalsRoot.innerHTML = totalEntries.length
+      ? totalEntries.map(([k,v])=>`<div><code>${esc(k)}</code>: ${Number(v).toFixed(2)}</div>`).join('')
+      : 'No active modifiers.';
+
+    listRoot.innerHTML = mods.length
+      ? mods.map(m=>`
+          <div class=\"border-bottom border-secondary py-1 small\">
+            <div><code>${esc(m.effect_key)}</code> ${Number(m.effect_value||0).toFixed(2)}</div>
+            <div class=\"subtle\">from: ${esc(m.source_headline)}</div>
+            <div class=\"subtle\">expires: Y${esc(m.expires_year)} W${esc(m.expires_week)}</div>
+          </div>
+        `).join('')
+      : `<div class=\"small subtle\">No active modifier rows.</div>`;
+  }
+
+  async function loadFeed(){
+    const data = await api('/api/world/feed?limit=50');
+    const items = data.items || [];
+    renderItems(items);
+    if(items.length) latestSeen = items[0].created_at;
+    document.getElementById('wfLastSync').textContent = `Synced ${new Date().toLocaleTimeString()}`;
+  }
+
+  async function loadModifiers(){
+    const data = await api('/api/world/modifiers');
+    renderModifiers(data);
+  }
+
+  async function runTick(){
+    const max_items = Number(document.getElementById('wfMaxItems').value || 3);
+    const out = await api('/api/world/tick', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({max_items})
+    });
+    await loadFeed();
+    await loadModifiers();
+    alert(`World tick complete: ${out.created} story item(s) generated.`);
+  }
+
+  document.getElementById('wfRefreshBtn').addEventListener('click', loadFeed);
+  document.getElementById('wfTickBtn').addEventListener('click', runTick);
+  document.getElementById('wfRunTickPrimary').addEventListener('click', runTick);
+
+  Promise.all([loadFeed(), loadModifiers()]).catch(err=>{
+    console.error(err);
+    alert(`World Feed failed to load: ${err.message}`);
+  });
+
+  // Real-time polling
+  pollId = setInterval(()=>{
+    loadFeed().catch(console.error);
+    loadModifiers().catch(console.error);
+  }, 8000);
+  window.viewCleanup = function(){
+    if(pollId) clearInterval(pollId);
+  };
+})();
+</script>

@@ -1,0 +1,127 @@
+[
+  {
+    "id": "title001",
+    "name": "ROC World Championship",
+    "assigned_brand": "ROC Alpha",
+    "title_type": "World",
+    "prestige": 90,
+    "current_holder_id": "w001",
+    "current_holder_name": "Magnus Steele",
+    "history": [
+      {
+        "wrestler_id": "w001",
+        "wrestler_name": "Magnus Steele",
+        "won_at_show_id": null,
+        "won_at_show_name": "Inaugural Champion",
+        "won_date_year": 1,
+        "won_date_week": 1
+      }
+    ]
+  },
+  {
+    "id": "title002",
+    "name": "ROC United Championship",
+    "assigned_brand": "ROC Velocity",
+    "title_type": "World",
+    "prestige": 85,
+    "current_holder_id": "w003",
+    "current_holder_name": "Drake Thunder",
+    "history": [
+      {
+        "wrestler_id": "w003",
+        "wrestler_name": "Drake Thunder",
+        "won_at_show_id": null,
+        "won_at_show_name": "Inaugural Champion",
+        "won_date_year": 1,
+        "won_date_week": 1
+      }
+    ]
+  },
+  {
+    "id": "title003",
+    "name": "ROC Intercontinental Championship",
+    "assigned_brand": "ROC Alpha",
+    "title_type": "Midcard",
+    "prestige": 70,
+    "current_holder_id": "w005",
+    "current_holder_name": "Phoenix Wright",
+    "history": [
+      {
+        "wrestler_id": "w005",
+        "wrestler_name": "Phoenix Wright",
+        "won_at_show_id": null,
+        "won_at_show_name": "Inaugural Champion",
+        "won_date_year": 1,
+        "won_date_week": 1
+      }
+    ]
+  },
+  {
+    "id": "title004",
+    "name": "ROC Tag Team Championship",
+    "assigned_brand": "ROC Alpha",
+    "title_type": "Tag Team",
+    "prestige": 65,
+    "current_holder_id": null,
+    "current_holder_name": "VACANT",
+    "history": []
+  },
+  {
+    "id": "title005",
+    "name": "ROC Velocity Tag Titles",
+    "assigned_brand": "ROC Velocity",
+    "title_type": "Tag Team",
+    "prestige": 60,
+    "current_holder_id": null,
+    "current_holder_name": "VACANT",
+    "history": []
+  },
+  {
+    "id": "title006",
+    "name": "ROC Vanguard Championship",
+    "assigned_brand": "ROC Vanguard",
+    "title_type": "Developmental",
+    "prestige": 55,
+    "current_holder_id": "w023",
+    "current_holder_name": "Orion Savage",
+    "history": [
+      {
+        "wrestler_id": "w023",
+        "wrestler_name": "Orion Savage",
+        "won_at_show_id": null,
+        "won_at_show_name": "Inaugural Champion",
+        "won_date_year": 1,
+        "won_date_week": 1
+      }
+    ]
+  },
+  {
+    "id": "title007",
+    "name": "ROC Vanguard Tag Team Titles",
+    "assigned_brand": "ROC Vanguard",
+    "title_type": "Tag Team",
+    "prestige": 50,
+    "current_holder_id": null,
+    "current_holder_name": "VACANT",
+    "history": []
+  },
+  {
+    "id": "title008",
+    "name": "ROC Women's World Championship",
+    "assigned_brand": "Cross-Brand",
+    "title_type": "Women",
+    "prestige": 80,
+    "current_holder_id": "w013",
+    "current_holder_name": "Luna Eclipse",
+    "history": [
+      {
+        "wrestler_id": "w013",
+        "wrestler_name": "Luna Eclipse",
+        "won_at_show_id": null,
+        "won_at_show_name": "Inaugural Champion",
+        "won_date_year": 1,
+        "won_date_week": 1
+      }
+    ]
+  }
+]

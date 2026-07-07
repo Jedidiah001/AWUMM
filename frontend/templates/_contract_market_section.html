@@ -1,0 +1,340 @@
+<!-- Contracts-integrated signing, release, handshake, and rival market section. -->
+<div class="container-fluid py-3 contract-market-view">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h2 class="mb-1"><i class="bi bi-cash-coin"></i> Contract Market</h2>
+            <div class="text-muted">Signings, clauses, handshake risk, releases, and rival pressure.</div>
+        </div>
+        <button class="btn btn-outline-primary" onclick="window.refreshContractMarket()">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+        </button>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Promotion Reputation</div>
+                    <h3 id="cmReputation">-</h3>
+                    <div class="text-muted small" id="cmReputationReason"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Trust With Talent</div>
+                    <h3 id="cmTrust">-</h3>
+                    <div class="text-muted small">Handshake deals and fair releases move this.</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Recent Rival Events</div>
+                    <h3 id="cmRivalCount">-</h3>
+                    <div class="text-muted small">Poaching, counter-programming, spying, partnerships, invasions.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#cmNegotiate" type="button">Negotiate</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#cmTypes" type="button">Types</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#cmHandshakes" type="button">Handshakes</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#cmRivals" type="button">Rivals</button></li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="cmNegotiate">
+            <div class="row g-3">
+                <div class="col-lg-5">
+                    <div class="card">
+                        <div class="card-header">Contract Offer</div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <label class="form-label">Roster Wrestler</label>
+                                <select class="form-select" id="cmWrestler"></select>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label">Contract Type</label>
+                                    <select class="form-select" id="cmContractType"></select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Weeks</label>
+                                    <input class="form-control" id="cmWeeks" type="number" min="1" value="104">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Salary / Show</label>
+                                    <input class="form-control" id="cmSalary" type="number" min="1" value="25000">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Signing Bonus</label>
+                                    <input class="form-control" id="cmBonus" type="number" min="0" value="0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Creative Control</label>
+                                    <select class="form-select" id="cmCreative">
+                                        <option value="none">None</option>
+                                        <option value="consultation">Consultation</option>
+                                        <option value="approval">Approval</option>
+                                        <option value="partnership">Partnership</option>
+                                        <option value="full">Full</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">No-Compete Weeks</label>
+                                    <input class="form-control" id="cmNoCompete" type="number" min="0" value="0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Release Clause</label>
+                                    <input class="form-control" id="cmReleaseClause" type="number" min="0" value="0">
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="cmHandshake">
+                                        <label class="form-check-label" for="cmHandshake">Handshake promise</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 mt-3">
+                                <button class="btn btn-primary" onclick="window.submitContractOffer()">Submit Offer</button>
+                                <button class="btn btn-outline-secondary" onclick="window.previewContractDemands()">Preview Demands</button>
+                            </div>
+                            <div class="alert mt-3 mb-0 d-none" id="cmOfferResult"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="card">
+                        <div class="card-header">Recent Negotiations</div>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead><tr><th>Talent</th><th>Type</th><th>Offer</th><th>Demand</th><th>Outcome</th></tr></thead>
+                                <tbody id="cmNegotiations"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-header">Release Tool</div>
+                        <div class="card-body d-flex flex-wrap gap-2">
+                            <select class="form-select" id="cmReleaseWrestler" style="max-width:320px"></select>
+                            <input class="form-control" id="cmReleaseNoCompete" type="number" min="0" value="8" style="max-width:150px">
+                            <button class="btn btn-outline-danger" onclick="window.releaseContractMarketWrestler()">Release</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="cmTypes">
+            <div class="row g-3" id="cmContractTypes"></div>
+        </div>
+
+        <div class="tab-pane fade" id="cmHandshakes">
+            <div class="row g-3">
+                <div class="col-lg-5">
+                    <div class="card">
+                        <div class="card-header">Create Handshake</div>
+                        <div class="card-body">
+                            <select class="form-select mb-2" id="cmHandshakeWrestler"></select>
+                            <input class="form-control mb-2" id="cmHandshakeTerms" value="Future title opportunity and protected booking">
+                            <button class="btn btn-primary" onclick="window.createContractHandshake()">Create</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="card">
+                        <div class="card-header">Handshake Deals</div>
+                        <div id="cmHandshakeList" class="list-group list-group-flush"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="cmRivals">
+            <div class="card mb-3">
+                <div class="card-body d-flex flex-wrap gap-2">
+                    <input class="form-control" id="cmPlayerShow" value="ROC Alpha Weekly" style="max-width:280px">
+                    <button class="btn btn-primary" onclick="window.simulateContractRivals()">Simulate Rival Week</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">Rival Strategy Feed</div>
+                <div id="cmRivalEvents" class="list-group list-group-flush"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const API = '/api/contract-market';
+    let state = null;
+
+    const money = value => `$${Number(value || 0).toLocaleString()}`;
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    async function getJson(url, options) {
+        const res = await fetch(url, options);
+        const data = await res.json();
+        if (!res.ok || data.success === false) throw new Error(data.error || 'Request failed');
+        return data;
+    }
+
+    function offerPayload() {
+        return {
+            wrestler_id: document.getElementById('cmWrestler').value,
+            contract_type: document.getElementById('cmContractType').value,
+            salary_per_show: Number(document.getElementById('cmSalary').value),
+            contract_weeks: Number(document.getElementById('cmWeeks').value),
+            signing_bonus: Number(document.getElementById('cmBonus').value),
+            clauses: {
+                creative_control: document.getElementById('cmCreative').value,
+                no_compete_weeks: Number(document.getElementById('cmNoCompete').value),
+                release_clause_amount: Number(document.getElementById('cmReleaseClause').value),
+                handshake: document.getElementById('cmHandshake').checked,
+            },
+        };
+    }
+
+    function fillSelect(id, rows) {
+        const el = document.getElementById(id);
+        el.innerHTML = rows.map(w => `<option value="${esc(w.id)}">${esc(w.name)} (${esc(w.role)}; Morale ${w.morale})</option>`).join('');
+    }
+
+    function render() {
+        const rep = state.reputation || {};
+        document.getElementById('cmReputation').textContent = Math.round(rep.reputation_score || 0);
+        document.getElementById('cmTrust').textContent = Math.round(rep.trust_score || 0);
+        document.getElementById('cmReputationReason').textContent = rep.last_reason || '';
+        document.getElementById('cmRivalCount').textContent = state.rival_events.length;
+
+        const targets = state.negotiation_targets || [];
+        ['cmWrestler', 'cmReleaseWrestler', 'cmHandshakeWrestler'].forEach(id => fillSelect(id, targets));
+        document.getElementById('cmContractType').innerHTML = Object.entries(state.contract_types).map(([key, val]) =>
+            `<option value="${esc(key)}">${esc(val.label)}</option>`
+        ).join('');
+
+        document.getElementById('cmContractTypes').innerHTML = Object.entries(state.contract_types).map(([key, val]) => `
+            <div class="col-md-6 col-xl-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5>${esc(val.label)}</h5>
+                        <p class="text-muted mb-2">${esc(val.description)}</p>
+                        <div class="badge bg-warning text-dark">${esc(val.risk)}</div>
+                        <div class="small mt-2">Default ${val.default_weeks} weeks, salary x${val.salary_multiplier}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        document.getElementById('cmNegotiations').innerHTML = (state.recent_negotiations || []).map(row => `
+            <tr>
+                <td>${esc(row.wrestler_name)}</td>
+                <td>${esc(row.contract_type)}</td>
+                <td>${money(row.offered_salary)}</td>
+                <td>${money(row.demanded_salary)}</td>
+                <td><span class="badge bg-${row.outcome === 'accepted' ? 'success' : row.outcome === 'rejected' ? 'danger' : 'secondary'}">${esc(row.outcome)}</span></td>
+            </tr>
+        `).join('') || '<tr><td colspan="5" class="text-muted">No negotiations yet.</td></tr>';
+
+        document.getElementById('cmHandshakeList').innerHTML = (state.handshakes || []).map(row => `
+            <div class="list-group-item d-flex justify-content-between align-items-start gap-2">
+                <div>
+                    <strong>${esc(row.wrestler_name)}</strong>
+                    <div class="text-muted small">${esc(row.status)} - ${esc((row.promised_terms_json || {}).summary || JSON.stringify(row.promised_terms_json || {}))}</div>
+                </div>
+                ${row.status === 'pending' ? `<button class="btn btn-sm btn-outline-danger" onclick="window.breakContractHandshake('${esc(row.id)}')">Break</button>` : ''}
+            </div>
+        `).join('') || '<div class="list-group-item text-muted">No handshake deals.</div>';
+
+        document.getElementById('cmRivalEvents').innerHTML = (state.rival_events || []).map(row => `
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <strong>${esc(row.promotion_name)}</strong>
+                    <span class="badge bg-dark">${esc(row.event_type)}</span>
+                </div>
+                <div>${esc(row.target_name || '')}</div>
+                <div class="text-muted small">${esc(JSON.stringify(row.details_json || {}))}</div>
+            </div>
+        `).join('') || '<div class="list-group-item text-muted">No rival events yet.</div>';
+    }
+
+    window.refreshContractMarket = async function() {
+        state = await getJson(`${API}/dashboard`);
+        render();
+    };
+
+    window.previewContractDemands = async function() {
+        const data = await getJson(`${API}/demands`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(offerPayload()),
+        });
+        const box = document.getElementById('cmOfferResult');
+        box.className = 'alert alert-info mt-3 mb-0';
+        box.textContent = `Asking ${money(data.demands.asking_salary)}, minimum ${money(data.demands.minimum_salary)}, agent ${data.demands.agent_name || 'none'}.`;
+    };
+
+    window.submitContractOffer = async function() {
+        const data = await getJson(`${API}/negotiate`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(offerPayload()),
+        });
+        const outcome = data.negotiation.outcome;
+        const box = document.getElementById('cmOfferResult');
+        box.className = `alert mt-3 mb-0 alert-${outcome === 'accepted' ? 'success' : outcome === 'rejected' ? 'danger' : 'warning'}`;
+        box.textContent = data.response.message || outcome;
+        await window.refreshContractMarket();
+    };
+
+    window.releaseContractMarketWrestler = async function() {
+        const wrestlerId = document.getElementById('cmReleaseWrestler').value;
+        await getJson(`${API}/release/${encodeURIComponent(wrestlerId)}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({reason: 'Management release', no_compete_weeks: Number(document.getElementById('cmReleaseNoCompete').value)}),
+        });
+        await window.refreshContractMarket();
+    };
+
+    window.createContractHandshake = async function() {
+        await getJson(`${API}/handshake`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                wrestler_id: document.getElementById('cmHandshakeWrestler').value,
+                promised_terms: {summary: document.getElementById('cmHandshakeTerms').value},
+            }),
+        });
+        await window.refreshContractMarket();
+    };
+
+    window.breakContractHandshake = async function(id) {
+        await getJson(`${API}/handshake/${encodeURIComponent(id)}/break`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({reason: 'Management backed out of informal promise'}),
+        });
+        await window.refreshContractMarket();
+    };
+
+    window.simulateContractRivals = async function() {
+        await getJson(`${API}/rivals/simulate`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({player_show_name: document.getElementById('cmPlayerShow').value}),
+        });
+        await window.refreshContractMarket();
+    };
+
+    window.refreshContractMarket().catch(err => {
+        document.querySelector('.contract-market-view').innerHTML = `<div class="alert alert-danger">${esc(err.message)}</div>`;
+    });
+})();
+</script>

@@ -1,0 +1,440 @@
+{
+  "storylines": [
+    {
+      "storyline_id": "story_001",
+      "name": "The Titan's Betrayal",
+      "storyline_type": "betrayal",
+      "description": "Titan Maximus shockingly betrays his longtime partner at Victory Dome",
+      "priority": 90,
+      "trigger_conditions": [
+        {
+          "type": "specific_ppv",
+          "ppv_name": "Victory Dome"
+        }
+      ],
+      "required_cast": {
+        "betrayer": {
+          "wrestler_id": "w037",
+          "alignment": "Face"
+        },
+        "victim": {
+          "alignment": "Face",
+          "role": "Main Event",
+          "brand": "ROC Alpha"
+        }
+      },
+      "beats": [
+        {
+          "beat_id": "titan_turn_01",
+          "week_offset": 0,
+          "description": "Titan Maximus costs his partner the match and attacks them post-match",
+          "segment_type": "betrayal",
+          "participants": ["betrayer", "victim"],
+          "create_feud": true,
+          "turn_alignment": {
+            "betrayer": "Heel"
+          }
+        },
+        {
+          "beat_id": "titan_turn_02",
+          "week_offset": 1,
+          "description": "Titan explains his actions - jealousy and being overshadowed",
+          "segment_type": "promo",
+          "participants": ["betrayer"]
+        },
+        {
+          "beat_id": "titan_turn_03",
+          "week_offset": 3,
+          "description": "Backstage brawl erupts between former partners",
+          "segment_type": "attack",
+          "participants": ["betrayer", "victim"]
+        }
+      ],
+      "payoff_show": "Next PPV"
+    },
+    {
+      "storyline_id": "story_002",
+      "name": "The Prodigal Son Returns",
+      "storyline_type": "return",
+      "description": "Deacon Graves makes a shocking return at Rumble Royale",
+      "priority": 85,
+      "trigger_conditions": [
+        {
+          "type": "specific_ppv",
+          "ppv_name": "Rumble Royale"
+        },
+        {
+          "type": "wrestler_state",
+          "wrestler_id": "w038",
+          "state": "active"
+        }
+      ],
+      "required_cast": {
+        "returner": {
+          "wrestler_id": "w038"
+        },
+        "target": {
+          "alignment": "Face",
+          "role": "Main Event",
+          "is_champion": true
+        }
+      },
+      "beats": [
+        {
+          "beat_id": "deacon_return_01",
+          "week_offset": 0,
+          "description": "Deacon Graves enters the Rumble as a surprise entrant",
+          "segment_type": "return",
+          "participants": ["returner"]
+        },
+        {
+          "beat_id": "deacon_return_02",
+          "week_offset": 1,
+          "description": "Deacon targets the champion, declaring his intentions",
+          "segment_type": "confrontation",
+          "participants": ["returner", "target"],
+          "create_feud": true
+        }
+      ],
+      "payoff_show": "Clash of Titans"
+    },
+    {
+      "storyline_id": "story_003",
+      "name": "The Rookie's Journey",
+      "storyline_type": "rookie_rise",
+      "description": "A young Vanguard wrestler begins their rise to prominence",
+      "priority": 70,
+      "trigger_conditions": [
+        {
+          "type": "after_week",
+          "year": 1,
+          "week": 8
+        }
+      ],
+      "required_cast": {
+        "rookie": {
+          "brand": "ROC Vanguard",
+          "role": "Midcard",
+          "max_age": 25,
+          "alignment": "Face"
+        },
+        "mentor": {
+          "brand": "ROC Vanguard",
+          "role": "Main Event"
+        },
+        "rival": {
+          "brand": "ROC Vanguard",
+          "alignment": "Heel"
+        }
+      },
+      "beats": [
+        {
+          "beat_id": "rookie_01",
+          "week_offset": 0,
+          "description": "Young star scores upset victory, catching mentor's attention",
+          "segment_type": "match",
+          "participants": ["rookie", "rival"]
+        },
+        {
+          "beat_id": "rookie_02",
+          "week_offset": 2,
+          "description": "Mentor offers to guide the rookie",
+          "segment_type": "promo",
+          "participants": ["rookie", "mentor"]
+        },
+        {
+          "beat_id": "rookie_03",
+          "week_offset": 4,
+          "description": "Rival attacks rookie backstage out of jealousy",
+          "segment_type": "attack",
+          "participants": ["rival", "rookie"],
+          "create_feud": true
+        },
+        {
+          "beat_id": "rookie_04",
+          "week_offset": 8,
+          "description": "Rookie defeats rival with mentor's support",
+          "segment_type": "match",
+          "participants": ["rookie", "rival"]
+        }
+      ],
+      "payoff_show": "Overdrive"
+    },
+    {
+      "storyline_id": "story_004",
+      "name": "The Authority Strikes",
+      "storyline_type": "authority",
+      "description": "The General Manager begins abusing their power",
+      "priority": 75,
+      "trigger_conditions": [
+        {
+          "type": "specific_week",
+          "year": 1,
+          "week": 20
+        }
+      ],
+      "required_cast": {
+        "rebel": {
+          "alignment": "Face",
+          "role": "Upper Midcard",
+          "min_popularity": 65
+        },
+        "enforcer": {
+          "alignment": "Heel",
+          "role": "Upper Midcard"
+        }
+      },
+      "beats": [
+        {
+          "beat_id": "authority_01",
+          "week_offset": 0,
+          "description": "GM unfairly books rebel in handicap match",
+          "segment_type": "announcement",
+          "participants": ["rebel"]
+        },
+        {
+          "beat_id": "authority_02",
+          "week_offset": 1,
+          "description": "Rebel calls out the GM's corruption",
+          "segment_type": "promo",
+          "participants": ["rebel"]
+        },
+        {
+          "beat_id": "authority_03",
+          "week_offset": 2,
+          "description": "GM's enforcer attacks rebel",
+          "segment_type": "attack",
+          "participants": ["enforcer", "rebel"],
+          "create_feud": true
+        },
+        {
+          "beat_id": "authority_04",
+          "week_offset": 6,
+          "description": "Rebel defeats enforcer, earning GM's respect",
+          "segment_type": "match",
+          "participants": ["rebel", "enforcer"]
+        }
+      ],
+      "payoff_show": "Champions' Ascent"
+    },
+    {
+      "storyline_id": "story_005",
+      "name": "The Women's Revolution",
+      "storyline_type": "title_pursuit",
+      "description": "Luna Eclipse's dominant reign faces its greatest challenge",
+      "priority": 80,
+      "trigger_conditions": [
+        {
+          "type": "specific_ppv",
+          "ppv_name": "Summer Slamfest"
+        },
+        {
+          "type": "wrestler_state",
+          "wrestler_id": "w013",
+          "state": "is_champion"
+        }
+      ],
+      "required_cast": {
+        "champion": {
+          "wrestler_id": "w013"
+        },
+        "challenger": {
+          "gender": "Female",
+          "alignment": "Heel",
+          "min_popularity": 60
+        },
+        "wildcard": {
+          "gender": "Female",
+          "role": "Midcard"
+        }
+      },
+      "beats": [
+        {
+          "beat_id": "womens_01",
+          "week_offset": 0,
+          "description": "Challenger brutally attacks champion after title defense",
+          "segment_type": "attack",
+          "participants": ["challenger", "champion"],
+          "create_feud": true
+        },
+        {
+          "beat_id": "womens_02",
+          "week_offset": 2,
+          "description": "Wildcard makes her case for title shot",
+          "segment_type": "promo",
+          "participants": ["wildcard"]
+        },
+        {
+          "beat_id": "womens_03",
+          "week_offset": 4,
+          "description": "Triple threat announced for next PPV",
+          "segment_type": "announcement",
+          "participants": ["champion", "challenger", "wildcard"],
+          "title_change_setup": true
+        }
+      ],
+      "payoff_show": "Autumn Annihilation"
+    },
+    {
+      "storyline_id": "story_006",
+      "name": "The Faction Forms",
+      "storyline_type": "faction_war",
+      "description": "A new dominant faction emerges to terrorize the roster",
+      "priority": 65,
+      "trigger_conditions": [
+        {
+          "type": "after_week",
+          "year": 1,
+          "week": 30
+        }
+      ],
+      "required_cast": {
+        "leader": {
+          "alignment": "Heel",
+          "role": "Main Event",
+          "min_popularity": 70
+        },
+        "lieutenant": {
+          "alignment": "Heel",
+          "role": "Upper Midcard"
+        },
+        "muscle": {
+          "alignment": "Heel",
+          "min_brawling": 75
+        },
+        "target": {
+          "alignment": "Face",
+          "is_champion": true
+        }
+      },
+      "beats": [
+        {
+          "beat_id": "faction_01",
+          "week_offset": 0,
+          "description": "Mysterious attacks on top faces begin",
+          "segment_type": "attack",
+          "participants": ["muscle", "target"]
+        },
+        {
+          "beat_id": "faction_02",
+          "week_offset": 1,
+          "description": "Leader reveals themselves as mastermind",
+          "segment_type": "reveal",
+          "participants": ["leader", "lieutenant", "muscle"]
+        },
+        {
+          "beat_id": "faction_03",
+          "week_offset": 3,
+          "description": "Faction dominates, taking out multiple faces",
+          "segment_type": "attack",
+          "participants": ["leader", "lieutenant", "muscle"],
+          "injury_target": "target"
+        }
+      ],
+      "payoff_show": "Night of Glory"
+    },
+    {
+      "storyline_id": "story_007",
+      "name": "The Underdog's Dream",
+      "storyline_type": "title_pursuit",
+      "description": "A lower card wrestler gets an unlikely title opportunity",
+      "priority": 60,
+      "trigger_conditions": [
+        {
+          "type": "random_chance",
+          "chance": 0.3
+        },
+        {
+          "type": "after_week",
+          "year": 1,
+          "week": 15
+        }
+      ],
+            "required_cast": {
+        "underdog": {
+          "role": "Lower Midcard",
+          "alignment": "Face",
+          "max_popularity": 50
+        },
+        "champion": {
+          "is_champion": true,
+          "alignment": "Heel"
+        }
+      },
+      "beats": [
+        {
+          "beat_id": "underdog_01",
+          "week_offset": 0,
+          "description": "Underdog wins battle royal to earn title shot",
+          "segment_type": "match",
+          "participants": ["underdog"]
+        },
+        {
+          "beat_id": "underdog_02",
+          "week_offset": 1,
+          "description": "Champion mocks the underdog's chances",
+          "segment_type": "promo",
+          "participants": ["champion", "underdog"],
+          "create_feud": true
+        },
+        {
+          "beat_id": "underdog_03",
+          "week_offset": 3,
+          "description": "Underdog scores non-title upset over champion",
+          "segment_type": "match",
+          "participants": ["underdog", "champion"]
+        }
+      ],
+      "payoff_show": "Next PPV"
+    },
+    {
+      "storyline_id": "story_008",
+      "name": "The Legend's Last Stand",
+      "storyline_type": "retirement",
+      "description": "An aging veteran puts their career on the line",
+      "priority": 70,
+      "trigger_conditions": [
+        {
+          "type": "specific_ppv",
+          "ppv_name": "Night of Glory"
+        }
+      ],
+      "required_cast": {
+        "legend": {
+          "min_age": 38,
+          "min_years_experience": 15,
+          "is_major_superstar": true
+        },
+        "challenger": {
+          "alignment": "Heel",
+          "max_age": 35
+        }
+      },
+      "beats": [
+        {
+          "beat_id": "retirement_01",
+          "week_offset": -4,
+          "description": "Legend announces this might be their last year",
+          "segment_type": "promo",
+          "participants": ["legend"]
+        },
+        {
+          "beat_id": "retirement_02",
+          "week_offset": -2,
+          "description": "Challenger disrespects the legend's legacy",
+          "segment_type": "promo",
+          "participants": ["challenger", "legend"],
+          "create_feud": true
+        },
+        {
+          "beat_id": "retirement_03",
+          "week_offset": 0,
+          "description": "Career vs Career match announced",
+          "segment_type": "announcement",
+          "participants": ["legend", "challenger"]
+        }
+      ],
+      "payoff_show": "Night of Glory"
+    }
+  ]
+}

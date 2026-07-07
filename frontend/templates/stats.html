@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWUM - Statistics & Records</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+    <style>
+        .stats-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        
+        .stats-card-header {
+            padding: 1.25rem;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .stats-card-header h5 {
+            margin: 0;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #f1f3f5;
+            transition: background 0.2s ease;
+        }
+        
+        .leaderboard-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .leaderboard-rank {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 1rem;
+        }
+        
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #1a1a2e; }
+        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #d7d7d7); color: #1a1a2e; }
+        .rank-3 { background: linear-gradient(135deg, #cd7f32, #e4a853); color: white; }
+        .rank-default { background: #6c757d; color: white; }
+        
+        .wrestler-link {
+            color: #1a1a2e;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .wrestler-link:hover {
+            color: #667eea;
+        }
+        
+        .record-card {
+            background: linear-gradient(145deg, #f8f9ff 0%, #eef1ff 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .record-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        
+        .record-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        
+        .record-details {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        
+        .milestone-item {
+            display: flex;
+            align-items: start;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .milestone-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .milestone-content {
+            flex: 1;
+        }
+        
+        .milestone-title {
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 0.25rem;
+        }
+        
+        .milestone-date {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #6c757d;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: #667eea;
+            background: none;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .search-box {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-box input {
+            padding-left: 3rem;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">🎮 AWUM</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/office">Office</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/roster">Roster</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/stats">Stats</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/feuds">Feuds</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contracts">Contracts</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/finance">Finance</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="stats-header">
+            <h2><i class="bi bi-graph-up-arrow"></i> Statistics & Records</h2>
+            <p class="lead mb-0">Track career achievements, milestones, and promotion records</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs mb-4" id="statsTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="leaderboards-tab" data-bs-toggle="tab" data-bs-target="#leaderboards" type="button">
+                    <i class="bi bi-trophy"></i> Leaderboards
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="records-tab" data-bs-toggle="tab" data-bs-target="#records" type="button">
+                    <i class="bi bi-award"></i> Records
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="milestones-tab" data-bs-toggle="tab" data-bs-target="#milestones" type="button">
+                    <i class="bi bi-flag"></i> Milestones
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="wrestler-stats-tab" data-bs-toggle="tab" data-bs-target="#wrestler-stats" type="button">
+                    <i class="bi bi-person-badge"></i> Wrestler Stats
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="statsTabContent">
+            <!-- Leaderboards Tab -->
+            <div class="tab-pane fade show active" id="leaderboards" role="tabpanel">
+                <div class="row">
+                    <!-- Wins Leaderboard -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="stats-card">
+                            <div class="stats-card-header">
+                                <h5><i class="bi bi-star-fill text-warning"></i> Most Wins</h5>
+                            </div>
+                            <div class="stats-card-body">
+                                <div id="winsLeaderboard">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Win Percentage Leaderboard -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="stats-card">
+                            <div class="stats-card-header">
+                                <h5><i class="bi bi-percent text-success"></i> Win Percentage</h5>
+                            </div>
+                            <div class="stats-card-body">
+                                <div id="winPercentageLeaderboard">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Title Reigns Leaderboard -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="stats-card">
+                            <div class="stats-card-header">
+                                <h5><i class="bi bi-trophy-fill text-warning"></i> Most Title Reigns</h5>
+                            </div>
+                            <div class="stats-card-body">
+                                <div id="titleReignsLeaderboard">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Star Rating Leaderboard -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="stats-card">
+                            <div class="stats-card-header">
+                                <h5><i class="bi bi-star-fill text-info"></i> Average Star Rating</h5>
+                            </div>
+                            <div class="stats-card-body">
+                                <div id="starRatingLeaderboard">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Records Tab -->
+            <div class="tab-pane fade" id="records" role="tabpanel">
+                <div class="row" id="recordsContainer">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Milestones Tab -->
+            <div class="tab-pane fade" id="milestones" role="tabpanel">
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <h5><i class="bi bi-calendar-event"></i> Recent Milestones</h5>
+                    </div>
+                    <div class="stats-card-body">
+                        <div id="recentMilestones">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wrestler Stats Tab -->
+            <div class="tab-pane fade" id="wrestler-stats" role="tabpanel">
+                <!-- Search Box -->
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="form-control" id="wrestlerSearch" placeholder="Search for a wrestler...">
+                </div>
+
+                <!-- Wrestler Select -->
+                <div class="mb-4">
+                    <select class="form-select" id="wrestlerSelect">
+                        <option value="">Select a wrestler...</option>
+                    </select>
+                </div>
+
+                <!-- Stats Display -->
+                <div id="wrestlerStatsDisplay" style="display: none;">
+                    <!-- Stats will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/stats.js"></script>
+</body>
+</html>

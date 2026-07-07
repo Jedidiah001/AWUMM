@@ -1,0 +1,475 @@
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Enterprise Simulation</h2>
+            <p class="text-muted mb-0">Locker room culture, performance center pipeline, and dynasty simulation</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary" onclick="loadSimulationExpansion()">Refresh</button>
+            <button class="btn btn-primary" onclick="runEnterpriseWeekly()">Run Weekly Systems</button>
+        </div>
+    </div>
+
+    <div id="simExpansionAlert" class="mb-3"></div>
+
+    <div class="row g-3 mb-4" id="simSummaryCards"></div>
+
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#sim-locker">Locker Room</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#sim-dev">Performance Center</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#sim-advanced">Advanced Simulation</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#sim-dynamic">Dynamic Events</button></li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="sim-locker">
+            <div class="row g-3">
+                <div class="col-xl-7">
+                    <div class="card">
+                        <div class="card-header bg-dark text-white d-flex justify-content-between">
+                            <span>Wrestler Culture State</span>
+                            <button class="btn btn-sm btn-light" onclick="runLockerRoomWeekly()">Run Culture Tick</button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Brand</th>
+                                            <th>Morale</th>
+                                            <th>Ego</th>
+                                            <th>Professionalism</th>
+                                            <th>Influence</th>
+                                            <th>Modifier</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="lockerRows">
+                                        <tr><td colspan="7" class="text-center text-muted py-3">Loading...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5">
+                    <div class="card mb-3">
+                        <div class="card-header bg-dark text-white">Brand Atmosphere</div>
+                        <div class="card-body" id="atmosphereRows"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header bg-dark text-white">Open Culture Risks</div>
+                        <div class="card-body" id="cultureRiskRows"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="sim-dev">
+            <div class="row g-3">
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">Facility</div>
+                        <div class="card-body" id="centerPanel"></div>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header bg-success text-white d-flex justify-content-between">
+                            <span>Trainee Readiness</span>
+                            <button class="btn btn-sm btn-light" onclick="runDevelopmentWeekly()">Run Development Week</button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Status</th>
+                                            <th>Readiness</th>
+                                            <th>Trainer</th>
+                                            <th>Curriculum</th>
+                                            <th>Plateau</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="traineeRows">
+                                        <tr><td colspan="6" class="text-center text-muted py-3">Loading...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">Training Issues and Excursions</div>
+                        <div class="card-body" id="developmentRiskRows"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="sim-advanced">
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">Match Scripts and Production</div>
+                        <div class="card-body" id="advancedCreativeRows"></div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">Attendance, Brands, and Endgame</div>
+                        <div class="card-body" id="advancedBusinessRows"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="sim-dynamic">
+            <div class="row g-3">
+                <div class="col-xl-8">
+                    <div class="card">
+                        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                            <span>Open Dynamic Events</span>
+                            <button class="btn btn-sm btn-light" onclick="runDynamicEventsWeekly()">Run Event Week</button>
+                        </div>
+                        <div class="card-body" id="dynamicOpenRows"></div>
+                    </div>
+                </div>
+                <div class="col-xl-4">
+                    <div class="card mb-3">
+                        <div class="card-header bg-danger text-white">Event Coverage Audit</div>
+                        <div class="card-body" id="dynamicAuditRows"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header bg-danger text-white">Recent Event Feed</div>
+                        <div class="card-body" id="dynamicRecentRows"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+let simulationExpansionCache = null;
+
+(function initSimulationExpansion() {
+    loadSimulationExpansion();
+})();
+
+window.loadSimulationExpansion = loadSimulationExpansion;
+window.runEnterpriseWeekly = runEnterpriseWeekly;
+window.runLockerRoomWeekly = runLockerRoomWeekly;
+window.runDevelopmentWeekly = runDevelopmentWeekly;
+window.runDynamicEventsWeekly = runDynamicEventsWeekly;
+window.resolveDynamicEvent = resolveDynamicEvent;
+
+async function loadSimulationExpansion() {
+    setAlert('Loading enterprise simulation data...', 'info');
+    try {
+        const response = await fetch('/api/simulation-expansion/dashboard');
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.error?.message || 'Failed to load dashboard');
+        simulationExpansionCache = result.data;
+        renderSimulationExpansion(result.data);
+        setAlert('', '');
+    } catch (error) {
+        setAlert(error.message, 'danger');
+    }
+}
+
+async function runEnterpriseWeekly() {
+    await postAndRefresh('/api/simulation-expansion/weekly', { seed: 149182250 }, 'Weekly enterprise systems completed.');
+}
+
+async function runLockerRoomWeekly() {
+    await postAndRefresh('/api/locker-room/weekly', { seed: 149160 }, 'Locker room culture tick completed.');
+}
+
+async function runDevelopmentWeekly() {
+    await postAndRefresh('/api/performance-center/weekly', { seed: 171182 }, 'Developmental training week completed.');
+}
+
+async function runDynamicEventsWeekly() {
+    setAlert('Triggering dynamic event...', 'info');
+    try {
+        const response = await fetch('/api/dynamic-events/weekly', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ seed: Date.now(), max_events: 1, guarantee_event: true, force: true })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.error?.message || 'Dynamic event request failed');
+        const created = result.data.created || 0;
+        setAlert(created ? `Created ${created} dynamic event.` : 'No event was created for this pulse.', created ? 'success' : 'warning');
+        await loadSimulationExpansion();
+    } catch (error) {
+        setAlert(error.message, 'danger');
+    }
+}
+
+async function resolveDynamicEvent(eventId, choice) {
+    await postAndRefresh(`/api/dynamic-events/${encodeURIComponent(eventId)}/resolve`, { choice }, 'Dynamic event resolved.');
+}
+
+async function postAndRefresh(url, body, successMessage) {
+    setAlert('Running...', 'info');
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body || {})
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.error?.message || 'Request failed');
+        setAlert(successMessage, 'success');
+        await loadSimulationExpansion();
+    } catch (error) {
+        setAlert(error.message, 'danger');
+    }
+}
+
+function renderSimulationExpansion(data) {
+    const locker = data.locker_room;
+    const dev = data.developmental;
+    const advanced = data.advanced;
+    const dynamicEvents = data.dynamic_events || {};
+    const summary = locker.summary || {};
+    const center = dev.center || {};
+    const eventSummary = dynamicEvents.summary || {};
+    document.getElementById('simSummaryCards').innerHTML = [
+        summaryCard('Average Morale', summary.average_morale ?? 0, `${summary.low_morale || 0} low morale`),
+        summaryCard('High Ego Risks', summary.high_ego || 0, `${summary.low_professionalism || 0} professionalism risks`),
+        summaryCard('Performance Center', `${center.facility_level || 0}/10`, `${center.trainee_count || 0}/${center.capacity || 0} trainees`),
+        summaryCard('Dynamic Events', eventSummary.open || 0, `${eventSummary.urgent || 0} urgent`),
+        summaryCard('Endgame Goals', (advanced.endgame || []).filter(o => o.status === 'achieved').length, `${(advanced.endgame || []).length} tracked`)
+    ].join('');
+
+    renderLocker(locker);
+    renderDevelopment(dev);
+    renderAdvanced(advanced);
+    renderDynamicEvents(dynamicEvents);
+}
+
+function renderLocker(locker) {
+    const rows = locker.wrestlers || [];
+    document.getElementById('lockerRows').innerHTML = rows.length ? rows.map(w => `
+        <tr onclick="loadWrestlerCulture('${escapeAttr(w.wrestler_id)}')" style="cursor:pointer">
+            <td><strong>${escapeHtml(w.wrestler_name)}</strong></td>
+            <td>${escapeHtml(w.brand)}</td>
+            <td>${badge(Math.round(w.morale_score), moraleClass(w.morale_score))} <span class="small text-muted">${escapeHtml(w.morale_level)}</span></td>
+            <td>${Math.round(w.ego_level)}</td>
+            <td>${Math.round(w.professionalism)}</td>
+            <td>${Math.round(w.backstage_influence)}</td>
+            <td>${Number(w.performance_modifier).toFixed(3)}</td>
+        </tr>
+    `).join('') : '<tr><td colspan="7" class="text-center text-muted py-3">No wrestler states yet.</td></tr>';
+
+    document.getElementById('atmosphereRows').innerHTML = (locker.atmosphere || []).length
+        ? locker.atmosphere.map(a => `
+            <div class="d-flex justify-content-between border-bottom py-2">
+                <div><strong>${escapeHtml(a.brand)}</strong><div class="small text-muted">${escapeHtml(a.atmosphere_level)}</div></div>
+                <div class="text-end">${badge(Math.round(a.atmosphere_score), moraleClass(a.atmosphere_score))}
+                    <div class="small text-muted">Match ${Number(a.match_quality_modifier).toFixed(3)}</div>
+                </div>
+            </div>
+        `).join('')
+        : '<div class="text-muted">Run a culture tick to create atmosphere snapshots.</div>';
+
+    const riskBlocks = [
+        riskList('Open Creative Disagreements', locker.open_disagreements || [], 'wrestler_name', 'escalation_level'),
+        riskList('Bullying Incidents', locker.open_bullying_incidents || [], 'target_wrestler_name', 'incident_type'),
+        riskList('Urgent Shoot Incidents', locker.urgent_shoot_incidents || [], 'trigger_context', 'status')
+    ];
+    document.getElementById('cultureRiskRows').innerHTML = riskBlocks.join('');
+}
+
+async function loadWrestlerCulture(wrestlerId) {
+    try {
+        const response = await fetch(`/api/locker-room/wrestlers/${wrestlerId}`);
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.error?.message || 'Unable to load wrestler');
+        const detail = result.data;
+        const factors = detail.state.last_primary_factors_json || {};
+        setAlert(`${detail.state.wrestler_name}: morale ${detail.state.morale_score}. Booking ${Math.round(factors.booking_satisfaction || 0)}, pay ${Math.round(factors.pay_satisfaction || 0)}, creative ${Math.round(factors.creative_satisfaction || 0)}.`, 'info');
+    } catch (error) {
+        setAlert(error.message, 'danger');
+    }
+}
+
+function renderDevelopment(dev) {
+    const center = dev.center || {};
+    document.getElementById('centerPanel').innerHTML = `
+        <div class="d-flex justify-content-between"><span>Facility Level</span><strong>${center.facility_level || 0}/10</strong></div>
+        <div class="d-flex justify-content-between"><span>Capacity</span><strong>${center.trainee_count || 0}/${center.capacity || 0}</strong></div>
+        <div class="d-flex justify-content-between"><span>Weekly Cost</span><strong>$${Number(center.weekly_operational_cost || 0).toLocaleString()}</strong></div>
+        <div class="d-flex justify-content-between"><span>Training Modifier</span><strong>${Number(center.training_quality_modifier || 0).toFixed(3)}</strong></div>
+    `;
+    const trainers = Object.fromEntries((dev.trainers || []).map(t => [t.id, t.trainer_name]));
+    const curricula = Object.fromEntries((dev.curricula || []).map(c => [c.id, c.curriculum_name]));
+    document.getElementById('traineeRows').innerHTML = (dev.trainees || []).length
+        ? dev.trainees.map(t => `
+            <tr>
+                <td><strong>${escapeHtml(t.wrestler_name)}</strong></td>
+                <td>${escapeHtml(t.status)}</td>
+                <td>${badge(Math.round(t.readiness_score), moraleClass(t.readiness_score))}</td>
+                <td>${escapeHtml(trainers[t.assigned_trainer_id] || 'Unassigned')}</td>
+                <td>${escapeHtml(curricula[t.curriculum_id] || 'Default')}</td>
+                <td>${t.plateau_weeks}</td>
+            </tr>
+        `).join('')
+        : '<tr><td colspan="6" class="text-center text-muted py-3">No trainees in the persistent pipeline yet.</td></tr>';
+
+    document.getElementById('developmentRiskRows').innerHTML = [
+        riskList('Active Training Injuries', dev.active_injuries || [], 'wrestler_name', 'severity'),
+        riskList('Active Excursions', dev.active_excursions || [], 'wrestler_name', 'destination_name'),
+        riskList('Recent Tryouts', dev.recent_tryouts || [], 'location', 'status')
+    ].join('');
+}
+
+function renderAdvanced(advanced) {
+    document.getElementById('advancedCreativeRows').innerHTML = [
+        riskList('Match Scripts', advanced.match_scripts || [], 'match_id', 'intended_reaction'),
+        riskList('Production History', advanced.production_history || [], 'show_id', 'broadcast_score'),
+        riskList('Aging Snapshots', advanced.aging || [], 'wrestler_name', 'career_wear_score')
+    ].join('');
+    document.getElementById('advancedBusinessRows').innerHTML = [
+        riskList('Attendance Records', advanced.attendance || [], 'show_name', 'actual_attendance'),
+        riskList('Brands', advanced.brands || [], 'brand_name', 'creative_identity'),
+        riskList('Endgame Objectives', advanced.endgame || [], 'objective_name', 'progress_pct')
+    ].join('');
+}
+
+function renderDynamicEvents(dynamicEvents) {
+    const openEvents = dynamicEvents.open_events || [];
+    document.getElementById('dynamicOpenRows').innerHTML = openEvents.length
+        ? openEvents.map(event => dynamicEventCard(event)).join('')
+        : '<div class="text-muted">No open dynamic events. Run an event week to generate persistent random events.</div>';
+
+    const audit = dynamicEvents.audit || [];
+    document.getElementById('dynamicAuditRows').innerHTML = audit.length
+        ? audit.map(row => `
+            <div class="border-bottom py-2">
+                <div class="d-flex justify-content-between gap-2">
+                    <strong class="small">${escapeHtml(row.feature_name)}</strong>
+                    ${badge(row.overlap_status, eventAuditClass(row.overlap_status))}
+                </div>
+                <div class="small text-muted">${escapeHtml((row.existing_systems_json || []).join(', '))}</div>
+            </div>
+        `).join('')
+        : '<div class="text-muted">Audit has not been synchronized yet.</div>';
+
+    const recent = dynamicEvents.recent_events || [];
+    document.getElementById('dynamicRecentRows').innerHTML = recent.length
+        ? recent.slice(0, 8).map(event => `
+            <div class="border-bottom py-2 small">
+                <div class="d-flex justify-content-between gap-2">
+                    <strong>${escapeHtml(event.title)}</strong>
+                    <span class="text-muted">${escapeHtml(event.status)}</span>
+                </div>
+                <div class="text-muted">Y${escapeHtml(event.year)} W${escapeHtml(event.week)} · ${escapeHtml(event.category)}</div>
+            </div>
+        `).join('')
+        : '<div class="text-muted">No event history yet.</div>';
+}
+
+function dynamicEventCard(event) {
+    const options = event.response_options_json || [];
+    return `
+        <div class="border rounded p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                    <div class="fw-bold">${escapeHtml(event.title)}</div>
+                    <div class="small text-muted">${escapeHtml(event.summary)}</div>
+                    <div class="small mt-2">
+                        ${badge(event.category, 'secondary')}
+                        ${badge(event.severity_level, eventSeverityClass(event.severity_score))}
+                        ${badge(event.urgency, event.urgency === 'urgent' ? 'danger' : 'primary')}
+                    </div>
+                </div>
+                <div class="text-end small text-muted">Y${escapeHtml(event.year)} W${escapeHtml(event.week)}</div>
+            </div>
+            <div class="mt-3 d-flex flex-wrap gap-2">
+                ${options.map(option => `
+                    <button class="btn btn-sm btn-outline-danger" onclick="resolveDynamicEvent('${escapeAttr(event.id)}', '${escapeAttr(option.key)}')">
+                        ${escapeHtml(option.label)}
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function eventSeverityClass(score) {
+    score = Number(score || 0);
+    if (score >= 75) return 'danger';
+    if (score >= 55) return 'warning';
+    return 'primary';
+}
+
+function eventAuditClass(status) {
+    if (status === 'exists') return 'success';
+    if (status === 'partial') return 'warning';
+    return 'danger';
+}
+
+function summaryCard(label, value, subtext) {
+    return `
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-muted small">${escapeHtml(label)}</div>
+                    <div class="h3 mb-0">${escapeHtml(value)}</div>
+                    <div class="small text-muted">${escapeHtml(subtext)}</div>
+                </div>
+            </div>
+        </div>`;
+}
+
+function riskList(title, rows, primary, secondary) {
+    if (!rows.length) return `<div class="mb-3"><strong>${escapeHtml(title)}</strong><div class="text-muted small">None recorded.</div></div>`;
+    return `
+        <div class="mb-3">
+            <strong>${escapeHtml(title)}</strong>
+            ${rows.slice(0, 5).map(row => `
+                <div class="d-flex justify-content-between border-bottom py-1 small">
+                    <span>${escapeHtml(row[primary] ?? '')}</span>
+                    <span class="text-muted">${escapeHtml(row[secondary] ?? '')}</span>
+                </div>
+            `).join('')}
+        </div>`;
+}
+
+function badge(value, cls) {
+    return `<span class="badge bg-${cls}">${escapeHtml(value)}</span>`;
+}
+
+function moraleClass(score) {
+    score = Number(score || 0);
+    if (score >= 75) return 'success';
+    if (score >= 55) return 'primary';
+    if (score >= 35) return 'warning';
+    return 'danger';
+}
+
+function setAlert(message, type) {
+    const el = document.getElementById('simExpansionAlert');
+    if (!message) {
+        el.innerHTML = '';
+        return;
+    }
+    el.innerHTML = `<div class="alert alert-${type || 'info'} mb-0">${escapeHtml(message)}</div>`;
+}
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function escapeAttr(value) {
+    return String(value ?? '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+})();
+</script>

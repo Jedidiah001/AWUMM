@@ -1,0 +1,707 @@
+You are my **senior React Native engineer + mobile architect**.
+
+I want you to help me implement a **fully functional, offline-first** mobile application called **Excuse Pattern Tracker** – a self-awareness tool that helps users identify and confront their patterns of avoidance by logging excuses in real-time.
+
+This is a **15-day build challenge** that I will document for social media content (Facebook, TikTok). The app must be complete, polished, and demonstrable by day 15.
+
+---
+
+## Constraints & Stack (Non-Negotiable)
+
+- **Platform**: iOS and Android (cross-platform)
+- **Framework**: **React Native** with **Expo (managed workflow)**
+- **Navigation**: **React Navigation 6** (bottom tabs + nested stacks)
+- **State Management**: **Context API + useReducer** (no Redux, no MobX)
+- **Local Storage**: **AsyncStorage** for all persistent data
+- **Charts**: **react-native-chart-kit** or **victory-native**
+- **Icons**: **react-native-vector-icons** or **Expo vector icons**
+- **Notifications**: **expo-notifications** for reminders
+- **Sharing**: **expo-sharing** + **react-native-view-shot** for shareable reports
+
+**Critical Constraints**:
+- App must work **fully offline** – no backend, no cloud, no external APIs
+- All data stored locally on device
+- No authentication required (single-user app)
+- No in-app purchases for this version
+- Must run smoothly on mid-range Android devices
+
+You must not simplify any of the design requirements. Every feature listed below must be implemented in some form, even if initial logic is basic.
+
+---
+
+## High-Level App Design (Must Implement All Features)
+
+### User Fantasy
+
+> I am someone who makes excuses regularly without realizing it. I want to track every excuse I make, understand my patterns, and confront my avoidance behaviors. The app reveals my most-used excuses, what I avoid most, when I'm most likely to make excuses, and challenges me to improve.
+
+The app must support:
+
+- **Quick excuse logging** with minimal friction (under 5 seconds to log)
+- **Preset excuses** for common patterns + custom excuse input
+- **Category system** for what user is avoiding (Exercise, Work, Social, etc.)
+- **Full history** with search, filter, and date grouping
+- **Analytics dashboard** with charts showing patterns
+- **AI-generated insights** based on logged data
+- **Streak tracking** for excuse-free days
+- **Shareable reports** for social accountability
+- **Daily reminder notifications**
+- **Customizable categories and presets**
+- **Onboarding flow** for first-time users
+
+You must include and wire up ALL of these systems.
+
+---
+
+## 1. Excuse Logging System
+
+You must implement a frictionless excuse capture system:
+
+### Quick Logging
+- One-tap access from home screen (floating action button)
+- Text input for custom excuses
+- Character limit: 200 characters
+- Voice-to-text option (optional enhancement)
+
+### Preset Excuses
+- Pre-loaded common excuses (minimum 16):
+  ```
+  "I'm too tired"
+  "I don't have time"
+  "I'll do it tomorrow"
+  "I'm not feeling well"
+  "It's too late now"
+  "I'll start Monday"
+  "I'm too busy"
+  "I forgot"
+  "I'm not in the mood"
+  "I'll do it later"
+  "I need to rest"
+  "It's not that important"
+  "Someone else will do it"
+  "I don't feel like it"
+  "The weather is bad"
+  "I deserve a break"
+  ```
+- User can tap preset to auto-fill input
+- User can star/favorite frequently used excuses
+- Recently used excuses appear first
+
+### Category Assignment
+- Each excuse MUST be tagged with a category
+- Default categories (6 minimum):
+  - **Exercise** (dumbbell icon)
+  - **Work** (briefcase icon)
+  - **Social** (people icon)
+  - **Chores** (broom icon)
+  - **Learning** (book icon)
+  - **Health** (heart icon)
+- User can add custom categories (max 20 total)
+- Each category has:
+  - `id`
+  - `name`
+  - `icon` (from icon library)
+  - `color` (from preset palette)
+  - `isDefault` (boolean)
+  - `excuseCount` (tracked automatically)
+
+### Timestamp Capture
+- Auto-capture date and time on save
+- Derive and store:
+  - `dayOfWeek` (Monday, Tuesday, etc.)
+  - `timeOfDay` (Morning/Afternoon/Evening/Night)
+  - `weekNumber`
+  - `month`
+  - `year`
+
+---
+
+## 2. Data Models (Must Implement All)
+
+### Excuse Entry
+```javascript
+{
+  id: "uuid-string",
+  text: "I'm too tired",
+  categoryId: "category-uuid",
+  timestamp: "2024-01-15T14:30:00Z",
+  date: "2024-01-15",
+  dayOfWeek: "Monday",
+  timeOfDay: "Afternoon",
+  hour: 14,
+  weekNumber: 3,
+  month: 1,
+  year: 2024,
+  isPreset: true,
+  isFavorite: false
+}
+```
+
+### Category
+```javascript
+{
+  id: "uuid-string",
+  name: "Exercise",
+  icon: "dumbbell",
+  color: "#FF6B6B",
+  isDefault: true,
+  isActive: true,
+  createdAt: "2024-01-01T00:00:00Z",
+  excuseCount: 23
+}
+```
+
+### User Stats (Computed/Cached)
+```javascript
+{
+  totalExcuses: 147,
+  excusesToday: 3,
+  excusesThisWeek: 18,
+  excusesThisMonth: 47,
+  currentStreak: 2,
+  longestStreak: 7,
+  streakStartDate: "2024-01-14",
+  topExcuse: "I'll do it tomorrow",
+  topExcuseCount: 23,
+  mostAvoidedCategory: "exercise",
+  mostAvoidedCategoryCount: 45,
+  peakHour: 21,
+  peakDayOfWeek: "Monday",
+  avoidanceScore: 73,
+  lastUpdated: "2024-01-15T14:30:00Z"
+}
+```
+
+### App Settings
+```javascript
+{
+  userName: "User",
+  reminderEnabled: true,
+  reminderTime: "21:00",
+  darkModeEnabled: false,
+  onboardingCompleted: true,
+  firstLaunchDate: "2024-01-01T00:00:00Z"
+}
+```
+
+---
+
+## 3. Streak System
+
+You MUST implement:
+
+### Streak Logic
+- A streak counts **consecutive days with ZERO excuses logged**
+- Streak resets to 0 when an excuse is logged
+- Streak increments at midnight if no excuses that day
+- Track:
+  - `currentStreak` (days)
+  - `longestStreak` (all-time best)
+  - `streakStartDate`
+  - `lastExcuseDate`
+
+### Streak Display
+- Prominent display on home screen
+- Visual indicator (flame icon, progress bar, etc.)
+- Celebration animation when reaching milestones (3, 7, 14, 30 days)
+- Show comparison to longest streak
+
+### Edge Cases
+- First day of app use starts at 0
+- If user logs excuse at 11:59 PM, streak for that day is broken
+- Multiple excuses on same day only count as one "broken" day
+
+---
+
+## 4. Analytics System
+
+You MUST implement comprehensive analytics:
+
+### Time Period Selection
+- Segmented control: Week / Month / Year / All Time
+- All charts update based on selection
+
+### Statistics Cards (Horizontal Scroll)
+- Total Excuses (with trend arrow vs previous period)
+- Daily Average (with decimal precision)
+- Most Active Day (day name + count)
+- Longest Streak (days + date range)
+
+### Top Excuses Chart
+- Horizontal bar chart
+- Top 5 most-used excuses
+- Show count and percentage
+- Sorted by frequency descending
+
+### Category Breakdown
+- Donut/pie chart
+- All categories with excuse counts
+- Color-coded by category color
+- Legend with percentages
+- Tappable segments (optional: navigate to filtered history)
+
+### Weekly Pattern Chart
+- Bar chart showing 7 days (Mon-Sun)
+- X-axis: Day abbreviations
+- Y-axis: Excuse count
+- Highlight highest day
+- Mark current day differently
+
+### Hourly Heatmap
+- Grid or bar showing excuse distribution by hour
+- Group into: Morning (6-12), Afternoon (12-17), Evening (17-21), Night (21-6)
+- Color intensity = frequency
+- Show peak time prominently
+
+### Trend Line
+- Line chart showing excuses over time
+- X-axis: Dates or weeks
+- Y-axis: Count
+- Smooth curve preferred
+- Optional: Goal line (if user sets goal)
+
+---
+
+## 5. Insights System
+
+You MUST implement pattern detection and insight generation:
+
+### Avoidance Score
+- Computed score from 0-100
+- Factors:
+  - Excuse frequency (higher = higher score)
+  - Variety of categories (more = higher score)
+  - Recent trend (increasing = higher score)
+  - Streak length (longer = lower score)
+- Color coding:
+  - 0-30: Green (Low avoidance)
+  - 31-60: Yellow (Moderate)
+  - 61-80: Orange (High)
+  - 81-100: Red (Very high)
+- Show change from last week
+
+### Pattern Detection Rules
+Implement logic to detect and generate insights for:
+
+1. **Day Patterns**
+   - "You make 40% more excuses on Mondays"
+   - Trigger: One day has significantly higher count than average
+
+2. **Time Patterns**
+   - "Most excuses happen between 9-11 PM"
+   - Trigger: Peak hour analysis
+
+3. **Category Patterns**
+   - "Exercise is your #1 avoided activity"
+   - Trigger: Category with highest count
+
+4. **Excuse Repetition**
+   - "You've said 'I'm too tired' 15 times this month"
+   - Trigger: Single excuse used frequently
+
+5. **Trend Patterns**
+   - "Your excuses increased 25% this week"
+   - Trigger: Week-over-week comparison
+
+6. **Streak Patterns**
+   - "Your best excuse-free streak was 7 days in January"
+   - Trigger: Historical streak data
+
+### Insight Card Format
+Each insight must have:
+- Icon or emoji
+- Title (bold, concise)
+- Description (2-3 lines)
+- Relevant statistic (highlighted)
+- Optional: Actionable suggestion
+
+### Weekly Summary
+- Generated every week
+- Summarizes:
+  - Total excuses this week
+  - Comparison to last week
+  - Top excuse of the week
+  - Most avoided category
+  - Any pattern changes
+
+---
+
+## 6. History System
+
+You MUST implement full history management:
+
+### List Display
+- Grouped by date (sticky headers)
+- Date format: "Today", "Yesterday", "Monday, Jan 15"
+- Each item shows:
+  - Category icon (colored)
+  - Excuse text (max 2 lines, truncated)
+  - Category name (small, gray)
+  - Time logged (relative or absolute)
+
+### Search
+- Full-text search on excuse text
+- Real-time filtering as user types
+- Clear button when text present
+- "No results" empty state
+
+### Filtering
+- Filter by category (multi-select)
+- Filter by date range:
+  - Today
+  - Yesterday
+  - This Week
+  - Last Week
+  - This Month
+  - Last Month
+  - Custom Range (date pickers)
+- Filter by time of day (multi-select)
+- Show active filter count
+- "Reset filters" option
+
+### Sorting
+- Newest first (default)
+- Oldest first
+
+### Item Actions
+- Tap: Navigate to detail screen
+- Swipe left: Delete (with confirmation)
+- Swipe right: Edit
+
+### Infinite Scroll
+- Load in batches (20-50 items)
+- Pull-to-refresh at top
+
+---
+
+## 7. Notification System
+
+You MUST implement:
+
+### Daily Reminder
+- Configurable time (default: 9:00 PM)
+- Notification content:
+  - Title: "Daily Check-in"
+  - Body: "Did you make any excuses today? Log them now."
+- Deep link to log excuse screen
+
+### Permission Handling
+- Request permission on onboarding (optional)
+- Request permission in settings if not granted
+- Handle permission denied gracefully
+
+### Settings
+- Toggle on/off
+- Time picker for reminder time
+- Test notification button (optional)
+
+---
+
+## 8. Sharing System
+
+You MUST implement shareable reports:
+
+### Report Generation
+- Create styled image from stats
+- Capture using react-native-view-shot
+- Save to camera roll OR share directly
+
+### Report Content Options (Toggleable)
+- Total excuse count
+- Top excuse
+- Category breakdown
+- Avoidance score
+- Streak information
+
+### Report Styles
+- Minimum 2 style options:
+  - Light/minimal
+  - Dark mode
+- Branded with app name/logo
+
+### Time Period Selection
+- This Week
+- Last Week
+- This Month
+- Custom
+
+### Share Options
+- Native share sheet
+- Save to photos
+- Copy image (if supported)
+
+### Report Design
+- Social media optimized dimensions (1080x1080 or 1080x1920)
+- Clean, readable text
+- App branding/watermark
+- Optional: "Track your excuses at [app name]" CTA
+
+---
+
+## 9. Onboarding System
+
+You MUST implement a 3-screen onboarding flow:
+
+### Screen 1: Welcome
+- Illustration (person with excuse thought bubbles)
+- Headline: "Stop Making Excuses"
+- Subheadline: "Track your patterns. Break the cycle."
+- Brief description
+
+### Screen 2: Features
+- Illustration showing app features
+- Three feature highlights with icons:
+  - Quick logging
+  - Visual analytics
+  - Smart insights
+
+### Screen 3: Setup
+- Quick category selection (optional)
+- Notification permission request
+- "Start Tracking" button
+
+### Navigation
+- Swipeable between screens
+- Page indicator dots
+- Skip option on screens 1-2
+- Complete onboarding flag saved
+
+---
+
+## 10. Settings System
+
+You MUST implement:
+
+### Preferences Section
+- Dark mode toggle
+- Notification settings (toggle + time)
+
+### Customization Section
+- Manage categories (navigate to manager)
+- Manage preset excuses (optional)
+
+### Data Section
+- Export data (JSON/CSV)
+- Clear all data (with confirmation modal)
+
+### Support Section
+- Help/FAQ
+- Send feedback
+- Rate app
+- Privacy policy
+- Terms of service
+
+### Footer
+- App version
+- Developer credit
+
+---
+
+## 11. Screen Flow & Navigation
+
+### Bottom Tab Navigator (5 tabs)
+```
+├── Home (house icon)
+├── History (clock icon)
+├── Analytics (chart icon)
+├── Insights (lightbulb icon)
+└── Settings (gear icon)
+```
+
+### Stack Navigators (Nested)
+```
+├── Home Stack
+│   ├── Home Screen
+│   └── Log Excuse Screen
+├── History Stack
+│   ├── History Screen
+│   └── Excuse Detail Screen
+├── Analytics Stack
+│   └── Analytics Screen
+├── Insights Stack
+│   └── Insights Screen
+└── Settings Stack
+    ├── Settings Screen
+    ├── Category Manager Screen
+    └── Share Report Screen
+```
+
+### Modals
+- Filter Modal (bottom sheet)
+- Preset Excuses Modal (bottom sheet)
+- Delete Confirmation Modal
+- Clear Data Confirmation Modal
+
+### Onboarding
+- Shown only on first launch
+- Separate navigator/flow
+- Cannot access main app until completed
+
+---
+
+## 12. Screens Specification (12 Total)
+
+| # | Screen | Type | Key Components |
+|---|--------|------|----------------|
+| 1 | Home | Tab | Streak card, today's count, recent excuses, FAB |
+| 2 | Log Excuse | Stack | Text input, presets, category picker, save button |
+| 3 | History | Tab | Search, filters, grouped list, swipe actions |
+| 4 | Analytics | Tab | Period selector, stat cards, charts |
+| 5 | Insights | Tab | Avoidance score, insight cards, weekly summary |
+| 6 | Settings | Tab | Preferences list, data options, support links |
+| 7 | Onboarding (3 screens) | Flow | Illustrations, feature highlights, setup |
+| 8 | Category Manager | Stack | Reorderable list, add/edit/delete categories |
+| 9 | Excuse Detail | Stack | Full excuse, metadata, edit/delete actions |
+| 10 | Share Report | Stack | Preview, customization toggles, share button |
+| 11 | Filter Modal | Modal | Category chips, date range, time of day |
+| 12 | Preset Excuses Modal | Modal | Grid of presets, favorites, search |
+
+---
+
+## 13. Implementation Steps (15-Day Schedule)
+
+You must help me build this **step by step**, with working React Native + Expo code.
+
+### Phase 1: Foundation (Days 1-2)
+1. Initialize Expo project with TypeScript (optional) or JavaScript
+2. Set up folder structure:
+   ```
+   /src
+     /components
+     /screens
+     /navigation
+     /context
+     /hooks
+     /utils
+     /constants
+     /assets
+   ```
+3. Configure React Navigation (bottom tabs + stacks)
+4. Create theme/design system (colors, typography, spacing)
+5. Set up Context + Reducer for global state
+6. Configure AsyncStorage wrapper utilities
+7. Create placeholder screens for all 12 screens
+
+### Phase 2: Core Logging (Days 3-4)
+1. Build Log Excuse Screen UI
+2. Implement preset excuses data and component
+3. Build category picker component
+4. Create excuse saving logic with AsyncStorage
+5. Generate unique IDs (uuid or custom)
+6. Build Home Screen with FAB navigation
+7. Display today's excuse count
+8. Wire up basic data flow
+
+### Phase 3: History & Detail (Days 5-6)
+1. Build History Screen list with FlatList
+2. Implement date grouping logic
+3. Create search functionality
+4. Build Filter Modal (bottom sheet)
+5. Implement filter logic (category, date, time)
+6. Build Excuse Detail Screen
+7. Implement edit functionality
+8. Implement delete with confirmation
+9. Add swipe actions
+
+### Phase 4: Analytics (Days 7-9)
+1. Create stats computation utilities
+2. Build Analytics Screen layout
+3. Implement period selector (week/month/year/all)
+4. Build stat cards (horizontal scroll)
+5. Integrate chart library
+6. Build Top Excuses bar chart
+7. Build Category donut/pie chart
+8. Build Weekly pattern bar chart
+9. Build Hourly heatmap
+10. Build Trend line chart
+11. Optimize re-computation (memoization)
+
+### Phase 5: Insights & Streaks (Days 10-11)
+1. Implement streak calculation logic
+2. Add streak display to Home Screen
+3. Build Insights Screen layout
+4. Implement avoidance score calculation
+5. Build pattern detection algorithms
+6. Create insight card components
+7. Generate dynamic insights from data
+8. Build weekly summary component
+
+### Phase 6: Settings & Polish (Days 12-13)
+1. Build Settings Screen
+2. Build Category Manager Screen
+3. Implement add/edit/delete categories
+4. Set up expo-notifications
+5. Implement reminder scheduling
+6. Build onboarding flow (3 screens)
+7. Implement dark mode (optional)
+8. Build Share Report Screen
+9. Implement view-shot capture
+10. Implement native sharing
+
+### Phase 7: Testing & Content (Days 14-15)
+1. Test all flows end-to-end
+2. Fix bugs and edge cases
+3. Add loading states
+4. Add empty states
+5. Polish animations/transitions
+6. Optimize performance
+7. Test on physical devices (iOS + Android)
+8. Record demo content for social media
+9. Create before/after showcase
+10. Document learnings for content
+
+---
+
+## 14. Content Creation Hooks
+
+Throughout development, capture content for:
+
+### Day 1
+- "Building an app that exposes your excuses"
+- Project setup timelapse
+
+### Day 7
+- "Halfway through - here's what I've built"
+- Analytics dashboard reveal
+
+### Day 10
+- "The data doesn't lie - testing on myself"
+- Show real insights from personal use
+
+### Day 15
+- "I built an app in 15 days - final reveal"
+- Full app walkthrough
+- "What I learned" reflection
+
+---
+
+## 15. Quality Requirements
+
+### Performance
+- Smooth 60fps scrolling
+- Fast screen transitions (<300ms)
+- No visible loading for cached data
+- Efficient chart rendering
+
+### UX
+- All touch targets minimum 44px
+- Clear loading/error/empty states
+- Consistent spacing and typography
+- Intuitive navigation
+
+### Code Quality
+- Components under 200 lines
+- Reusable components extracted
+- Custom hooks for logic
+- Constants for magic values
+- Comments for complex logic
+
+For the front end screens, I have designed UI screens for the frontend. Whenever it's time for the frontend, ask me for the screens images that I have to know how the frontend should look like
+
+## Begin Implementation
+
+Start with **Phase 1, Step 1**: Initialize the Expo project and set up the folder structure.
+
+Provide complete, working code that I can run immediately in Termux or any terminal with Expo CLI installed.
+
+After each step, wait for my confirmation before proceeding to the next step.
